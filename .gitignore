@@ -1,0 +1,10 @@
+.idea
+node_modules
+coverage/
+lib/
+.vsconfig
+yarn-error.log
+.orig
+$LOG_FILE
+temp/
+**/.DS_Store
