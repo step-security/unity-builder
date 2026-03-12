@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
-import axios, {isAxiosError} from 'axios';
+import axios, { isAxiosError } from 'axios';
 import { Action, BuildParameters, Cache, Orchestrator, Docker, ImageTag, Output } from './model';
 import { Cli } from './model/cli/cli';
 import MacBuilder from './model/mac-builder';
@@ -27,7 +27,8 @@ async function validateSubscription() {
   try {
     await axios.post(
       `https://agent.api.stepsecurity.io/v1/github/${process.env.GITHUB_REPOSITORY}/actions/maintained-actions-subscription`,
-      body, { timeout: 3000 }
+      body,
+      { timeout: 3000 },
     );
   } catch (error) {
     if (isAxiosError(error) && error.response?.status === 403) {
