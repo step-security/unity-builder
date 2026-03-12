@@ -22,8 +22,8 @@ else
 
 fi
 
-echo "---------- git config --list -------------"
-git config --list
+echo "---------- git config --list (filtered) -------------"
+git config --list | sed -E 's/(token:|ssh:|git:)[^@]+@/\1***@/g'
 
-echo "---------- git config --list --show-origin -------------"
-git config --list --show-origin
+echo "---------- git config --list --show-origin (filtered) -------------"
+git config --list --show-origin | sed -E 's/(token:|ssh:|git:)[^@]+@/\1***@/g'

@@ -13,8 +13,8 @@ else {
     git config --global url."https://git:$env:GIT_PRIVATE_TOKEN@github.com/".insteadOf "git@github.com:"
 }
 
-Write-Host "---------- git config --list -------------"
-git config --list
+Write-Host "---------- git config --list (filtered) -------------"
+git config --list | ForEach-Object { $_ -replace '(token:|ssh:|git:)[^@]+@', '$1***@' }
 
-Write-Host "---------- git config --list --show-origin -------------"
-git config --list --show-origin
+Write-Host "---------- git config --list --show-origin (filtered) -------------"
+git config --list --show-origin | ForEach-Object { $_ -replace '(token:|ssh:|git:)[^@]+@', '$1***@' }
