@@ -2,20 +2,9 @@
 
 # Unity - Builder
 
-(Not affiliated with Unity Technologies)
-
 GitHub Action to
 [build Unity projects](https://github.com/marketplace/actions/unity-builder)
 for different platforms.
-
-<br />
-<br />
-
-[![Builds - Ubuntu](https://github.com/step-security/unity-builder/actions/workflows/build-tests-ubuntu.yml/badge.svg)](https://github.com/step-security/unity-builder/actions/workflows/build-tests-ubuntu.yml)
-[![Builds - Windows](https://github.com/step-security/unity-builder/actions/workflows/build-tests-windows.yml/badge.svg)](https://github.com/step-security/unity-builder/actions/workflows/build-tests-windows.yml)
-[![Builds - MacOS](https://github.com/step-security/unity-builder/actions/workflows/build-tests-mac.yml/badge.svg)](https://github.com/step-security/unity-builder/actions/workflows/build-tests-mac.yml)
-<br />
-<br />
 
 ## How to use
 
