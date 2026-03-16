@@ -73,3 +73,19 @@ reason = "tar@6.2.1 drive-relative path traversal; cpFromPod/cpToPod never calle
 [[IgnoredVulns]]
 id = "GHSA-r6q2-hw4h-h46w"
 reason = "tar@6.2.1 race condition on macOS APFS; cpFromPod/cpToPod never called from source code"
+
+[[IgnoredVulns]]
+id = "GHSA-2mjp-6q6p-2qxm"
+reason = "undici@5.29.0 HTTP smuggling via duplicate Content-Length; only makes requests with internally-constructed headers to trusted services"
+
+[[IgnoredVulns]]
+id = "GHSA-4992-7rv2-5pvq"
+reason = "undici@5.29.0 CRLF injection via upgrade option; upgrade option not used in this codebase"
+
+[[IgnoredVulns]]
+id = "GHSA-v9p9-hfj2-hcw8"
+reason = "undici@5.29.0 WebSocket crash via invalid server param; no WebSocket connections to untrusted servers"
+
+[[IgnoredVulns]]
+id = "GHSA-vrm6-8vpv-qv8q"
+reason = "undici@5.29.0 WebSocket decompression bomb; no WebSocket connections to untrusted servers"
