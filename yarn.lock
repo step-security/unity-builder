@@ -3480,7 +3480,7 @@ chalk@^2.4.2:
     escape-string-regexp "^1.0.5"
     supports-color "^5.3.0"
 
-chalk@^4.0.0, chalk@^4.1.0:
+chalk@^4.0.0:
   version "4.1.2"
   resolved "https://registry.npmjs.org/chalk/-/chalk-4.1.2.tgz"
   integrity sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==
@@ -5502,12 +5502,10 @@ jest-environment-node@^27.5.1:
     jest-mock "^27.5.1"
     jest-util "^27.5.1"
 
-jest-fail-on-console@^3.0.2:
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/jest-fail-on-console/-/jest-fail-on-console-3.1.1.tgz#4ca0d0cc8f11675e8e9f52159a37a6602a7e6c09"
-  integrity sha512-g9HGhKcWOz8lHeZhLCXGg+RD/7upngiKkkBrHimsO/tGB0qi++QZffOgybjeI2bDW1qgdFiJJEG6t/WeTlfmOw==
-  dependencies:
-    chalk "^4.1.0"
+jest-fail-on-console@^3.3.1:
+  version "3.3.1"
+  resolved "https://registry.yarnpkg.com/jest-fail-on-console/-/jest-fail-on-console-3.3.1.tgz#7d17e3a155cd0452b5be0d0906b6cb35e8594000"
+  integrity sha512-dmq/dmh5OBgJlD1MJdpznzwFQP8S7msf3ghTGWQLGhagWwHKzGtqXza76nuJUKOK7BdwqcTK6CCE49Xxv4ckUQ==
 
 jest-get-type@^27.5.1:
   version "27.5.1"
