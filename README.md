@@ -1,64 +1,53 @@
 # Unity - Builder
 [![StepSecurity Maintained Action](https://raw.githubusercontent.com/step-security/maintained-actions-assets/main/assets/maintained-action-banner.png)](https://docs.stepsecurity.io/actions/stepsecurity-maintained-actions)
 
+(Not affiliated with Unity Technologies)
+
+GitHub Action to
+[build Unity projects](https://github.com/marketplace/actions/unity-builder)
+for different platforms.
+
+Part of the <a href="https://game.ci">GameCI</a> open source project.
+<br />
+<br />
+
+[![Builds - Ubuntu](https://github.com/game-ci/unity-builder/actions/workflows/build-tests-ubuntu.yml/badge.svg)](https://github.com/game-ci/unity-builder/actions/workflows/build-tests-ubuntu.yml)
+[![Builds - Windows](https://github.com/game-ci/unity-builder/actions/workflows/build-tests-windows.yml/badge.svg)](https://github.com/game-ci/unity-builder/actions/workflows/build-tests-windows.yml)
+[![Builds - MacOS](https://github.com/game-ci/unity-builder/actions/workflows/build-tests-mac.yml/badge.svg)](https://github.com/game-ci/unity-builder/actions/workflows/build-tests-mac.yml)
+[![codecov - test coverage](https://codecov.io/gh/game-ci/unity-builder/branch/master/graph/badge.svg)](https://codecov.io/gh/game-ci/unity-builder)
+<br />
+<br />
 
 ## How to use
-
-```yml
-name: Actions 😎
-
-on: [push, pull_request]
-
-jobs:
-  build:
-    name: Build my project ✨
-    runs-on: ubuntu-latest
-    steps:
-      # Checkout
-      - name: Checkout repository
-        uses: actions/checkout@v6
-        with:
-          lfs: true
-
-      # Cache
-      - uses: actions/cache@v5
-        with:
-          path: Library
-          key: Library-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
-          restore-keys: |
-            Library-
-
-      # Test
-      - name: Run tests
-        uses: game-ci/unity-test-runner@v4
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        with:
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
-
-      # Build
-      - name: Build project
-        uses: step-security/unity-builder@v4
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        with:
-          targetPlatform: WebGL
-
-      # Output
-      - uses: actions/upload-artifact@v7
-        with:
-          name: Build
-          path: build
-```
 
 Find the
 [docs](https://game.ci/docs/github/builder)
 on the GameCI
 [documentation website](https://game.ci/docs).
+
+## Related actions
+
+Visit the
+GameCI <a href="https://github.com/game-ci/unity-actions">Unity Actions</a>
+status repository for related Actions.
+
+## Community
+
+Feel free to join us on
+<a href="http://game.ci/discord"><img height="30" src="media/Discord-Logo.svg" alt="Discord" /></a>
+and engage with the community.
+
+## Contributing
+
+To help improve the documentation, please find the docs [repository](https://github.com/game-ci/documentation).
+
+To contribute to Unity Builder, kindly read the [contribution guide](./CONTRIBUTING.md).
+
+## Support us
+
+GameCI is free for everyone forever.
+
+You can support us at [OpenCollective](https://opencollective.com/game-ci).
 
 ## Licence
 
