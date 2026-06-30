@@ -290,6 +290,10 @@ class Input {
     return input === 'true';
   }
 
+  static get region(): string {
+    return Input.getInput('region') ?? 'eu-west-2';
+  }
+
   public static ToEnvVarFormat(input: string) {
     if (input.toUpperCase() === input) {
       return input;

@@ -566,7 +566,7 @@ class Docker {
         return await (0, exec_1.exec)(runCommand, undefined, options);
     }
     static getLinuxCommand(image, parameters, overrideCommands = '', additionalVariables = [], entrypointBash = false) {
-        const { workspace, actionFolder, runnerTempPath, sshAgent, sshPublicKeysDirectoryPath, gitPrivateToken, dockerWorkspacePath, dockerCpuLimit, dockerMemoryLimit, } = parameters;
+        const { workspace, actionFolder, useHostNetwork, runnerTempPath, sshAgent, sshPublicKeysDirectoryPath, gitPrivateToken, dockerWorkspacePath, dockerCpuLimit, dockerMemoryLimit, } = parameters;
         const githubHome = node_path_1.default.join(runnerTempPath, '_github_home');
         if (!(0, node_fs_1.existsSync)(githubHome))
             (0, node_fs_1.mkdirSync)(githubHome);
@@ -599,6 +599,7 @@ class Docker {
             ? '--volume /home/runner/.ssh/known_hosts:/root/.ssh/known_hosts:ro'
             : ''} \
             ${sshPublicKeysDirectoryPath ? `--volume ${sshPublicKeysDirectoryPath}:/root/.ssh:ro` : ''} \
+            ${useHostNetwork ? '--net=host' : ''} \
             ${entrypointBash ? `--entrypoint ${commandPrefix}` : ``} \
             ${image} \
             ${entrypointBash ? `-c` : `${commandPrefix} -c`} \
@@ -1399,6 +1400,9 @@ class Input {
     static get linux64RemoveExecutableExtension() {
         const input = Input.getInput('linux64RemoveExecutableExtension') ?? 'false';
         return input === 'true';
+    }
+    static get region() {
+        return Input.getInput('region') ?? 'eu-west-2';
     }
     static ToEnvVarFormat(input) {
         if (input.toUpperCase() === input) {
