@@ -40,7 +40,9 @@ async function validateSubscription() {
   }
 }
 
-async function runMain() {
+// Exported so tests can drive the lifecycle directly without depending on
+// vitest's module re-loading (which changed in vitest 4).
+export async function runMain() {
   try {
     await validateSubscription();
     if (Cli.InitCliMode()) {
@@ -87,4 +89,9 @@ async function runMain() {
   }
 }
 
-runMain();
+// Auto-run when this module is the entry point. Tests import the file via
+// `await import('./index')` purely to register the mock factories and then
+// call `runMain()` directly.
+if (process.env.NODE_ENV !== 'test') {
+  runMain();
+}
