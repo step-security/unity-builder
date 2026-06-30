@@ -17298,9 +17298,6 @@ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 
-dot-object
-MIT
-
 dunder-proto
 MIT
 MIT License
@@ -20237,9 +20234,6 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 For more information, please refer to <http://unlicense.org>
 
-
-twirp-ts
-MIT
 
 underscore
 MIT

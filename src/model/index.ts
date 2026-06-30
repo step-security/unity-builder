@@ -9,6 +9,8 @@ import Platform from './platform';
 import Project from './project';
 import Unity from './unity';
 import Versioning from './versioning';
+import Orchestrator from './orchestrator/orchestrator';
+import loadProvider, { ProviderLoader } from './orchestrator/providers/provider-loader';
 
 export {
   Action,
@@ -22,4 +24,7 @@ export {
   Project,
   Unity,
   Versioning,
+  Orchestrator as Orchestrator,
+  loadProvider,
+  ProviderLoader,
 };

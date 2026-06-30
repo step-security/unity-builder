@@ -17,13 +17,7 @@ class Docker {
     let runCommand = '';
     switch (process.platform) {
       case 'linux':
-        runCommand = this.getLinuxCommand(
-          image,
-          parameters,
-          overrideCommands,
-          additionalVariables,
-          entrypointBash,
-        );
+        runCommand = this.getLinuxCommand(image, parameters, overrideCommands, additionalVariables, entrypointBash);
         break;
       case 'win32':
         runCommand = this.getWindowsCommand(image, parameters);
@@ -48,7 +42,6 @@ class Docker {
     const {
       workspace,
       actionFolder,
-      useHostNetwork,
       runnerTempPath,
       sshAgent,
       sshPublicKeysDirectoryPath,
@@ -92,7 +85,6 @@ class Docker {
                 : ''
             } \
             ${sshPublicKeysDirectoryPath ? `--volume ${sshPublicKeysDirectoryPath}:/root/.ssh:ro` : ''} \
-            ${useHostNetwork ? '--net=host' : ''} \
             ${entrypointBash ? `--entrypoint ${commandPrefix}` : ``} \
             ${image} \
             ${entrypointBash ? `-c` : `${commandPrefix} -c`} \

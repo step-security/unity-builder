@@ -33,6 +33,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.runMain = void 0;
 const core = __importStar(__nccwpck_require__(42186));
 const github = __importStar(__nccwpck_require__(95438));
 const axios_1 = __importStar(__nccwpck_require__(88757));
@@ -70,6 +71,8 @@ async function validateSubscription() {
         core.info('Timeout or API not reachable. Continuing to next step.');
     }
 }
+// Exported so tests can drive the lifecycle directly without depending on
+// vitest's module re-loading (which changed in vitest 4).
 async function runMain() {
     try {
         await validateSubscription();
@@ -111,7 +114,13 @@ async function runMain() {
         core.setFailed(error.message);
     }
 }
-runMain();
+exports.runMain = runMain;
+// Auto-run when this module is the entry point. Tests import the file via
+// `await import('./index')` purely to register the mock factories and then
+// call `runMain()` directly.
+if (process.env.NODE_ENV !== 'test') {
+    runMain();
+}
 
 
 /***/ }),
@@ -281,6 +290,92 @@ const orchestrator_options_1 = __importDefault(__nccwpck_require__(82473));
 const orchestrator_1 = __importDefault(__nccwpck_require__(8330));
 const core = __importStar(__nccwpck_require__(42186));
 class BuildParameters {
+    editorVersion;
+    customImage;
+    unitySerial;
+    unityLicensingServer;
+    skipActivation;
+    runnerTempPath;
+    targetPlatform;
+    projectPath;
+    buildProfile;
+    buildName;
+    buildPath;
+    buildFile;
+    buildMethod;
+    buildVersion;
+    manualExit;
+    enableGpu;
+    androidVersionCode;
+    androidKeystoreName;
+    androidKeystoreBase64;
+    androidKeystorePass;
+    androidKeyaliasName;
+    androidKeyaliasPass;
+    androidTargetSdkVersion;
+    androidSdkManagerParameters;
+    androidExportType;
+    androidSymbolType;
+    dockerCpuLimit;
+    dockerMemoryLimit;
+    dockerIsolationMode;
+    containerRegistryRepository;
+    containerRegistryImageVersion;
+    customParameters;
+    sshAgent;
+    sshPublicKeysDirectoryPath;
+    providerStrategy;
+    gitPrivateToken;
+    awsStackName;
+    awsEndpoint;
+    awsCloudFormationEndpoint;
+    awsEcsEndpoint;
+    awsKinesisEndpoint;
+    awsCloudWatchLogsEndpoint;
+    awsS3Endpoint;
+    storageProvider;
+    rcloneRemote;
+    kubeConfig;
+    containerMemory;
+    containerCpu;
+    containerNamespace;
+    kubeVolumeSize;
+    kubeVolume;
+    kubeStorageClass;
+    runAsHostUser;
+    chownFilesTo;
+    commandHooks;
+    pullInputList;
+    inputPullCommand;
+    cacheKey;
+    postBuildContainerHooks;
+    preBuildContainerHooks;
+    customJob;
+    runNumber;
+    branch;
+    githubRepo;
+    orchestratorRepoName;
+    cloneDepth;
+    gitSha;
+    logId;
+    buildGuid;
+    orchestratorBranch;
+    orchestratorDebug;
+    buildPlatform;
+    isCliMode;
+    maxRetainedWorkspaces;
+    useLargePackages;
+    useCompressionStrategy;
+    garbageMaxAge;
+    githubChecks;
+    asyncWorkflow;
+    githubCheckId;
+    finalHooks;
+    skipLfs;
+    skipCache;
+    cacheUnityInstallationOnMac;
+    unityHubVersionOnMac;
+    dockerWorkspacePath;
     static shouldUseRetainedWorkspaceMode(buildParameters) {
         return buildParameters.maxRetainedWorkspaces > 0 && orchestrator_1.default.lockedWorkspace !== ``;
     }
@@ -511,6 +606,7 @@ exports["default"] = Cache;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CliFunction = exports.CliFunctionsRepository = void 0;
 class CliFunctionsRepository {
+    static targets = [];
     static PushCliFunction(target, propertyKey, descriptor, key, description) {
         CliFunctionsRepository.targets.push({
             target,
@@ -539,7 +635,6 @@ class CliFunctionsRepository {
     static PushCliFunctionSource(cliFunction) { }
 }
 exports.CliFunctionsRepository = CliFunctionsRepository;
-CliFunctionsRepository.targets = [];
 function CliFunction(key, description) {
     return (target, propertyKey, descriptor) => {
         CliFunctionsRepository.PushCliFunction(target, propertyKey, descriptor, key, description);
@@ -602,6 +697,7 @@ const remote_client_1 = __nccwpck_require__(85666);
 const orchestrator_options_reader_1 = __importDefault(__nccwpck_require__(54381));
 const github_1 = __importDefault(__nccwpck_require__(83654));
 class Cli {
+    static options;
     static get isCliMode() {
         return Cli.options !== undefined && Cli.options.mode !== undefined && Cli.options.mode !== '';
     }
@@ -927,6 +1023,13 @@ const orchestrator_options_1 = __importDefault(__nccwpck_require__(82473));
 const core = __importStar(__nccwpck_require__(42186));
 const core_1 = __nccwpck_require__(76762);
 class GitHub {
+    static asyncChecksApiWorkflowName = `Async Checks API`;
+    static githubInputEnabled = true;
+    static longDescriptionContent = ``;
+    static startedDate;
+    static endedDate;
+    static result = ``;
+    static forceAsyncTest;
     static get octokitDefaultToken() {
         return new core_1.Octokit({
             auth: process.env.GITHUB_TOKEN,
@@ -1111,10 +1214,6 @@ class GitHub {
         return await GitHub.octokitDefaultToken.request(`GET /repos/{owner}/{repo}/check-runs/{check_run_id}`);
     }
 }
-GitHub.asyncChecksApiWorkflowName = `Async Checks API`;
-GitHub.githubInputEnabled = true;
-GitHub.longDescriptionContent = ``;
-GitHub.result = ``;
 exports["default"] = GitHub;
 
 
@@ -1235,6 +1334,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const platform_1 = __importDefault(__nccwpck_require__(9707));
 class ImageTag {
+    repository;
+    editorVersion;
+    targetPlatform;
+    builderPlatform;
+    customImage;
+    imageRollingVersion;
+    imagePlatformPrefix;
     constructor(imageProperties) {
         const { editorVersion, targetPlatform, customImage, buildPlatform, containerRegistryRepository, containerRegistryImageVersion, providerStrategy, } = imageProperties;
         if (!ImageTag.versionPattern.test(editorVersion)) {
@@ -1461,6 +1567,7 @@ const node_fs_1 = __importDefault(__nccwpck_require__(87561));
 const node_path_1 = __importDefault(__nccwpck_require__(49411));
 const yaml_1 = __importDefault(__nccwpck_require__(44083));
 class ActionYamlReader {
+    actionYamlParsed;
     constructor() {
         let filename = `action.yml`;
         if (!node_fs_1.default.existsSync(filename)) {
@@ -1487,14 +1594,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.GenericInputReader = void 0;
-const orchestrator_system_1 = __nccwpck_require__(9744);
-const orchestrator_options_1 = __importDefault(__nccwpck_require__(82473));
+const node_child_process_1 = __nccwpck_require__(17718);
+const input_1 = __importDefault(__nccwpck_require__(48096));
 class GenericInputReader {
     static async Run(command) {
-        if (orchestrator_options_1.default.providerStrategy === 'local') {
+        if ((input_1.default.getInput('providerStrategy') || 'local') === 'local') {
             return '';
         }
-        return await orchestrator_system_1.OrchestratorSystem.Run(command, false, true);
+        return new Promise((resolve, reject) => {
+            (0, node_child_process_1.exec)(command, { maxBuffer: 1024 * 10000 }, (error, stdout) => {
+                if (error) {
+                    reject(error);
+                    return;
+                }
+                resolve(stdout.toString());
+            });
+        });
     }
 }
 exports.GenericInputReader = GenericInputReader;
@@ -1507,6 +1622,29 @@ exports.GenericInputReader = GenericInputReader;
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -1514,27 +1652,37 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.GitRepoReader = void 0;
 const node_console_1 = __nccwpck_require__(40027);
 const node_fs_1 = __importDefault(__nccwpck_require__(87561));
-const orchestrator_system_1 = __nccwpck_require__(9744);
-const orchestrator_logger_1 = __importDefault(__nccwpck_require__(32549));
-const orchestrator_options_1 = __importDefault(__nccwpck_require__(82473));
+const node_child_process_1 = __nccwpck_require__(17718);
+const core = __importStar(__nccwpck_require__(42186));
 const input_1 = __importDefault(__nccwpck_require__(48096));
 class GitRepoReader {
+    static async runCommand(command) {
+        return new Promise((resolve, reject) => {
+            (0, node_child_process_1.exec)(command, { maxBuffer: 1024 * 10000 }, (error, stdout) => {
+                if (error) {
+                    reject(error);
+                    return;
+                }
+                resolve(stdout.toString());
+            });
+        });
+    }
     static async GetRemote() {
-        if (orchestrator_options_1.default.providerStrategy === 'local') {
+        if ((input_1.default.getInput('providerStrategy') || 'local') === 'local') {
             return '';
         }
         (0, node_console_1.assert)(node_fs_1.default.existsSync(`.git`));
-        const value = (await orchestrator_system_1.OrchestratorSystem.Run(`cd ${input_1.default.projectPath} && git remote -v`, false, true)).replace(/ /g, ``);
-        orchestrator_logger_1.default.log(`value ${value}`);
+        const value = (await GitRepoReader.runCommand(`cd ${input_1.default.projectPath} && git remote -v`)).replace(/ /g, ``);
+        core.info(`value ${value}`);
         (0, node_console_1.assert)(value.includes('github.com'));
         return value.split('github.com')[1].split('.git')[0].slice(1);
     }
     static async GetBranch() {
-        if (orchestrator_options_1.default.providerStrategy === 'local') {
+        if ((input_1.default.getInput('providerStrategy') || 'local') === 'local') {
             return '';
         }
         (0, node_console_1.assert)(node_fs_1.default.existsSync(`.git`));
-        return (await orchestrator_system_1.OrchestratorSystem.Run(`cd ${input_1.default.projectPath} && git branch --show-current`, false, true))
+        return (await GitRepoReader.runCommand(`cd ${input_1.default.projectPath} && git branch --show-current`))
             .split('\n')[0]
             .replace(/ /g, ``)
             .replace('/head', '');
@@ -1578,20 +1726,31 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.GithubCliReader = void 0;
-const orchestrator_system_1 = __nccwpck_require__(9744);
+const node_child_process_1 = __nccwpck_require__(17718);
 const core = __importStar(__nccwpck_require__(42186));
-const orchestrator_options_1 = __importDefault(__nccwpck_require__(82473));
+const input_1 = __importDefault(__nccwpck_require__(48096));
 class GithubCliReader {
+    static async runCommand(command, suppressError = false) {
+        return new Promise((resolve, reject) => {
+            (0, node_child_process_1.exec)(command, { maxBuffer: 1024 * 10000 }, (error, stdout, stderr) => {
+                if (error && !suppressError) {
+                    reject(error);
+                    return;
+                }
+                resolve((stdout || '').toString() + (stderr || '').toString());
+            });
+        });
+    }
     static async GetGitHubAuthToken() {
-        if (orchestrator_options_1.default.providerStrategy === 'local') {
+        if ((input_1.default.getInput('providerStrategy') || 'local') === 'local') {
             return '';
         }
         try {
-            const authStatus = await orchestrator_system_1.OrchestratorSystem.Run(`gh auth status`, true, true);
+            const authStatus = await GithubCliReader.runCommand(`gh auth status`, true);
             if (authStatus.includes('You are not logged') || authStatus === '') {
                 return '';
             }
-            return (await orchestrator_system_1.OrchestratorSystem.Run(`gh auth status -t`, false, true))
+            return (await GithubCliReader.runCommand(`gh auth status -t`))
                 .split(`Token: `)[1]
                 .replace(/ /g, '')
                 .replace(/\n/g, '');
@@ -1952,8 +2111,8 @@ exports.OrchestratorError = OrchestratorError;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 class OrchestratorConstants {
+    static alphabet = '0123456789abcdefghijklmnopqrstuvwxyz';
 }
-OrchestratorConstants.alphabet = '0123456789abcdefghijklmnopqrstuvwxyz';
 exports["default"] = OrchestratorConstants;
 
 
@@ -1966,6 +2125,8 @@ exports["default"] = OrchestratorConstants;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 class OrchestratorEnvironmentVariable {
+    name;
+    value;
 }
 exports["default"] = OrchestratorEnvironmentVariable;
 
@@ -1987,6 +2148,7 @@ const orchestrator_options_1 = __importDefault(__nccwpck_require__(82473));
 const orchestrator_1 = __importDefault(__nccwpck_require__(8330));
 const build_parameters_1 = __importDefault(__nccwpck_require__(80787));
 class OrchestratorFolders {
+    static repositoryFolder = 'repo';
     static ToLinuxFolder(folder) {
         return folder.replace(/\\/g, `/`);
     }
@@ -2045,7 +2207,6 @@ class OrchestratorFolders {
     }
 }
 exports.OrchestratorFolders = OrchestratorFolders;
-OrchestratorFolders.repositoryFolder = 'repo';
 
 
 /***/ }),
@@ -2411,6 +2572,7 @@ const formatFunction = (value, arguments_) => {
     return value;
 };
 class OrchestratorQueryOverride {
+    static queryOverrides;
     // TODO accept premade secret sources or custom secret source definition yamls
     static query(key, alternativeKey) {
         if (OrchestratorQueryOverride.queryOverrides && OrchestratorQueryOverride.queryOverrides[key] !== undefined) {
@@ -2464,9 +2626,9 @@ exports["default"] = OrchestratorQueryOverride;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.OrchestratorStatics = void 0;
 class OrchestratorStatics {
+    static logPrefix = `Orchestrator`;
 }
 exports.OrchestratorStatics = OrchestratorStatics;
-OrchestratorStatics.logPrefix = `Orchestrator`;
 
 
 /***/ }),
@@ -2479,6 +2641,9 @@ OrchestratorStatics.logPrefix = `Orchestrator`;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.OrchestratorStepParameters = void 0;
 class OrchestratorStepParameters {
+    image;
+    environment;
+    secrets;
     constructor(image, environmentVariables, secrets) {
         this.image = image;
         this.environment = environmentVariables;
@@ -2542,6 +2707,15 @@ const orchestrator_result_1 = __importDefault(__nccwpck_require__(86819));
 const orchestrator_options_1 = __importDefault(__nccwpck_require__(82473));
 const resource_tracking_1 = __importDefault(__nccwpck_require__(42604));
 class Orchestrator {
+    static Provider;
+    static buildParameters;
+    static defaultSecrets;
+    static orchestratorEnvironmentVariables;
+    static lockedWorkspace = ``;
+    static retainedWorkspacePrefix = `retained-workspace`;
+    // When true, validates AWS CloudFormation templates even when using local-docker execution
+    // This is set by AWS_FORCE_PROVIDER=aws-local mode
+    static validateAwsTemplates = false;
     static get isOrchestratorEnvironment() {
         return process.env[`GITHUB_ACTIONS`] !== `true`;
     }
@@ -2793,11 +2967,6 @@ class Orchestrator {
         }
     }
 }
-Orchestrator.lockedWorkspace = ``;
-Orchestrator.retainedWorkspacePrefix = `retained-workspace`;
-// When true, validates AWS CloudFormation templates even when using local-docker execution
-// This is set by AWS_FORCE_PROVIDER=aws-local mode
-Orchestrator.validateAwsTemplates = false;
 exports["default"] = Orchestrator;
 
 
@@ -2853,6 +3022,7 @@ class AWSBaseStack {
     constructor(baseStackName) {
         this.baseStackName = baseStackName;
     }
+    baseStackName;
     async setupBaseStack(CF) {
         const baseStackName = this.baseStackName;
         const stackWaitTimeSeconds = getStackWaitTime();
@@ -2994,6 +3164,11 @@ const client_s3_1 = __nccwpck_require__(19250);
 const __1 = __nccwpck_require__(41359);
 const orchestrator_options_1 = __importDefault(__nccwpck_require__(82473));
 class AwsClientFactory {
+    static cloudFormation;
+    static ecs;
+    static kinesis;
+    static cloudWatchLogs;
+    static s3;
     static getCredentials() {
         // Explicitly provide credentials from environment variables for LocalStack compatibility
         // LocalStack accepts any credentials, but the AWS SDK needs them to be explicitly set
@@ -3191,6 +3366,7 @@ function getStackWaitTime() {
     return DEFAULT_STACK_WAIT_TIME_SECONDS;
 }
 class AWSJobStack {
+    baseStackName;
     constructor(baseStackName) {
         this.baseStackName = baseStackName;
     }
@@ -3401,6 +3577,7 @@ const orchestrator_options_1 = __importDefault(__nccwpck_require__(82473));
 const github_1 = __importDefault(__nccwpck_require__(83654));
 const aws_client_factory_1 = __nccwpck_require__(5835);
 class AWSTaskRunner {
+    static encodedUnderscore = `$252F`;
     /**
      * Transform localhost endpoints to host.docker.internal for container environments.
      * When LocalStack is used, ECS tasks run in Docker containers that need to reach
@@ -3634,7 +3811,6 @@ class AWSTaskRunner {
         }))).ShardIterator || '');
     }
 }
-AWSTaskRunner.encodedUnderscore = `$252F`;
 exports["default"] = AWSTaskRunner;
 
 
@@ -3648,10 +3824,8 @@ exports["default"] = AWSTaskRunner;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.BaseStackFormation = void 0;
 class BaseStackFormation {
-}
-exports.BaseStackFormation = BaseStackFormation;
-BaseStackFormation.baseStackDecription = `Game-CI base stack`;
-BaseStackFormation.formation = `AWSTemplateFormatVersion: '2010-09-09'
+    static baseStackDecription = `Game-CI base stack`;
+    static formation = `AWSTemplateFormatVersion: '2010-09-09'
 Description: ${BaseStackFormation.baseStackDecription}
 Parameters:
   EnvironmentName:
@@ -4045,6 +4219,8 @@ Outputs:
     Export:
       Name: !Sub ${'${EnvironmentName}'}:ContainerSecurityGroup
 `;
+}
+exports.BaseStackFormation = BaseStackFormation;
 
 
 /***/ }),
@@ -4057,9 +4233,7 @@ Outputs:
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CleanupCronFormation = void 0;
 class CleanupCronFormation {
-}
-exports.CleanupCronFormation = CleanupCronFormation;
-CleanupCronFormation.formation = `AWSTemplateFormatVersion: '2010-09-09'
+    static formation = `AWSTemplateFormatVersion: '2010-09-09'
 Description: Schedule automatic deletion of CloudFormation stacks
 Metadata:
   AWS::CloudFormation::Interface:
@@ -4203,6 +4377,8 @@ Resources:
       ServiceToken: !GetAtt GenerateCronExpLambda.Arn
       ttl: !Ref 'TTL'
 `;
+}
+exports.CleanupCronFormation = CleanupCronFormation;
 
 
 /***/ }),
@@ -4219,6 +4395,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TaskDefinitionFormation = void 0;
 const orchestrator_1 = __importDefault(__nccwpck_require__(8330));
 class TaskDefinitionFormation {
+    static description = `Game CI Orchestrator Task Stack`;
     static get formation() {
         return `AWSTemplateFormatVersion: 2010-09-09
 Description: ${TaskDefinitionFormation.description}
@@ -4355,10 +4532,7 @@ Resources:
       - LogGroup
 `;
     }
-}
-exports.TaskDefinitionFormation = TaskDefinitionFormation;
-TaskDefinitionFormation.description = `Game CI Orchestrator Task Stack`;
-TaskDefinitionFormation.streamLogs = `
+    static streamLogs = `
   SubscriptionFilter:
     Type: 'AWS::Logs::SubscriptionFilter'
     Properties:
@@ -4385,6 +4559,8 @@ TaskDefinitionFormation.streamLogs = `
       'AWS::CloudFormation::Designer':
         id: c6f18447-b879-4696-8873-f981b2cedd2b
 `;
+}
+exports.TaskDefinitionFormation = TaskDefinitionFormation;
 
 
 /***/ }),
@@ -4418,6 +4594,7 @@ function getStackWaitTime() {
     return DEFAULT_STACK_WAIT_TIME_SECONDS;
 }
 class AWSBuildEnvironment {
+    baseStackName;
     constructor(buildParameters) {
         this.baseStackName = buildParameters.awsStackName;
     }
@@ -4825,6 +5002,7 @@ const orchestrator_system_1 = __nccwpck_require__(9744);
 const fs = __importStar(__nccwpck_require__(87561));
 const command_hook_service_1 = __nccwpck_require__(66604);
 class LocalDockerOrchestrator {
+    buildParameters;
     listResources() {
         return new Promise((resolve) => resolve([]));
     }
@@ -5008,16 +5186,24 @@ const kubernetes_role_1 = __nccwpck_require__(30226);
 const orchestrator_system_1 = __nccwpck_require__(9744);
 const resource_tracking_1 = __importDefault(__nccwpck_require__(42604));
 class Kubernetes {
+    static Instance;
+    kubeConfig;
+    kubeClient;
+    kubeClientApps;
+    kubeClientBatch;
+    rbacAuthorizationV1Api;
+    buildGuid = '';
+    buildParameters;
+    pvcName = '';
+    secretName = '';
+    jobName = '';
+    namespace;
+    podName = '';
+    containerName = '';
+    cleanupCronJobName = '';
+    serviceAccountName = '';
+    ip = '';
     constructor(buildParameters) {
-        this.buildGuid = '';
-        this.pvcName = '';
-        this.secretName = '';
-        this.jobName = '';
-        this.podName = '';
-        this.containerName = '';
-        this.cleanupCronJobName = '';
-        this.serviceAccountName = '';
-        this.ip = '';
         Kubernetes.Instance = this;
         this.kubeConfig = new k8s.KubeConfig();
         this.kubeConfig.loadFromDefault();
@@ -6097,6 +6283,8 @@ const orchestrator_1 = __importDefault(__nccwpck_require__(8330));
 const kubernetes_pods_1 = __importDefault(__nccwpck_require__(91575));
 const follow_log_stream_service_1 = __nccwpck_require__(36149);
 class KubernetesTaskRunner {
+    static maxRetry = 3;
+    static lastReceivedMessage = ``;
     static async runTask(kubeConfig, kubeClient, jobName, podName, containerName, namespace) {
         let output = '';
         let shouldReadLogs = true;
@@ -6661,8 +6849,6 @@ class KubernetesTaskRunner {
         return waitComplete;
     }
 }
-KubernetesTaskRunner.maxRetry = 3;
-KubernetesTaskRunner.lastReceivedMessage = ``;
 exports["default"] = KubernetesTaskRunner;
 
 
@@ -6794,6 +6980,8 @@ const execAsync = (0, util_1.promisify)(child_process_1.exec);
  * Manages git operations for provider repositories
  */
 class ProviderGitManager {
+    static CACHE_DIR = path_1.default.join(process.cwd(), '.provider-cache');
+    static GIT_TIMEOUT = 30000; // 30 seconds
     /**
      * Ensures the cache directory exists
      */
@@ -7007,8 +7195,6 @@ class ProviderGitManager {
     }
 }
 exports.ProviderGitManager = ProviderGitManager;
-ProviderGitManager.CACHE_DIR = path_1.default.join(process.cwd(), '.provider-cache');
-ProviderGitManager.GIT_TIMEOUT = 30000; // 30 seconds
 
 
 /***/ }),
@@ -8332,9 +8518,9 @@ class RemoteClientLogger {
         RemoteClientLogger.value += message;
         return false;
     }
+    static value = '';
 }
 exports.RemoteClientLogger = RemoteClientLogger;
-RemoteClientLogger.value = '';
 
 
 /***/ }),
@@ -8381,6 +8567,8 @@ class FollowLogStreamService {
     static Reset() {
         FollowLogStreamService.DidReceiveEndOfTransmission = false;
     }
+    static errors = ``;
+    static DidReceiveEndOfTransmission = false;
     static handleIteration(message, shouldReadLogs, shouldCleanup, output) {
         if (message.includes(`---${orchestrator_1.default.buildParameters.logId}`)) {
             orchestrator_logger_1.default.log('End of log transmission received');
@@ -8429,8 +8617,6 @@ class FollowLogStreamService {
     }
 }
 exports.FollowLogStreamService = FollowLogStreamService;
-FollowLogStreamService.errors = ``;
-FollowLogStreamService.DidReceiveEndOfTransmission = false;
 
 
 /***/ }),
@@ -8466,6 +8652,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(42186));
 class OrchestratorLogger {
+    static timestamp;
+    static globalTimestamp;
     static setup() {
         this.timestamp = this.createTimestamp();
         this.globalTimestamp = this.timestamp;
@@ -8506,6 +8694,11 @@ exports["default"] = OrchestratorLogger;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 class OrchestratorResult {
+    BuildParameters;
+    BuildResults;
+    BuildSucceeded;
+    BuildFinished;
+    LibraryCacheUsed;
     constructor(buildParameters, buildResults, buildSucceeded, buildFinished, libraryCacheUsed) {
         this.BuildParameters = buildParameters;
         this.BuildResults = buildResults;
@@ -8693,6 +8886,7 @@ const node_util_1 = __nccwpck_require__(47261);
 const node_child_process_1 = __nccwpck_require__(17718);
 const exec = (0, node_util_1.promisify)(node_child_process_1.exec);
 class SharedWorkspaceLocking {
+    static _s3;
     static get s3() {
         if (!SharedWorkspaceLocking._s3) {
             // Use factory so LocalStack endpoint/path-style settings are honored
@@ -9002,6 +9196,17 @@ const orchestrator_options_reader_1 = __importDefault(__nccwpck_require__(54381)
 const orchestrator_query_override_1 = __importDefault(__nccwpck_require__(34664));
 const command_hook_service_1 = __nccwpck_require__(66604);
 class TaskParameterSerializer {
+    static blockedParameterNames = new Set([
+        '0',
+        'length',
+        'prototype',
+        '',
+        'unityVersion',
+        'CACHE_UNITY_INSTALLATION_ON_MAC',
+        'RUNNER_TEMP_PATH',
+        'NAME',
+        'CUSTOM_JOB',
+    ]);
     static createOrchestratorEnvironmentVariables(buildParameters) {
         const result = this.uniqBy([
             ...[
@@ -9143,17 +9348,6 @@ class TaskParameterSerializer {
     }
 }
 exports.TaskParameterSerializer = TaskParameterSerializer;
-TaskParameterSerializer.blockedParameterNames = new Set([
-    '0',
-    'length',
-    'prototype',
-    '',
-    'unityVersion',
-    'CACHE_UNITY_INSTALLATION_ON_MAC',
-    'RUNNER_TEMP_PATH',
-    'NAME',
-    'CUSTOM_JOB',
-]);
 
 
 /***/ }),
@@ -10260,7 +10454,9 @@ const node_path_1 = __importDefault(__nccwpck_require__(49411));
 class SetupAndroid {
     static async setup(buildParameters) {
         const { targetPlatform, androidKeystoreBase64, androidKeystoreName, projectPath } = buildParameters;
-        if (targetPlatform === 'Android' && androidKeystoreBase64 !== '' && androidKeystoreName !== '') {
+        if (targetPlatform === 'Android' &&
+            androidKeystoreBase64 !== '' &&
+            androidKeystoreName !== '') {
             SetupAndroid.setupAndroidRun(androidKeystoreBase64, androidKeystoreName, projectPath);
         }
     }
@@ -10289,6 +10485,8 @@ const exec_1 = __nccwpck_require__(71514);
 const cache_1 = __nccwpck_require__(27799);
 const node_fs_1 = __importDefault(__nccwpck_require__(87561));
 class SetupMac {
+    static unityHubBasePath = `/Applications/"Unity Hub.app"`;
+    static unityHubExecPath = `${SetupMac.unityHubBasePath}/Contents/MacOS/"Unity Hub"`;
     static async setup(buildParameters, actionFolder) {
         const unityEditorPath = `/Applications/Unity/Hub/Editor/${buildParameters.editorVersion}/Unity.app/Contents/MacOS/Unity`;
         if (!node_fs_1.default.existsSync(this.unityHubExecPath.replace(/"/g, ''))) {
@@ -10451,8 +10649,6 @@ class SetupMac {
         process.env.ENABLE_GPU = buildParameters.enableGpu.toString();
     }
 }
-SetupMac.unityHubBasePath = `/Applications/"Unity Hub.app"`;
-SetupMac.unityHubExecPath = `${SetupMac.unityHubBasePath}/Contents/MacOS/"Unity Hub"`;
 exports["default"] = SetupMac;
 
 
@@ -10925,7 +11121,9 @@ class Versioning {
             const { tag, commits, hash } = versionDescriptor;
             // Ensure 3 digits (commits should always be patch level)
             const [major, minor, patch] = `${tag}.${commits}`.split('.');
-            const threeDigitVersion = /^\d+$/.test(patch) ? `${major}.${minor}.${patch}` : `${major}.0.${minor}`;
+            const threeDigitVersion = /^\d+$/.test(patch)
+                ? `${major}.${minor}.${patch}`
+                : `${major}.0.${minor}`;
             core.info(`Found semantic version ${threeDigitVersion} for ${this.branch}@${hash}`);
             return `${threeDigitVersion}`;
         }
@@ -11099,7 +11297,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.saveCache = exports.restoreCache = exports.isFeatureAvailable = exports.ReserveCacheError = exports.ValidationError = void 0;
+exports.saveCache = exports.restoreCache = exports.isFeatureAvailable = exports.FinalizeCacheError = exports.ReserveCacheError = exports.ValidationError = void 0;
 const core = __importStar(__nccwpck_require__(42186));
 const path = __importStar(__nccwpck_require__(71017));
 const utils = __importStar(__nccwpck_require__(75340));
@@ -11107,7 +11305,7 @@ const cacheHttpClient = __importStar(__nccwpck_require__(98245));
 const cacheTwirpClient = __importStar(__nccwpck_require__(82502));
 const config_1 = __nccwpck_require__(35147);
 const tar_1 = __nccwpck_require__(56490);
-const constants_1 = __nccwpck_require__(88840);
+const http_client_1 = __nccwpck_require__(96255);
 class ValidationError extends Error {
     constructor(message) {
         super(message);
@@ -11124,6 +11322,14 @@ class ReserveCacheError extends Error {
     }
 }
 exports.ReserveCacheError = ReserveCacheError;
+class FinalizeCacheError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = 'FinalizeCacheError';
+        Object.setPrototypeOf(this, FinalizeCacheError.prototype);
+    }
+}
+exports.FinalizeCacheError = FinalizeCacheError;
 function checkPaths(paths) {
     if (!paths || paths.length === 0) {
         throw new ValidationError(`Path Validation Error: At least one directory or file path is required`);
@@ -11144,7 +11350,17 @@ function checkKey(key) {
  * @returns boolean return true if Actions cache service feature is available, otherwise false
  */
 function isFeatureAvailable() {
-    return !!process.env['ACTIONS_CACHE_URL'];
+    const cacheServiceVersion = (0, config_1.getCacheServiceVersion)();
+    // Check availability based on cache service version
+    switch (cacheServiceVersion) {
+        case 'v2':
+            // For v2, we need ACTIONS_RESULTS_URL
+            return !!process.env['ACTIONS_RESULTS_URL'];
+        case 'v1':
+        default:
+            // For v1, we only need ACTIONS_CACHE_URL
+            return !!process.env['ACTIONS_CACHE_URL'];
+    }
 }
 exports.isFeatureAvailable = isFeatureAvailable;
 /**
@@ -11229,8 +11445,16 @@ function restoreCacheV1(paths, primaryKey, restoreKeys, options, enableCrossOsAr
                 throw error;
             }
             else {
-                // Supress all non-validation cache related errors because caching should be optional
-                core.warning(`Failed to restore: ${error.message}`);
+                // warn on cache restore failure and continue build
+                // Log server errors (5xx) as errors, all other errors as warnings
+                if (typedError instanceof http_client_1.HttpClientError &&
+                    typeof typedError.statusCode === 'number' &&
+                    typedError.statusCode >= 500) {
+                    core.error(`Failed to restore: ${error.message}`);
+                }
+                else {
+                    core.warning(`Failed to restore: ${error.message}`);
+                }
             }
         }
         finally {
@@ -11280,10 +11504,16 @@ function restoreCacheV2(paths, primaryKey, restoreKeys, options, enableCrossOsAr
             };
             const response = yield twirpClient.GetCacheEntryDownloadURL(request);
             if (!response.ok) {
-                core.warning(`Cache not found for keys: ${keys.join(', ')}`);
+                core.debug(`Cache not found for version ${request.version} of keys: ${keys.join(', ')}`);
                 return undefined;
             }
-            core.info(`Cache hit for: ${request.key}`);
+            const isRestoreKeyMatch = request.key !== response.matchedKey;
+            if (isRestoreKeyMatch) {
+                core.info(`Cache hit for restore-key: ${response.matchedKey}`);
+            }
+            else {
+                core.info(`Cache hit for: ${response.matchedKey}`);
+            }
             if (options === null || options === void 0 ? void 0 : options.lookupOnly) {
                 core.info('Lookup only - skipping download');
                 return response.matchedKey;
@@ -11308,7 +11538,15 @@ function restoreCacheV2(paths, primaryKey, restoreKeys, options, enableCrossOsAr
             }
             else {
                 // Supress all non-validation cache related errors because caching should be optional
-                core.warning(`Failed to restore: ${error.message}`);
+                // Log server errors (5xx) as errors, all other errors as warnings
+                if (typedError instanceof http_client_1.HttpClientError &&
+                    typeof typedError.statusCode === 'number' &&
+                    typedError.statusCode >= 500) {
+                    core.error(`Failed to restore: ${error.message}`);
+                }
+                else {
+                    core.warning(`Failed to restore: ${error.message}`);
+                }
             }
         }
         finally {
@@ -11411,7 +11649,15 @@ function saveCacheV1(paths, key, options, enableCrossOsArchive = false) {
                 core.info(`Failed to save: ${typedError.message}`);
             }
             else {
-                core.warning(`Failed to save: ${typedError.message}`);
+                // Log server errors (5xx) as errors, all other errors as warnings
+                if (typedError instanceof http_client_1.HttpClientError &&
+                    typeof typedError.statusCode === 'number' &&
+                    typedError.statusCode >= 500) {
+                    core.error(`Failed to save: ${typedError.message}`);
+                }
+                else {
+                    core.warning(`Failed to save: ${typedError.message}`);
+                }
             }
         }
         finally {
@@ -11460,10 +11706,6 @@ function saveCacheV2(paths, key, options, enableCrossOsArchive = false) {
             }
             const archiveFileSize = utils.getArchiveFileSizeInBytes(archivePath);
             core.debug(`File Size: ${archiveFileSize}`);
-            // For GHES, this check will take place in ReserveCache API with enterprise file size limit
-            if (archiveFileSize > constants_1.CacheFileSizeLimit && !(0, config_1.isGhes)()) {
-                throw new Error(`Cache size of ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B) is over the 10GB limit, not saving cache.`);
-            }
             // Set the archive size in the options, will be used to display the upload progress
             options.archiveSizeBytes = archiveFileSize;
             core.debug('Reserving Cache');
@@ -11472,12 +11714,23 @@ function saveCacheV2(paths, key, options, enableCrossOsArchive = false) {
                 key,
                 version
             };
-            const response = yield twirpClient.CreateCacheEntry(request);
-            if (!response.ok) {
+            let signedUploadUrl;
+            try {
+                const response = yield twirpClient.CreateCacheEntry(request);
+                if (!response.ok) {
+                    if (response.message) {
+                        core.warning(`Cache reservation failed: ${response.message}`);
+                    }
+                    throw new Error(response.message || 'Response was not ok');
+                }
+                signedUploadUrl = response.signedUploadUrl;
+            }
+            catch (error) {
+                core.debug(`Failed to reserve cache: ${error}`);
                 throw new ReserveCacheError(`Unable to reserve cache with key ${key}, another job may be creating this cache.`);
             }
             core.debug(`Attempting to upload cache located at: ${archivePath}`);
-            yield cacheHttpClient.saveCache(cacheId, archivePath, response.signedUploadUrl, options);
+            yield cacheHttpClient.saveCache(cacheId, archivePath, signedUploadUrl, options);
             const finalizeRequest = {
                 key,
                 version,
@@ -11486,6 +11739,9 @@ function saveCacheV2(paths, key, options, enableCrossOsArchive = false) {
             const finalizeResponse = yield twirpClient.FinalizeCacheEntryUpload(finalizeRequest);
             core.debug(`FinalizeCacheEntryUploadResponse: ${finalizeResponse.ok}`);
             if (!finalizeResponse.ok) {
+                if (finalizeResponse.message) {
+                    throw new FinalizeCacheError(finalizeResponse.message);
+                }
                 throw new Error(`Unable to finalize cache with key ${key}, another job may be finalizing this cache.`);
             }
             cacheId = parseInt(finalizeResponse.entryId);
@@ -11498,8 +11754,19 @@ function saveCacheV2(paths, key, options, enableCrossOsArchive = false) {
             else if (typedError.name === ReserveCacheError.name) {
                 core.info(`Failed to save: ${typedError.message}`);
             }
+            else if (typedError.name === FinalizeCacheError.name) {
+                core.warning(typedError.message);
+            }
             else {
-                core.warning(`Failed to save: ${typedError.message}`);
+                // Log server errors (5xx) as errors, all other errors as warnings
+                if (typedError instanceof http_client_1.HttpClientError &&
+                    typeof typedError.statusCode === 'number' &&
+                    typedError.statusCode >= 500) {
+                    core.error(`Failed to save: ${typedError.message}`);
+                }
+                else {
+                    core.warning(`Failed to save: ${typedError.message}`);
+                }
             }
         }
         finally {
@@ -11518,156 +11785,13 @@ function saveCacheV2(paths, key, options, enableCrossOsArchive = false) {
 
 /***/ }),
 
-/***/ 24469:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Timestamp = void 0;
-const runtime_1 = __nccwpck_require__(4061);
-const runtime_2 = __nccwpck_require__(4061);
-const runtime_3 = __nccwpck_require__(4061);
-const runtime_4 = __nccwpck_require__(4061);
-const runtime_5 = __nccwpck_require__(4061);
-const runtime_6 = __nccwpck_require__(4061);
-const runtime_7 = __nccwpck_require__(4061);
-// @generated message type with reflection information, may provide speed optimized methods
-class Timestamp$Type extends runtime_7.MessageType {
-    constructor() {
-        super("google.protobuf.Timestamp", [
-            { no: 1, name: "seconds", kind: "scalar", T: 3 /*ScalarType.INT64*/ },
-            { no: 2, name: "nanos", kind: "scalar", T: 5 /*ScalarType.INT32*/ }
-        ]);
-    }
-    /**
-     * Creates a new `Timestamp` for the current time.
-     */
-    now() {
-        const msg = this.create();
-        const ms = Date.now();
-        msg.seconds = runtime_6.PbLong.from(Math.floor(ms / 1000)).toString();
-        msg.nanos = (ms % 1000) * 1000000;
-        return msg;
-    }
-    /**
-     * Converts a `Timestamp` to a JavaScript Date.
-     */
-    toDate(message) {
-        return new Date(runtime_6.PbLong.from(message.seconds).toNumber() * 1000 + Math.ceil(message.nanos / 1000000));
-    }
-    /**
-     * Converts a JavaScript Date to a `Timestamp`.
-     */
-    fromDate(date) {
-        const msg = this.create();
-        const ms = date.getTime();
-        msg.seconds = runtime_6.PbLong.from(Math.floor(ms / 1000)).toString();
-        msg.nanos = (ms % 1000) * 1000000;
-        return msg;
-    }
-    /**
-     * In JSON format, the `Timestamp` type is encoded as a string
-     * in the RFC 3339 format.
-     */
-    internalJsonWrite(message, options) {
-        let ms = runtime_6.PbLong.from(message.seconds).toNumber() * 1000;
-        if (ms < Date.parse("0001-01-01T00:00:00Z") || ms > Date.parse("9999-12-31T23:59:59Z"))
-            throw new Error("Unable to encode Timestamp to JSON. Must be from 0001-01-01T00:00:00Z to 9999-12-31T23:59:59Z inclusive.");
-        if (message.nanos < 0)
-            throw new Error("Unable to encode invalid Timestamp to JSON. Nanos must not be negative.");
-        let z = "Z";
-        if (message.nanos > 0) {
-            let nanosStr = (message.nanos + 1000000000).toString().substring(1);
-            if (nanosStr.substring(3) === "000000")
-                z = "." + nanosStr.substring(0, 3) + "Z";
-            else if (nanosStr.substring(6) === "000")
-                z = "." + nanosStr.substring(0, 6) + "Z";
-            else
-                z = "." + nanosStr + "Z";
-        }
-        return new Date(ms).toISOString().replace(".000Z", z);
-    }
-    /**
-     * In JSON format, the `Timestamp` type is encoded as a string
-     * in the RFC 3339 format.
-     */
-    internalJsonRead(json, options, target) {
-        if (typeof json !== "string")
-            throw new Error("Unable to parse Timestamp from JSON " + (0, runtime_5.typeofJsonValue)(json) + ".");
-        let matches = json.match(/^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})(?:Z|\.([0-9]{3,9})Z|([+-][0-9][0-9]:[0-9][0-9]))$/);
-        if (!matches)
-            throw new Error("Unable to parse Timestamp from JSON. Invalid format.");
-        let ms = Date.parse(matches[1] + "-" + matches[2] + "-" + matches[3] + "T" + matches[4] + ":" + matches[5] + ":" + matches[6] + (matches[8] ? matches[8] : "Z"));
-        if (Number.isNaN(ms))
-            throw new Error("Unable to parse Timestamp from JSON. Invalid value.");
-        if (ms < Date.parse("0001-01-01T00:00:00Z") || ms > Date.parse("9999-12-31T23:59:59Z"))
-            throw new globalThis.Error("Unable to parse Timestamp from JSON. Must be from 0001-01-01T00:00:00Z to 9999-12-31T23:59:59Z inclusive.");
-        if (!target)
-            target = this.create();
-        target.seconds = runtime_6.PbLong.from(ms / 1000).toString();
-        target.nanos = 0;
-        if (matches[7])
-            target.nanos = (parseInt("1" + matches[7] + "0".repeat(9 - matches[7].length)) - 1000000000);
-        return target;
-    }
-    create(value) {
-        const message = { seconds: "0", nanos: 0 };
-        globalThis.Object.defineProperty(message, runtime_4.MESSAGE_TYPE, { enumerable: false, value: this });
-        if (value !== undefined)
-            (0, runtime_3.reflectionMergePartial)(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader, length, options, target) {
-        let message = target !== null && target !== void 0 ? target : this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* int64 seconds */ 1:
-                    message.seconds = reader.int64().toString();
-                    break;
-                case /* int32 nanos */ 2:
-                    message.nanos = reader.int32();
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? runtime_2.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message, writer, options) {
-        /* int64 seconds = 1; */
-        if (message.seconds !== "0")
-            writer.tag(1, runtime_1.WireType.Varint).int64(message.seconds);
-        /* int32 nanos = 2; */
-        if (message.nanos !== 0)
-            writer.tag(2, runtime_1.WireType.Varint).int32(message.nanos);
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? runtime_2.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message google.protobuf.Timestamp
- */
-exports.Timestamp = new Timestamp$Type();
-//# sourceMappingURL=timestamp.js.map
-
-/***/ }),
-
 /***/ 84388:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.CacheService = exports.LookupCacheEntryResponse = exports.LookupCacheEntryRequest = exports.ListCacheEntriesResponse = exports.ListCacheEntriesRequest = exports.DeleteCacheEntryResponse = exports.DeleteCacheEntryRequest = exports.GetCacheEntryDownloadURLResponse = exports.GetCacheEntryDownloadURLRequest = exports.FinalizeCacheEntryUploadResponse = exports.FinalizeCacheEntryUploadRequest = exports.CreateCacheEntryResponse = exports.CreateCacheEntryRequest = void 0;
+exports.CacheService = exports.GetCacheEntryDownloadURLResponse = exports.GetCacheEntryDownloadURLRequest = exports.FinalizeCacheEntryUploadResponse = exports.FinalizeCacheEntryUploadRequest = exports.CreateCacheEntryResponse = exports.CreateCacheEntryRequest = void 0;
 // @generated by protobuf-ts 2.9.1 with parameter long_type_string,client_none,generate_dependencies
 // @generated from protobuf file "results/api/v1/cache.proto" (package "github.actions.results.api.v1", syntax proto3)
 // tslint:disable
@@ -11677,7 +11801,6 @@ const runtime_2 = __nccwpck_require__(4061);
 const runtime_3 = __nccwpck_require__(4061);
 const runtime_4 = __nccwpck_require__(4061);
 const runtime_5 = __nccwpck_require__(4061);
-const cacheentry_1 = __nccwpck_require__(53639);
 const cachemetadata_1 = __nccwpck_require__(67988);
 // @generated message type with reflection information, may provide speed optimized methods
 class CreateCacheEntryRequest$Type extends runtime_5.MessageType {
@@ -11745,11 +11868,12 @@ class CreateCacheEntryResponse$Type extends runtime_5.MessageType {
     constructor() {
         super("github.actions.results.api.v1.CreateCacheEntryResponse", [
             { no: 1, name: "ok", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
-            { no: 2, name: "signed_upload_url", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 2, name: "signed_upload_url", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value) {
-        const message = { ok: false, signedUploadUrl: "" };
+        const message = { ok: false, signedUploadUrl: "", message: "" };
         globalThis.Object.defineProperty(message, runtime_4.MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
             (0, runtime_3.reflectionMergePartial)(this, message, value);
@@ -11765,6 +11889,9 @@ class CreateCacheEntryResponse$Type extends runtime_5.MessageType {
                     break;
                 case /* string signed_upload_url */ 2:
                     message.signedUploadUrl = reader.string();
+                    break;
+                case /* string message */ 3:
+                    message.message = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -11784,6 +11911,9 @@ class CreateCacheEntryResponse$Type extends runtime_5.MessageType {
         /* string signed_upload_url = 2; */
         if (message.signedUploadUrl !== "")
             writer.tag(2, runtime_1.WireType.LengthDelimited).string(message.signedUploadUrl);
+        /* string message = 3; */
+        if (message.message !== "")
+            writer.tag(3, runtime_1.WireType.LengthDelimited).string(message.message);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? runtime_2.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -11867,11 +11997,12 @@ class FinalizeCacheEntryUploadResponse$Type extends runtime_5.MessageType {
     constructor() {
         super("github.actions.results.api.v1.FinalizeCacheEntryUploadResponse", [
             { no: 1, name: "ok", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
-            { no: 2, name: "entry_id", kind: "scalar", T: 3 /*ScalarType.INT64*/ }
+            { no: 2, name: "entry_id", kind: "scalar", T: 3 /*ScalarType.INT64*/ },
+            { no: 3, name: "message", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value) {
-        const message = { ok: false, entryId: "0" };
+        const message = { ok: false, entryId: "0", message: "" };
         globalThis.Object.defineProperty(message, runtime_4.MESSAGE_TYPE, { enumerable: false, value: this });
         if (value !== undefined)
             (0, runtime_3.reflectionMergePartial)(this, message, value);
@@ -11887,6 +12018,9 @@ class FinalizeCacheEntryUploadResponse$Type extends runtime_5.MessageType {
                     break;
                 case /* int64 entry_id */ 2:
                     message.entryId = reader.int64().toString();
+                    break;
+                case /* string message */ 3:
+                    message.message = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -11906,6 +12040,9 @@ class FinalizeCacheEntryUploadResponse$Type extends runtime_5.MessageType {
         /* int64 entry_id = 2; */
         if (message.entryId !== "0")
             writer.tag(2, runtime_1.WireType.Varint).int64(message.entryId);
+        /* string message = 3; */
+        if (message.message !== "")
+            writer.tag(3, runtime_1.WireType.LengthDelimited).string(message.message);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? runtime_2.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -12045,376 +12182,25 @@ class GetCacheEntryDownloadURLResponse$Type extends runtime_5.MessageType {
  * @generated MessageType for protobuf message github.actions.results.api.v1.GetCacheEntryDownloadURLResponse
  */
 exports.GetCacheEntryDownloadURLResponse = new GetCacheEntryDownloadURLResponse$Type();
-// @generated message type with reflection information, may provide speed optimized methods
-class DeleteCacheEntryRequest$Type extends runtime_5.MessageType {
-    constructor() {
-        super("github.actions.results.api.v1.DeleteCacheEntryRequest", [
-            { no: 1, name: "metadata", kind: "message", T: () => cachemetadata_1.CacheMetadata },
-            { no: 2, name: "key", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
-        ]);
-    }
-    create(value) {
-        const message = { key: "" };
-        globalThis.Object.defineProperty(message, runtime_4.MESSAGE_TYPE, { enumerable: false, value: this });
-        if (value !== undefined)
-            (0, runtime_3.reflectionMergePartial)(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader, length, options, target) {
-        let message = target !== null && target !== void 0 ? target : this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* github.actions.results.entities.v1.CacheMetadata metadata */ 1:
-                    message.metadata = cachemetadata_1.CacheMetadata.internalBinaryRead(reader, reader.uint32(), options, message.metadata);
-                    break;
-                case /* string key */ 2:
-                    message.key = reader.string();
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? runtime_2.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message, writer, options) {
-        /* github.actions.results.entities.v1.CacheMetadata metadata = 1; */
-        if (message.metadata)
-            cachemetadata_1.CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, runtime_1.WireType.LengthDelimited).fork(), options).join();
-        /* string key = 2; */
-        if (message.key !== "")
-            writer.tag(2, runtime_1.WireType.LengthDelimited).string(message.key);
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? runtime_2.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message github.actions.results.api.v1.DeleteCacheEntryRequest
- */
-exports.DeleteCacheEntryRequest = new DeleteCacheEntryRequest$Type();
-// @generated message type with reflection information, may provide speed optimized methods
-class DeleteCacheEntryResponse$Type extends runtime_5.MessageType {
-    constructor() {
-        super("github.actions.results.api.v1.DeleteCacheEntryResponse", [
-            { no: 1, name: "ok", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
-            { no: 2, name: "entry_id", kind: "scalar", T: 3 /*ScalarType.INT64*/ }
-        ]);
-    }
-    create(value) {
-        const message = { ok: false, entryId: "0" };
-        globalThis.Object.defineProperty(message, runtime_4.MESSAGE_TYPE, { enumerable: false, value: this });
-        if (value !== undefined)
-            (0, runtime_3.reflectionMergePartial)(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader, length, options, target) {
-        let message = target !== null && target !== void 0 ? target : this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* bool ok */ 1:
-                    message.ok = reader.bool();
-                    break;
-                case /* int64 entry_id */ 2:
-                    message.entryId = reader.int64().toString();
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? runtime_2.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message, writer, options) {
-        /* bool ok = 1; */
-        if (message.ok !== false)
-            writer.tag(1, runtime_1.WireType.Varint).bool(message.ok);
-        /* int64 entry_id = 2; */
-        if (message.entryId !== "0")
-            writer.tag(2, runtime_1.WireType.Varint).int64(message.entryId);
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? runtime_2.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message github.actions.results.api.v1.DeleteCacheEntryResponse
- */
-exports.DeleteCacheEntryResponse = new DeleteCacheEntryResponse$Type();
-// @generated message type with reflection information, may provide speed optimized methods
-class ListCacheEntriesRequest$Type extends runtime_5.MessageType {
-    constructor() {
-        super("github.actions.results.api.v1.ListCacheEntriesRequest", [
-            { no: 1, name: "metadata", kind: "message", T: () => cachemetadata_1.CacheMetadata },
-            { no: 2, name: "key", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 3, name: "restore_keys", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ }
-        ]);
-    }
-    create(value) {
-        const message = { key: "", restoreKeys: [] };
-        globalThis.Object.defineProperty(message, runtime_4.MESSAGE_TYPE, { enumerable: false, value: this });
-        if (value !== undefined)
-            (0, runtime_3.reflectionMergePartial)(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader, length, options, target) {
-        let message = target !== null && target !== void 0 ? target : this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* github.actions.results.entities.v1.CacheMetadata metadata */ 1:
-                    message.metadata = cachemetadata_1.CacheMetadata.internalBinaryRead(reader, reader.uint32(), options, message.metadata);
-                    break;
-                case /* string key */ 2:
-                    message.key = reader.string();
-                    break;
-                case /* repeated string restore_keys */ 3:
-                    message.restoreKeys.push(reader.string());
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? runtime_2.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message, writer, options) {
-        /* github.actions.results.entities.v1.CacheMetadata metadata = 1; */
-        if (message.metadata)
-            cachemetadata_1.CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, runtime_1.WireType.LengthDelimited).fork(), options).join();
-        /* string key = 2; */
-        if (message.key !== "")
-            writer.tag(2, runtime_1.WireType.LengthDelimited).string(message.key);
-        /* repeated string restore_keys = 3; */
-        for (let i = 0; i < message.restoreKeys.length; i++)
-            writer.tag(3, runtime_1.WireType.LengthDelimited).string(message.restoreKeys[i]);
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? runtime_2.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message github.actions.results.api.v1.ListCacheEntriesRequest
- */
-exports.ListCacheEntriesRequest = new ListCacheEntriesRequest$Type();
-// @generated message type with reflection information, may provide speed optimized methods
-class ListCacheEntriesResponse$Type extends runtime_5.MessageType {
-    constructor() {
-        super("github.actions.results.api.v1.ListCacheEntriesResponse", [
-            { no: 1, name: "entries", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => cacheentry_1.CacheEntry }
-        ]);
-    }
-    create(value) {
-        const message = { entries: [] };
-        globalThis.Object.defineProperty(message, runtime_4.MESSAGE_TYPE, { enumerable: false, value: this });
-        if (value !== undefined)
-            (0, runtime_3.reflectionMergePartial)(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader, length, options, target) {
-        let message = target !== null && target !== void 0 ? target : this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* repeated github.actions.results.entities.v1.CacheEntry entries */ 1:
-                    message.entries.push(cacheentry_1.CacheEntry.internalBinaryRead(reader, reader.uint32(), options));
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? runtime_2.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message, writer, options) {
-        /* repeated github.actions.results.entities.v1.CacheEntry entries = 1; */
-        for (let i = 0; i < message.entries.length; i++)
-            cacheentry_1.CacheEntry.internalBinaryWrite(message.entries[i], writer.tag(1, runtime_1.WireType.LengthDelimited).fork(), options).join();
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? runtime_2.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message github.actions.results.api.v1.ListCacheEntriesResponse
- */
-exports.ListCacheEntriesResponse = new ListCacheEntriesResponse$Type();
-// @generated message type with reflection information, may provide speed optimized methods
-class LookupCacheEntryRequest$Type extends runtime_5.MessageType {
-    constructor() {
-        super("github.actions.results.api.v1.LookupCacheEntryRequest", [
-            { no: 1, name: "metadata", kind: "message", T: () => cachemetadata_1.CacheMetadata },
-            { no: 2, name: "key", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 3, name: "restore_keys", kind: "scalar", repeat: 2 /*RepeatType.UNPACKED*/, T: 9 /*ScalarType.STRING*/ },
-            { no: 4, name: "version", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
-        ]);
-    }
-    create(value) {
-        const message = { key: "", restoreKeys: [], version: "" };
-        globalThis.Object.defineProperty(message, runtime_4.MESSAGE_TYPE, { enumerable: false, value: this });
-        if (value !== undefined)
-            (0, runtime_3.reflectionMergePartial)(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader, length, options, target) {
-        let message = target !== null && target !== void 0 ? target : this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* github.actions.results.entities.v1.CacheMetadata metadata */ 1:
-                    message.metadata = cachemetadata_1.CacheMetadata.internalBinaryRead(reader, reader.uint32(), options, message.metadata);
-                    break;
-                case /* string key */ 2:
-                    message.key = reader.string();
-                    break;
-                case /* repeated string restore_keys */ 3:
-                    message.restoreKeys.push(reader.string());
-                    break;
-                case /* string version */ 4:
-                    message.version = reader.string();
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? runtime_2.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message, writer, options) {
-        /* github.actions.results.entities.v1.CacheMetadata metadata = 1; */
-        if (message.metadata)
-            cachemetadata_1.CacheMetadata.internalBinaryWrite(message.metadata, writer.tag(1, runtime_1.WireType.LengthDelimited).fork(), options).join();
-        /* string key = 2; */
-        if (message.key !== "")
-            writer.tag(2, runtime_1.WireType.LengthDelimited).string(message.key);
-        /* repeated string restore_keys = 3; */
-        for (let i = 0; i < message.restoreKeys.length; i++)
-            writer.tag(3, runtime_1.WireType.LengthDelimited).string(message.restoreKeys[i]);
-        /* string version = 4; */
-        if (message.version !== "")
-            writer.tag(4, runtime_1.WireType.LengthDelimited).string(message.version);
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? runtime_2.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message github.actions.results.api.v1.LookupCacheEntryRequest
- */
-exports.LookupCacheEntryRequest = new LookupCacheEntryRequest$Type();
-// @generated message type with reflection information, may provide speed optimized methods
-class LookupCacheEntryResponse$Type extends runtime_5.MessageType {
-    constructor() {
-        super("github.actions.results.api.v1.LookupCacheEntryResponse", [
-            { no: 1, name: "exists", kind: "scalar", T: 8 /*ScalarType.BOOL*/ },
-            { no: 2, name: "entry", kind: "message", T: () => cacheentry_1.CacheEntry }
-        ]);
-    }
-    create(value) {
-        const message = { exists: false };
-        globalThis.Object.defineProperty(message, runtime_4.MESSAGE_TYPE, { enumerable: false, value: this });
-        if (value !== undefined)
-            (0, runtime_3.reflectionMergePartial)(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader, length, options, target) {
-        let message = target !== null && target !== void 0 ? target : this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* bool exists */ 1:
-                    message.exists = reader.bool();
-                    break;
-                case /* github.actions.results.entities.v1.CacheEntry entry */ 2:
-                    message.entry = cacheentry_1.CacheEntry.internalBinaryRead(reader, reader.uint32(), options, message.entry);
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? runtime_2.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message, writer, options) {
-        /* bool exists = 1; */
-        if (message.exists !== false)
-            writer.tag(1, runtime_1.WireType.Varint).bool(message.exists);
-        /* github.actions.results.entities.v1.CacheEntry entry = 2; */
-        if (message.entry)
-            cacheentry_1.CacheEntry.internalBinaryWrite(message.entry, writer.tag(2, runtime_1.WireType.LengthDelimited).fork(), options).join();
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? runtime_2.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message github.actions.results.api.v1.LookupCacheEntryResponse
- */
-exports.LookupCacheEntryResponse = new LookupCacheEntryResponse$Type();
 /**
  * @generated ServiceType for protobuf service github.actions.results.api.v1.CacheService
  */
 exports.CacheService = new runtime_rpc_1.ServiceType("github.actions.results.api.v1.CacheService", [
     { name: "CreateCacheEntry", options: {}, I: exports.CreateCacheEntryRequest, O: exports.CreateCacheEntryResponse },
     { name: "FinalizeCacheEntryUpload", options: {}, I: exports.FinalizeCacheEntryUploadRequest, O: exports.FinalizeCacheEntryUploadResponse },
-    { name: "GetCacheEntryDownloadURL", options: {}, I: exports.GetCacheEntryDownloadURLRequest, O: exports.GetCacheEntryDownloadURLResponse },
-    { name: "DeleteCacheEntry", options: {}, I: exports.DeleteCacheEntryRequest, O: exports.DeleteCacheEntryResponse },
-    { name: "ListCacheEntries", options: {}, I: exports.ListCacheEntriesRequest, O: exports.ListCacheEntriesResponse },
-    { name: "LookupCacheEntry", options: {}, I: exports.LookupCacheEntryRequest, O: exports.LookupCacheEntryResponse }
+    { name: "GetCacheEntryDownloadURL", options: {}, I: exports.GetCacheEntryDownloadURLRequest, O: exports.GetCacheEntryDownloadURLResponse }
 ]);
 //# sourceMappingURL=cache.js.map
 
 /***/ }),
 
-/***/ 40267:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+/***/ 42655:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.createCacheServiceServer = exports.CacheServiceMethodList = exports.CacheServiceMethod = exports.CacheServiceClientProtobuf = exports.CacheServiceClientJSON = void 0;
-const twirp_ts_1 = __nccwpck_require__(66465);
+exports.CacheServiceClientProtobuf = exports.CacheServiceClientJSON = void 0;
 const cache_1 = __nccwpck_require__(84388);
 class CacheServiceClientJSON {
     constructor(rpc) {
@@ -12422,9 +12208,6 @@ class CacheServiceClientJSON {
         this.CreateCacheEntry.bind(this);
         this.FinalizeCacheEntryUpload.bind(this);
         this.GetCacheEntryDownloadURL.bind(this);
-        this.DeleteCacheEntry.bind(this);
-        this.ListCacheEntries.bind(this);
-        this.LookupCacheEntry.bind(this);
     }
     CreateCacheEntry(request) {
         const data = cache_1.CreateCacheEntryRequest.toJson(request, {
@@ -12456,36 +12239,6 @@ class CacheServiceClientJSON {
             ignoreUnknownFields: true,
         }));
     }
-    DeleteCacheEntry(request) {
-        const data = cache_1.DeleteCacheEntryRequest.toJson(request, {
-            useProtoFieldName: true,
-            emitDefaultValues: false,
-        });
-        const promise = this.rpc.request("github.actions.results.api.v1.CacheService", "DeleteCacheEntry", "application/json", data);
-        return promise.then((data) => cache_1.DeleteCacheEntryResponse.fromJson(data, {
-            ignoreUnknownFields: true,
-        }));
-    }
-    ListCacheEntries(request) {
-        const data = cache_1.ListCacheEntriesRequest.toJson(request, {
-            useProtoFieldName: true,
-            emitDefaultValues: false,
-        });
-        const promise = this.rpc.request("github.actions.results.api.v1.CacheService", "ListCacheEntries", "application/json", data);
-        return promise.then((data) => cache_1.ListCacheEntriesResponse.fromJson(data, {
-            ignoreUnknownFields: true,
-        }));
-    }
-    LookupCacheEntry(request) {
-        const data = cache_1.LookupCacheEntryRequest.toJson(request, {
-            useProtoFieldName: true,
-            emitDefaultValues: false,
-        });
-        const promise = this.rpc.request("github.actions.results.api.v1.CacheService", "LookupCacheEntry", "application/json", data);
-        return promise.then((data) => cache_1.LookupCacheEntryResponse.fromJson(data, {
-            ignoreUnknownFields: true,
-        }));
-    }
 }
 exports.CacheServiceClientJSON = CacheServiceClientJSON;
 class CacheServiceClientProtobuf {
@@ -12494,9 +12247,6 @@ class CacheServiceClientProtobuf {
         this.CreateCacheEntry.bind(this);
         this.FinalizeCacheEntryUpload.bind(this);
         this.GetCacheEntryDownloadURL.bind(this);
-        this.DeleteCacheEntry.bind(this);
-        this.ListCacheEntries.bind(this);
-        this.LookupCacheEntry.bind(this);
     }
     CreateCacheEntry(request) {
         const data = cache_1.CreateCacheEntryRequest.toBinary(request);
@@ -12513,610 +12263,9 @@ class CacheServiceClientProtobuf {
         const promise = this.rpc.request("github.actions.results.api.v1.CacheService", "GetCacheEntryDownloadURL", "application/protobuf", data);
         return promise.then((data) => cache_1.GetCacheEntryDownloadURLResponse.fromBinary(data));
     }
-    DeleteCacheEntry(request) {
-        const data = cache_1.DeleteCacheEntryRequest.toBinary(request);
-        const promise = this.rpc.request("github.actions.results.api.v1.CacheService", "DeleteCacheEntry", "application/protobuf", data);
-        return promise.then((data) => cache_1.DeleteCacheEntryResponse.fromBinary(data));
-    }
-    ListCacheEntries(request) {
-        const data = cache_1.ListCacheEntriesRequest.toBinary(request);
-        const promise = this.rpc.request("github.actions.results.api.v1.CacheService", "ListCacheEntries", "application/protobuf", data);
-        return promise.then((data) => cache_1.ListCacheEntriesResponse.fromBinary(data));
-    }
-    LookupCacheEntry(request) {
-        const data = cache_1.LookupCacheEntryRequest.toBinary(request);
-        const promise = this.rpc.request("github.actions.results.api.v1.CacheService", "LookupCacheEntry", "application/protobuf", data);
-        return promise.then((data) => cache_1.LookupCacheEntryResponse.fromBinary(data));
-    }
 }
 exports.CacheServiceClientProtobuf = CacheServiceClientProtobuf;
-var CacheServiceMethod;
-(function (CacheServiceMethod) {
-    CacheServiceMethod["CreateCacheEntry"] = "CreateCacheEntry";
-    CacheServiceMethod["FinalizeCacheEntryUpload"] = "FinalizeCacheEntryUpload";
-    CacheServiceMethod["GetCacheEntryDownloadURL"] = "GetCacheEntryDownloadURL";
-    CacheServiceMethod["DeleteCacheEntry"] = "DeleteCacheEntry";
-    CacheServiceMethod["ListCacheEntries"] = "ListCacheEntries";
-    CacheServiceMethod["LookupCacheEntry"] = "LookupCacheEntry";
-})(CacheServiceMethod || (exports.CacheServiceMethod = CacheServiceMethod = {}));
-exports.CacheServiceMethodList = [
-    CacheServiceMethod.CreateCacheEntry,
-    CacheServiceMethod.FinalizeCacheEntryUpload,
-    CacheServiceMethod.GetCacheEntryDownloadURL,
-    CacheServiceMethod.DeleteCacheEntry,
-    CacheServiceMethod.ListCacheEntries,
-    CacheServiceMethod.LookupCacheEntry,
-];
-function createCacheServiceServer(service) {
-    return new twirp_ts_1.TwirpServer({
-        service,
-        packageName: "github.actions.results.api.v1",
-        serviceName: "CacheService",
-        methodList: exports.CacheServiceMethodList,
-        matchRoute: matchCacheServiceRoute,
-    });
-}
-exports.createCacheServiceServer = createCacheServiceServer;
-function matchCacheServiceRoute(method, events) {
-    switch (method) {
-        case "CreateCacheEntry":
-            return (ctx, service, data, interceptors) => __awaiter(this, void 0, void 0, function* () {
-                ctx = Object.assign(Object.assign({}, ctx), { methodName: "CreateCacheEntry" });
-                yield events.onMatch(ctx);
-                return handleCacheServiceCreateCacheEntryRequest(ctx, service, data, interceptors);
-            });
-        case "FinalizeCacheEntryUpload":
-            return (ctx, service, data, interceptors) => __awaiter(this, void 0, void 0, function* () {
-                ctx = Object.assign(Object.assign({}, ctx), { methodName: "FinalizeCacheEntryUpload" });
-                yield events.onMatch(ctx);
-                return handleCacheServiceFinalizeCacheEntryUploadRequest(ctx, service, data, interceptors);
-            });
-        case "GetCacheEntryDownloadURL":
-            return (ctx, service, data, interceptors) => __awaiter(this, void 0, void 0, function* () {
-                ctx = Object.assign(Object.assign({}, ctx), { methodName: "GetCacheEntryDownloadURL" });
-                yield events.onMatch(ctx);
-                return handleCacheServiceGetCacheEntryDownloadURLRequest(ctx, service, data, interceptors);
-            });
-        case "DeleteCacheEntry":
-            return (ctx, service, data, interceptors) => __awaiter(this, void 0, void 0, function* () {
-                ctx = Object.assign(Object.assign({}, ctx), { methodName: "DeleteCacheEntry" });
-                yield events.onMatch(ctx);
-                return handleCacheServiceDeleteCacheEntryRequest(ctx, service, data, interceptors);
-            });
-        case "ListCacheEntries":
-            return (ctx, service, data, interceptors) => __awaiter(this, void 0, void 0, function* () {
-                ctx = Object.assign(Object.assign({}, ctx), { methodName: "ListCacheEntries" });
-                yield events.onMatch(ctx);
-                return handleCacheServiceListCacheEntriesRequest(ctx, service, data, interceptors);
-            });
-        case "LookupCacheEntry":
-            return (ctx, service, data, interceptors) => __awaiter(this, void 0, void 0, function* () {
-                ctx = Object.assign(Object.assign({}, ctx), { methodName: "LookupCacheEntry" });
-                yield events.onMatch(ctx);
-                return handleCacheServiceLookupCacheEntryRequest(ctx, service, data, interceptors);
-            });
-        default:
-            events.onNotFound();
-            const msg = `no handler found`;
-            throw new twirp_ts_1.TwirpError(twirp_ts_1.TwirpErrorCode.BadRoute, msg);
-    }
-}
-function handleCacheServiceCreateCacheEntryRequest(ctx, service, data, interceptors) {
-    switch (ctx.contentType) {
-        case twirp_ts_1.TwirpContentType.JSON:
-            return handleCacheServiceCreateCacheEntryJSON(ctx, service, data, interceptors);
-        case twirp_ts_1.TwirpContentType.Protobuf:
-            return handleCacheServiceCreateCacheEntryProtobuf(ctx, service, data, interceptors);
-        default:
-            const msg = "unexpected Content-Type";
-            throw new twirp_ts_1.TwirpError(twirp_ts_1.TwirpErrorCode.BadRoute, msg);
-    }
-}
-function handleCacheServiceFinalizeCacheEntryUploadRequest(ctx, service, data, interceptors) {
-    switch (ctx.contentType) {
-        case twirp_ts_1.TwirpContentType.JSON:
-            return handleCacheServiceFinalizeCacheEntryUploadJSON(ctx, service, data, interceptors);
-        case twirp_ts_1.TwirpContentType.Protobuf:
-            return handleCacheServiceFinalizeCacheEntryUploadProtobuf(ctx, service, data, interceptors);
-        default:
-            const msg = "unexpected Content-Type";
-            throw new twirp_ts_1.TwirpError(twirp_ts_1.TwirpErrorCode.BadRoute, msg);
-    }
-}
-function handleCacheServiceGetCacheEntryDownloadURLRequest(ctx, service, data, interceptors) {
-    switch (ctx.contentType) {
-        case twirp_ts_1.TwirpContentType.JSON:
-            return handleCacheServiceGetCacheEntryDownloadURLJSON(ctx, service, data, interceptors);
-        case twirp_ts_1.TwirpContentType.Protobuf:
-            return handleCacheServiceGetCacheEntryDownloadURLProtobuf(ctx, service, data, interceptors);
-        default:
-            const msg = "unexpected Content-Type";
-            throw new twirp_ts_1.TwirpError(twirp_ts_1.TwirpErrorCode.BadRoute, msg);
-    }
-}
-function handleCacheServiceDeleteCacheEntryRequest(ctx, service, data, interceptors) {
-    switch (ctx.contentType) {
-        case twirp_ts_1.TwirpContentType.JSON:
-            return handleCacheServiceDeleteCacheEntryJSON(ctx, service, data, interceptors);
-        case twirp_ts_1.TwirpContentType.Protobuf:
-            return handleCacheServiceDeleteCacheEntryProtobuf(ctx, service, data, interceptors);
-        default:
-            const msg = "unexpected Content-Type";
-            throw new twirp_ts_1.TwirpError(twirp_ts_1.TwirpErrorCode.BadRoute, msg);
-    }
-}
-function handleCacheServiceListCacheEntriesRequest(ctx, service, data, interceptors) {
-    switch (ctx.contentType) {
-        case twirp_ts_1.TwirpContentType.JSON:
-            return handleCacheServiceListCacheEntriesJSON(ctx, service, data, interceptors);
-        case twirp_ts_1.TwirpContentType.Protobuf:
-            return handleCacheServiceListCacheEntriesProtobuf(ctx, service, data, interceptors);
-        default:
-            const msg = "unexpected Content-Type";
-            throw new twirp_ts_1.TwirpError(twirp_ts_1.TwirpErrorCode.BadRoute, msg);
-    }
-}
-function handleCacheServiceLookupCacheEntryRequest(ctx, service, data, interceptors) {
-    switch (ctx.contentType) {
-        case twirp_ts_1.TwirpContentType.JSON:
-            return handleCacheServiceLookupCacheEntryJSON(ctx, service, data, interceptors);
-        case twirp_ts_1.TwirpContentType.Protobuf:
-            return handleCacheServiceLookupCacheEntryProtobuf(ctx, service, data, interceptors);
-        default:
-            const msg = "unexpected Content-Type";
-            throw new twirp_ts_1.TwirpError(twirp_ts_1.TwirpErrorCode.BadRoute, msg);
-    }
-}
-function handleCacheServiceCreateCacheEntryJSON(ctx, service, data, interceptors) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let request;
-        let response;
-        try {
-            const body = JSON.parse(data.toString() || "{}");
-            request = cache_1.CreateCacheEntryRequest.fromJson(body, {
-                ignoreUnknownFields: true,
-            });
-        }
-        catch (e) {
-            if (e instanceof Error) {
-                const msg = "the json request could not be decoded";
-                throw new twirp_ts_1.TwirpError(twirp_ts_1.TwirpErrorCode.Malformed, msg).withCause(e, true);
-            }
-        }
-        if (interceptors && interceptors.length > 0) {
-            const interceptor = (0, twirp_ts_1.chainInterceptors)(...interceptors);
-            response = yield interceptor(ctx, request, (ctx, inputReq) => {
-                return service.CreateCacheEntry(ctx, inputReq);
-            });
-        }
-        else {
-            response = yield service.CreateCacheEntry(ctx, request);
-        }
-        return JSON.stringify(cache_1.CreateCacheEntryResponse.toJson(response, {
-            useProtoFieldName: true,
-            emitDefaultValues: false,
-        }));
-    });
-}
-function handleCacheServiceFinalizeCacheEntryUploadJSON(ctx, service, data, interceptors) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let request;
-        let response;
-        try {
-            const body = JSON.parse(data.toString() || "{}");
-            request = cache_1.FinalizeCacheEntryUploadRequest.fromJson(body, {
-                ignoreUnknownFields: true,
-            });
-        }
-        catch (e) {
-            if (e instanceof Error) {
-                const msg = "the json request could not be decoded";
-                throw new twirp_ts_1.TwirpError(twirp_ts_1.TwirpErrorCode.Malformed, msg).withCause(e, true);
-            }
-        }
-        if (interceptors && interceptors.length > 0) {
-            const interceptor = (0, twirp_ts_1.chainInterceptors)(...interceptors);
-            response = yield interceptor(ctx, request, (ctx, inputReq) => {
-                return service.FinalizeCacheEntryUpload(ctx, inputReq);
-            });
-        }
-        else {
-            response = yield service.FinalizeCacheEntryUpload(ctx, request);
-        }
-        return JSON.stringify(cache_1.FinalizeCacheEntryUploadResponse.toJson(response, {
-            useProtoFieldName: true,
-            emitDefaultValues: false,
-        }));
-    });
-}
-function handleCacheServiceGetCacheEntryDownloadURLJSON(ctx, service, data, interceptors) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let request;
-        let response;
-        try {
-            const body = JSON.parse(data.toString() || "{}");
-            request = cache_1.GetCacheEntryDownloadURLRequest.fromJson(body, {
-                ignoreUnknownFields: true,
-            });
-        }
-        catch (e) {
-            if (e instanceof Error) {
-                const msg = "the json request could not be decoded";
-                throw new twirp_ts_1.TwirpError(twirp_ts_1.TwirpErrorCode.Malformed, msg).withCause(e, true);
-            }
-        }
-        if (interceptors && interceptors.length > 0) {
-            const interceptor = (0, twirp_ts_1.chainInterceptors)(...interceptors);
-            response = yield interceptor(ctx, request, (ctx, inputReq) => {
-                return service.GetCacheEntryDownloadURL(ctx, inputReq);
-            });
-        }
-        else {
-            response = yield service.GetCacheEntryDownloadURL(ctx, request);
-        }
-        return JSON.stringify(cache_1.GetCacheEntryDownloadURLResponse.toJson(response, {
-            useProtoFieldName: true,
-            emitDefaultValues: false,
-        }));
-    });
-}
-function handleCacheServiceDeleteCacheEntryJSON(ctx, service, data, interceptors) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let request;
-        let response;
-        try {
-            const body = JSON.parse(data.toString() || "{}");
-            request = cache_1.DeleteCacheEntryRequest.fromJson(body, {
-                ignoreUnknownFields: true,
-            });
-        }
-        catch (e) {
-            if (e instanceof Error) {
-                const msg = "the json request could not be decoded";
-                throw new twirp_ts_1.TwirpError(twirp_ts_1.TwirpErrorCode.Malformed, msg).withCause(e, true);
-            }
-        }
-        if (interceptors && interceptors.length > 0) {
-            const interceptor = (0, twirp_ts_1.chainInterceptors)(...interceptors);
-            response = yield interceptor(ctx, request, (ctx, inputReq) => {
-                return service.DeleteCacheEntry(ctx, inputReq);
-            });
-        }
-        else {
-            response = yield service.DeleteCacheEntry(ctx, request);
-        }
-        return JSON.stringify(cache_1.DeleteCacheEntryResponse.toJson(response, {
-            useProtoFieldName: true,
-            emitDefaultValues: false,
-        }));
-    });
-}
-function handleCacheServiceListCacheEntriesJSON(ctx, service, data, interceptors) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let request;
-        let response;
-        try {
-            const body = JSON.parse(data.toString() || "{}");
-            request = cache_1.ListCacheEntriesRequest.fromJson(body, {
-                ignoreUnknownFields: true,
-            });
-        }
-        catch (e) {
-            if (e instanceof Error) {
-                const msg = "the json request could not be decoded";
-                throw new twirp_ts_1.TwirpError(twirp_ts_1.TwirpErrorCode.Malformed, msg).withCause(e, true);
-            }
-        }
-        if (interceptors && interceptors.length > 0) {
-            const interceptor = (0, twirp_ts_1.chainInterceptors)(...interceptors);
-            response = yield interceptor(ctx, request, (ctx, inputReq) => {
-                return service.ListCacheEntries(ctx, inputReq);
-            });
-        }
-        else {
-            response = yield service.ListCacheEntries(ctx, request);
-        }
-        return JSON.stringify(cache_1.ListCacheEntriesResponse.toJson(response, {
-            useProtoFieldName: true,
-            emitDefaultValues: false,
-        }));
-    });
-}
-function handleCacheServiceLookupCacheEntryJSON(ctx, service, data, interceptors) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let request;
-        let response;
-        try {
-            const body = JSON.parse(data.toString() || "{}");
-            request = cache_1.LookupCacheEntryRequest.fromJson(body, {
-                ignoreUnknownFields: true,
-            });
-        }
-        catch (e) {
-            if (e instanceof Error) {
-                const msg = "the json request could not be decoded";
-                throw new twirp_ts_1.TwirpError(twirp_ts_1.TwirpErrorCode.Malformed, msg).withCause(e, true);
-            }
-        }
-        if (interceptors && interceptors.length > 0) {
-            const interceptor = (0, twirp_ts_1.chainInterceptors)(...interceptors);
-            response = yield interceptor(ctx, request, (ctx, inputReq) => {
-                return service.LookupCacheEntry(ctx, inputReq);
-            });
-        }
-        else {
-            response = yield service.LookupCacheEntry(ctx, request);
-        }
-        return JSON.stringify(cache_1.LookupCacheEntryResponse.toJson(response, {
-            useProtoFieldName: true,
-            emitDefaultValues: false,
-        }));
-    });
-}
-function handleCacheServiceCreateCacheEntryProtobuf(ctx, service, data, interceptors) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let request;
-        let response;
-        try {
-            request = cache_1.CreateCacheEntryRequest.fromBinary(data);
-        }
-        catch (e) {
-            if (e instanceof Error) {
-                const msg = "the protobuf request could not be decoded";
-                throw new twirp_ts_1.TwirpError(twirp_ts_1.TwirpErrorCode.Malformed, msg).withCause(e, true);
-            }
-        }
-        if (interceptors && interceptors.length > 0) {
-            const interceptor = (0, twirp_ts_1.chainInterceptors)(...interceptors);
-            response = yield interceptor(ctx, request, (ctx, inputReq) => {
-                return service.CreateCacheEntry(ctx, inputReq);
-            });
-        }
-        else {
-            response = yield service.CreateCacheEntry(ctx, request);
-        }
-        return Buffer.from(cache_1.CreateCacheEntryResponse.toBinary(response));
-    });
-}
-function handleCacheServiceFinalizeCacheEntryUploadProtobuf(ctx, service, data, interceptors) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let request;
-        let response;
-        try {
-            request = cache_1.FinalizeCacheEntryUploadRequest.fromBinary(data);
-        }
-        catch (e) {
-            if (e instanceof Error) {
-                const msg = "the protobuf request could not be decoded";
-                throw new twirp_ts_1.TwirpError(twirp_ts_1.TwirpErrorCode.Malformed, msg).withCause(e, true);
-            }
-        }
-        if (interceptors && interceptors.length > 0) {
-            const interceptor = (0, twirp_ts_1.chainInterceptors)(...interceptors);
-            response = yield interceptor(ctx, request, (ctx, inputReq) => {
-                return service.FinalizeCacheEntryUpload(ctx, inputReq);
-            });
-        }
-        else {
-            response = yield service.FinalizeCacheEntryUpload(ctx, request);
-        }
-        return Buffer.from(cache_1.FinalizeCacheEntryUploadResponse.toBinary(response));
-    });
-}
-function handleCacheServiceGetCacheEntryDownloadURLProtobuf(ctx, service, data, interceptors) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let request;
-        let response;
-        try {
-            request = cache_1.GetCacheEntryDownloadURLRequest.fromBinary(data);
-        }
-        catch (e) {
-            if (e instanceof Error) {
-                const msg = "the protobuf request could not be decoded";
-                throw new twirp_ts_1.TwirpError(twirp_ts_1.TwirpErrorCode.Malformed, msg).withCause(e, true);
-            }
-        }
-        if (interceptors && interceptors.length > 0) {
-            const interceptor = (0, twirp_ts_1.chainInterceptors)(...interceptors);
-            response = yield interceptor(ctx, request, (ctx, inputReq) => {
-                return service.GetCacheEntryDownloadURL(ctx, inputReq);
-            });
-        }
-        else {
-            response = yield service.GetCacheEntryDownloadURL(ctx, request);
-        }
-        return Buffer.from(cache_1.GetCacheEntryDownloadURLResponse.toBinary(response));
-    });
-}
-function handleCacheServiceDeleteCacheEntryProtobuf(ctx, service, data, interceptors) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let request;
-        let response;
-        try {
-            request = cache_1.DeleteCacheEntryRequest.fromBinary(data);
-        }
-        catch (e) {
-            if (e instanceof Error) {
-                const msg = "the protobuf request could not be decoded";
-                throw new twirp_ts_1.TwirpError(twirp_ts_1.TwirpErrorCode.Malformed, msg).withCause(e, true);
-            }
-        }
-        if (interceptors && interceptors.length > 0) {
-            const interceptor = (0, twirp_ts_1.chainInterceptors)(...interceptors);
-            response = yield interceptor(ctx, request, (ctx, inputReq) => {
-                return service.DeleteCacheEntry(ctx, inputReq);
-            });
-        }
-        else {
-            response = yield service.DeleteCacheEntry(ctx, request);
-        }
-        return Buffer.from(cache_1.DeleteCacheEntryResponse.toBinary(response));
-    });
-}
-function handleCacheServiceListCacheEntriesProtobuf(ctx, service, data, interceptors) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let request;
-        let response;
-        try {
-            request = cache_1.ListCacheEntriesRequest.fromBinary(data);
-        }
-        catch (e) {
-            if (e instanceof Error) {
-                const msg = "the protobuf request could not be decoded";
-                throw new twirp_ts_1.TwirpError(twirp_ts_1.TwirpErrorCode.Malformed, msg).withCause(e, true);
-            }
-        }
-        if (interceptors && interceptors.length > 0) {
-            const interceptor = (0, twirp_ts_1.chainInterceptors)(...interceptors);
-            response = yield interceptor(ctx, request, (ctx, inputReq) => {
-                return service.ListCacheEntries(ctx, inputReq);
-            });
-        }
-        else {
-            response = yield service.ListCacheEntries(ctx, request);
-        }
-        return Buffer.from(cache_1.ListCacheEntriesResponse.toBinary(response));
-    });
-}
-function handleCacheServiceLookupCacheEntryProtobuf(ctx, service, data, interceptors) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let request;
-        let response;
-        try {
-            request = cache_1.LookupCacheEntryRequest.fromBinary(data);
-        }
-        catch (e) {
-            if (e instanceof Error) {
-                const msg = "the protobuf request could not be decoded";
-                throw new twirp_ts_1.TwirpError(twirp_ts_1.TwirpErrorCode.Malformed, msg).withCause(e, true);
-            }
-        }
-        if (interceptors && interceptors.length > 0) {
-            const interceptor = (0, twirp_ts_1.chainInterceptors)(...interceptors);
-            response = yield interceptor(ctx, request, (ctx, inputReq) => {
-                return service.LookupCacheEntry(ctx, inputReq);
-            });
-        }
-        else {
-            response = yield service.LookupCacheEntry(ctx, request);
-        }
-        return Buffer.from(cache_1.LookupCacheEntryResponse.toBinary(response));
-    });
-}
-//# sourceMappingURL=cache.twirp.js.map
-
-/***/ }),
-
-/***/ 53639:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.CacheEntry = void 0;
-const runtime_1 = __nccwpck_require__(4061);
-const runtime_2 = __nccwpck_require__(4061);
-const runtime_3 = __nccwpck_require__(4061);
-const runtime_4 = __nccwpck_require__(4061);
-const runtime_5 = __nccwpck_require__(4061);
-const timestamp_1 = __nccwpck_require__(24469);
-// @generated message type with reflection information, may provide speed optimized methods
-class CacheEntry$Type extends runtime_5.MessageType {
-    constructor() {
-        super("github.actions.results.entities.v1.CacheEntry", [
-            { no: 1, name: "key", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "hash", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 3, name: "size_bytes", kind: "scalar", T: 3 /*ScalarType.INT64*/ },
-            { no: 4, name: "scope", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 5, name: "version", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 6, name: "created_at", kind: "message", T: () => timestamp_1.Timestamp },
-            { no: 7, name: "last_accessed_at", kind: "message", T: () => timestamp_1.Timestamp },
-            { no: 8, name: "expires_at", kind: "message", T: () => timestamp_1.Timestamp }
-        ]);
-    }
-    create(value) {
-        const message = { key: "", hash: "", sizeBytes: "0", scope: "", version: "" };
-        globalThis.Object.defineProperty(message, runtime_4.MESSAGE_TYPE, { enumerable: false, value: this });
-        if (value !== undefined)
-            (0, runtime_3.reflectionMergePartial)(this, message, value);
-        return message;
-    }
-    internalBinaryRead(reader, length, options, target) {
-        let message = target !== null && target !== void 0 ? target : this.create(), end = reader.pos + length;
-        while (reader.pos < end) {
-            let [fieldNo, wireType] = reader.tag();
-            switch (fieldNo) {
-                case /* string key */ 1:
-                    message.key = reader.string();
-                    break;
-                case /* string hash */ 2:
-                    message.hash = reader.string();
-                    break;
-                case /* int64 size_bytes */ 3:
-                    message.sizeBytes = reader.int64().toString();
-                    break;
-                case /* string scope */ 4:
-                    message.scope = reader.string();
-                    break;
-                case /* string version */ 5:
-                    message.version = reader.string();
-                    break;
-                case /* google.protobuf.Timestamp created_at */ 6:
-                    message.createdAt = timestamp_1.Timestamp.internalBinaryRead(reader, reader.uint32(), options, message.createdAt);
-                    break;
-                case /* google.protobuf.Timestamp last_accessed_at */ 7:
-                    message.lastAccessedAt = timestamp_1.Timestamp.internalBinaryRead(reader, reader.uint32(), options, message.lastAccessedAt);
-                    break;
-                case /* google.protobuf.Timestamp expires_at */ 8:
-                    message.expiresAt = timestamp_1.Timestamp.internalBinaryRead(reader, reader.uint32(), options, message.expiresAt);
-                    break;
-                default:
-                    let u = options.readUnknownField;
-                    if (u === "throw")
-                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
-                    let d = reader.skip(wireType);
-                    if (u !== false)
-                        (u === true ? runtime_2.UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
-            }
-        }
-        return message;
-    }
-    internalBinaryWrite(message, writer, options) {
-        /* string key = 1; */
-        if (message.key !== "")
-            writer.tag(1, runtime_1.WireType.LengthDelimited).string(message.key);
-        /* string hash = 2; */
-        if (message.hash !== "")
-            writer.tag(2, runtime_1.WireType.LengthDelimited).string(message.hash);
-        /* int64 size_bytes = 3; */
-        if (message.sizeBytes !== "0")
-            writer.tag(3, runtime_1.WireType.Varint).int64(message.sizeBytes);
-        /* string scope = 4; */
-        if (message.scope !== "")
-            writer.tag(4, runtime_1.WireType.LengthDelimited).string(message.scope);
-        /* string version = 5; */
-        if (message.version !== "")
-            writer.tag(5, runtime_1.WireType.LengthDelimited).string(message.version);
-        /* google.protobuf.Timestamp created_at = 6; */
-        if (message.createdAt)
-            timestamp_1.Timestamp.internalBinaryWrite(message.createdAt, writer.tag(6, runtime_1.WireType.LengthDelimited).fork(), options).join();
-        /* google.protobuf.Timestamp last_accessed_at = 7; */
-        if (message.lastAccessedAt)
-            timestamp_1.Timestamp.internalBinaryWrite(message.lastAccessedAt, writer.tag(7, runtime_1.WireType.LengthDelimited).fork(), options).join();
-        /* google.protobuf.Timestamp expires_at = 8; */
-        if (message.expiresAt)
-            timestamp_1.Timestamp.internalBinaryWrite(message.expiresAt, writer.tag(8, runtime_1.WireType.LengthDelimited).fork(), options).join();
-        let u = options.writeUnknownFields;
-        if (u !== false)
-            (u == true ? runtime_2.UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
-        return writer;
-    }
-}
-/**
- * @generated MessageType for protobuf message github.actions.results.entities.v1.CacheEntry
- */
-exports.CacheEntry = new CacheEntry$Type();
-//# sourceMappingURL=cacheentry.js.map
+//# sourceMappingURL=cache.twirp-client.js.map
 
 /***/ }),
 
@@ -14387,7 +13536,8 @@ const config_1 = __nccwpck_require__(35147);
 const cacheUtils_1 = __nccwpck_require__(75340);
 const auth_1 = __nccwpck_require__(35526);
 const http_client_1 = __nccwpck_require__(96255);
-const cache_twirp_1 = __nccwpck_require__(40267);
+const cache_twirp_client_1 = __nccwpck_require__(42655);
+const util_1 = __nccwpck_require__(61953);
 /**
  * This class is a wrapper around the CacheServiceClientJSON class generated by Twirp.
  *
@@ -14447,6 +13597,7 @@ class CacheServiceClient {
                     (0, core_1.debug)(`[Response] - ${response.message.statusCode}`);
                     (0, core_1.debug)(`Headers: ${JSON.stringify(response.message.headers, null, 2)}`);
                     const body = JSON.parse(rawBody);
+                    (0, util_1.maskSecretUrls)(body);
                     (0, core_1.debug)(`Body: ${JSON.stringify(body, null, 2)}`);
                     if (this.isSuccessStatusCode(statusCode)) {
                         return { response, body };
@@ -14524,7 +13675,7 @@ class CacheServiceClient {
 }
 function internalCacheTwirpClient(options) {
     const client = new CacheServiceClient((0, user_agent_1.getUserAgentString)(), options === null || options === void 0 ? void 0 : options.maxAttempts, options === null || options === void 0 ? void 0 : options.retryIntervalMs, options === null || options === void 0 ? void 0 : options.retryMultiplier);
-    return new cache_twirp_1.CacheServiceClientJSON(client);
+    return new cache_twirp_client_1.CacheServiceClientJSON(client);
 }
 exports.internalCacheTwirpClient = internalCacheTwirpClient;
 //# sourceMappingURL=cacheTwirpClient.js.map
@@ -14625,6 +13776,87 @@ function getUserAgentString() {
 }
 exports.getUserAgentString = getUserAgentString;
 //# sourceMappingURL=user-agent.js.map
+
+/***/ }),
+
+/***/ 61953:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.maskSecretUrls = exports.maskSigUrl = void 0;
+const core_1 = __nccwpck_require__(42186);
+/**
+ * Masks the `sig` parameter in a URL and sets it as a secret.
+ *
+ * @param url - The URL containing the signature parameter to mask
+ * @remarks
+ * This function attempts to parse the provided URL and identify the 'sig' query parameter.
+ * If found, it registers both the raw and URL-encoded signature values as secrets using
+ * the Actions `setSecret` API, which prevents them from being displayed in logs.
+ *
+ * The function handles errors gracefully if URL parsing fails, logging them as debug messages.
+ *
+ * @example
+ * ```typescript
+ * // Mask a signature in an Azure SAS token URL
+ * maskSigUrl('https://example.blob.core.windows.net/container/file.txt?sig=abc123&se=2023-01-01');
+ * ```
+ */
+function maskSigUrl(url) {
+    if (!url)
+        return;
+    try {
+        const parsedUrl = new URL(url);
+        const signature = parsedUrl.searchParams.get('sig');
+        if (signature) {
+            (0, core_1.setSecret)(signature);
+            (0, core_1.setSecret)(encodeURIComponent(signature));
+        }
+    }
+    catch (error) {
+        (0, core_1.debug)(`Failed to parse URL: ${url} ${error instanceof Error ? error.message : String(error)}`);
+    }
+}
+exports.maskSigUrl = maskSigUrl;
+/**
+ * Masks sensitive information in URLs containing signature parameters.
+ * Currently supports masking 'sig' parameters in the 'signed_upload_url'
+ * and 'signed_download_url' properties of the provided object.
+ *
+ * @param body - The object should contain a signature
+ * @remarks
+ * This function extracts URLs from the object properties and calls maskSigUrl
+ * on each one to redact sensitive signature information. The function doesn't
+ * modify the original object; it only marks the signatures as secrets for
+ * logging purposes.
+ *
+ * @example
+ * ```typescript
+ * const responseBody = {
+ *   signed_upload_url: 'https://blob.core.windows.net/?sig=abc123',
+ *   signed_download_url: 'https://blob.core/windows.net/?sig=def456'
+ * };
+ * maskSecretUrls(responseBody);
+ * ```
+ */
+function maskSecretUrls(body) {
+    if (typeof body !== 'object' || body === null) {
+        (0, core_1.debug)('body is not an object or is null');
+        return;
+    }
+    if ('signed_upload_url' in body &&
+        typeof body.signed_upload_url === 'string') {
+        maskSigUrl(body.signed_upload_url);
+    }
+    if ('signed_download_url' in body &&
+        typeof body.signed_download_url === 'string') {
+        maskSigUrl(body.signed_download_url);
+    }
+}
+exports.maskSecretUrls = maskSecretUrls;
+//# sourceMappingURL=util.js.map
 
 /***/ }),
 
@@ -18736,6 +17968,7 @@ class Context {
         this.action = process.env.GITHUB_ACTION;
         this.actor = process.env.GITHUB_ACTOR;
         this.job = process.env.GITHUB_JOB;
+        this.runAttempt = parseInt(process.env.GITHUB_RUN_ATTEMPT, 10);
         this.runNumber = parseInt(process.env.GITHUB_RUN_NUMBER, 10);
         this.runId = parseInt(process.env.GITHUB_RUN_ID, 10);
         this.apiUrl = (_a = process.env.GITHUB_API_URL) !== null && _a !== void 0 ? _a : `https://api.github.com`;
@@ -110714,7 +109947,7 @@ exports.deleteObject = deleteObject;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.findObject = exports.findHomeDir = exports.bufferFromFileOrString = exports.makeAbsolutePath = exports.Config = exports.KubeConfig = void 0;
 const tslib_1 = __nccwpck_require__(67551);
-const execa = __nccwpck_require__(56754);
+const execa = __nccwpck_require__(55447);
 const fs = __nccwpck_require__(57147);
 const yaml = __nccwpck_require__(21917);
 const net = __nccwpck_require__(41808);
@@ -111535,7 +110768,7 @@ exports.Exec = Exec;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ExecAuth = void 0;
-const execa = __nccwpck_require__(56754);
+const execa = __nccwpck_require__(55447);
 class ExecAuth {
     constructor() {
         this.tokenCache = {};
@@ -216019,745 +215252,6 @@ exports.dumpYaml = dumpYaml;
 
 /***/ }),
 
-/***/ 56754:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-const path = __nccwpck_require__(71017);
-const childProcess = __nccwpck_require__(32081);
-const crossSpawn = __nccwpck_require__(72746);
-const stripFinalNewline = __nccwpck_require__(88174);
-const npmRunPath = __nccwpck_require__(20502);
-const onetime = __nccwpck_require__(89082);
-const makeError = __nccwpck_require__(36583);
-const normalizeStdio = __nccwpck_require__(87417);
-const {spawnedKill, spawnedCancel, setupTimeout, setExitHandler} = __nccwpck_require__(29787);
-const {handleInput, getSpawnedResult, makeAllStream, validateInputSync} = __nccwpck_require__(64614);
-const {mergePromise, getSpawnedPromise} = __nccwpck_require__(42229);
-const {joinCommand, parseCommand} = __nccwpck_require__(93197);
-
-const DEFAULT_MAX_BUFFER = 1000 * 1000 * 100;
-
-const getEnv = ({env: envOption, extendEnv, preferLocal, localDir, execPath}) => {
-	const env = extendEnv ? {...process.env, ...envOption} : envOption;
-
-	if (preferLocal) {
-		return npmRunPath.env({env, cwd: localDir, execPath});
-	}
-
-	return env;
-};
-
-const handleArguments = (file, args, options = {}) => {
-	const parsed = crossSpawn._parse(file, args, options);
-	file = parsed.command;
-	args = parsed.args;
-	options = parsed.options;
-
-	options = {
-		maxBuffer: DEFAULT_MAX_BUFFER,
-		buffer: true,
-		stripFinalNewline: true,
-		extendEnv: true,
-		preferLocal: false,
-		localDir: options.cwd || process.cwd(),
-		execPath: process.execPath,
-		encoding: 'utf8',
-		reject: true,
-		cleanup: true,
-		all: false,
-		windowsHide: true,
-		...options
-	};
-
-	options.env = getEnv(options);
-
-	options.stdio = normalizeStdio(options);
-
-	if (process.platform === 'win32' && path.basename(file, '.exe') === 'cmd') {
-		// #116
-		args.unshift('/q');
-	}
-
-	return {file, args, options, parsed};
-};
-
-const handleOutput = (options, value, error) => {
-	if (typeof value !== 'string' && !Buffer.isBuffer(value)) {
-		// When `execa.sync()` errors, we normalize it to '' to mimic `execa()`
-		return error === undefined ? undefined : '';
-	}
-
-	if (options.stripFinalNewline) {
-		return stripFinalNewline(value);
-	}
-
-	return value;
-};
-
-const execa = (file, args, options) => {
-	const parsed = handleArguments(file, args, options);
-	const command = joinCommand(file, args);
-
-	let spawned;
-	try {
-		spawned = childProcess.spawn(parsed.file, parsed.args, parsed.options);
-	} catch (error) {
-		// Ensure the returned error is always both a promise and a child process
-		const dummySpawned = new childProcess.ChildProcess();
-		const errorPromise = Promise.reject(makeError({
-			error,
-			stdout: '',
-			stderr: '',
-			all: '',
-			command,
-			parsed,
-			timedOut: false,
-			isCanceled: false,
-			killed: false
-		}));
-		return mergePromise(dummySpawned, errorPromise);
-	}
-
-	const spawnedPromise = getSpawnedPromise(spawned);
-	const timedPromise = setupTimeout(spawned, parsed.options, spawnedPromise);
-	const processDone = setExitHandler(spawned, parsed.options, timedPromise);
-
-	const context = {isCanceled: false};
-
-	spawned.kill = spawnedKill.bind(null, spawned.kill.bind(spawned));
-	spawned.cancel = spawnedCancel.bind(null, spawned, context);
-
-	const handlePromise = async () => {
-		const [{error, exitCode, signal, timedOut}, stdoutResult, stderrResult, allResult] = await getSpawnedResult(spawned, parsed.options, processDone);
-		const stdout = handleOutput(parsed.options, stdoutResult);
-		const stderr = handleOutput(parsed.options, stderrResult);
-		const all = handleOutput(parsed.options, allResult);
-
-		if (error || exitCode !== 0 || signal !== null) {
-			const returnedError = makeError({
-				error,
-				exitCode,
-				signal,
-				stdout,
-				stderr,
-				all,
-				command,
-				parsed,
-				timedOut,
-				isCanceled: context.isCanceled,
-				killed: spawned.killed
-			});
-
-			if (!parsed.options.reject) {
-				return returnedError;
-			}
-
-			throw returnedError;
-		}
-
-		return {
-			command,
-			exitCode: 0,
-			stdout,
-			stderr,
-			all,
-			failed: false,
-			timedOut: false,
-			isCanceled: false,
-			killed: false
-		};
-	};
-
-	const handlePromiseOnce = onetime(handlePromise);
-
-	handleInput(spawned, parsed.options.input);
-
-	spawned.all = makeAllStream(spawned, parsed.options);
-
-	return mergePromise(spawned, handlePromiseOnce);
-};
-
-module.exports = execa;
-
-module.exports.sync = (file, args, options) => {
-	const parsed = handleArguments(file, args, options);
-	const command = joinCommand(file, args);
-
-	validateInputSync(parsed.options);
-
-	let result;
-	try {
-		result = childProcess.spawnSync(parsed.file, parsed.args, parsed.options);
-	} catch (error) {
-		throw makeError({
-			error,
-			stdout: '',
-			stderr: '',
-			all: '',
-			command,
-			parsed,
-			timedOut: false,
-			isCanceled: false,
-			killed: false
-		});
-	}
-
-	const stdout = handleOutput(parsed.options, result.stdout, result.error);
-	const stderr = handleOutput(parsed.options, result.stderr, result.error);
-
-	if (result.error || result.status !== 0 || result.signal !== null) {
-		const error = makeError({
-			stdout,
-			stderr,
-			error: result.error,
-			signal: result.signal,
-			exitCode: result.status,
-			command,
-			parsed,
-			timedOut: result.error && result.error.code === 'ETIMEDOUT',
-			isCanceled: false,
-			killed: result.signal !== null
-		});
-
-		if (!parsed.options.reject) {
-			return error;
-		}
-
-		throw error;
-	}
-
-	return {
-		command,
-		exitCode: 0,
-		stdout,
-		stderr,
-		failed: false,
-		timedOut: false,
-		isCanceled: false,
-		killed: false
-	};
-};
-
-module.exports.command = (command, options) => {
-	const [file, ...args] = parseCommand(command);
-	return execa(file, args, options);
-};
-
-module.exports.commandSync = (command, options) => {
-	const [file, ...args] = parseCommand(command);
-	return execa.sync(file, args, options);
-};
-
-module.exports.node = (scriptPath, args, options = {}) => {
-	if (args && !Array.isArray(args) && typeof args === 'object') {
-		options = args;
-		args = [];
-	}
-
-	const stdio = normalizeStdio.node(options);
-	const defaultExecArgv = process.execArgv.filter(arg => !arg.startsWith('--inspect'));
-
-	const {
-		nodePath = process.execPath,
-		nodeOptions = defaultExecArgv
-	} = options;
-
-	return execa(
-		nodePath,
-		[
-			...nodeOptions,
-			scriptPath,
-			...(Array.isArray(args) ? args : [])
-		],
-		{
-			...options,
-			stdin: undefined,
-			stdout: undefined,
-			stderr: undefined,
-			stdio,
-			shell: false
-		}
-	);
-};
-
-
-/***/ }),
-
-/***/ 93197:
-/***/ ((module) => {
-
-"use strict";
-
-const SPACES_REGEXP = / +/g;
-
-const joinCommand = (file, args = []) => {
-	if (!Array.isArray(args)) {
-		return file;
-	}
-
-	return [file, ...args].join(' ');
-};
-
-// Handle `execa.command()`
-const parseCommand = command => {
-	const tokens = [];
-	for (const token of command.trim().split(SPACES_REGEXP)) {
-		// Allow spaces to be escaped by a backslash if not meant as a delimiter
-		const previousToken = tokens[tokens.length - 1];
-		if (previousToken && previousToken.endsWith('\\')) {
-			// Merge previous token with current one
-			tokens[tokens.length - 1] = `${previousToken.slice(0, -1)} ${token}`;
-		} else {
-			tokens.push(token);
-		}
-	}
-
-	return tokens;
-};
-
-module.exports = {
-	joinCommand,
-	parseCommand
-};
-
-
-/***/ }),
-
-/***/ 36583:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-const {signalsByName} = __nccwpck_require__(2779);
-
-const getErrorPrefix = ({timedOut, timeout, errorCode, signal, signalDescription, exitCode, isCanceled}) => {
-	if (timedOut) {
-		return `timed out after ${timeout} milliseconds`;
-	}
-
-	if (isCanceled) {
-		return 'was canceled';
-	}
-
-	if (errorCode !== undefined) {
-		return `failed with ${errorCode}`;
-	}
-
-	if (signal !== undefined) {
-		return `was killed with ${signal} (${signalDescription})`;
-	}
-
-	if (exitCode !== undefined) {
-		return `failed with exit code ${exitCode}`;
-	}
-
-	return 'failed';
-};
-
-const makeError = ({
-	stdout,
-	stderr,
-	all,
-	error,
-	signal,
-	exitCode,
-	command,
-	timedOut,
-	isCanceled,
-	killed,
-	parsed: {options: {timeout}}
-}) => {
-	// `signal` and `exitCode` emitted on `spawned.on('exit')` event can be `null`.
-	// We normalize them to `undefined`
-	exitCode = exitCode === null ? undefined : exitCode;
-	signal = signal === null ? undefined : signal;
-	const signalDescription = signal === undefined ? undefined : signalsByName[signal].description;
-
-	const errorCode = error && error.code;
-
-	const prefix = getErrorPrefix({timedOut, timeout, errorCode, signal, signalDescription, exitCode, isCanceled});
-	const execaMessage = `Command ${prefix}: ${command}`;
-	const isError = Object.prototype.toString.call(error) === '[object Error]';
-	const shortMessage = isError ? `${execaMessage}\n${error.message}` : execaMessage;
-	const message = [shortMessage, stderr, stdout].filter(Boolean).join('\n');
-
-	if (isError) {
-		error.originalMessage = error.message;
-		error.message = message;
-	} else {
-		error = new Error(message);
-	}
-
-	error.shortMessage = shortMessage;
-	error.command = command;
-	error.exitCode = exitCode;
-	error.signal = signal;
-	error.signalDescription = signalDescription;
-	error.stdout = stdout;
-	error.stderr = stderr;
-
-	if (all !== undefined) {
-		error.all = all;
-	}
-
-	if ('bufferedData' in error) {
-		delete error.bufferedData;
-	}
-
-	error.failed = true;
-	error.timedOut = Boolean(timedOut);
-	error.isCanceled = isCanceled;
-	error.killed = killed && !timedOut;
-
-	return error;
-};
-
-module.exports = makeError;
-
-
-/***/ }),
-
-/***/ 29787:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-const os = __nccwpck_require__(22037);
-const onExit = __nccwpck_require__(24931);
-
-const DEFAULT_FORCE_KILL_TIMEOUT = 1000 * 5;
-
-// Monkey-patches `childProcess.kill()` to add `forceKillAfterTimeout` behavior
-const spawnedKill = (kill, signal = 'SIGTERM', options = {}) => {
-	const killResult = kill(signal);
-	setKillTimeout(kill, signal, options, killResult);
-	return killResult;
-};
-
-const setKillTimeout = (kill, signal, options, killResult) => {
-	if (!shouldForceKill(signal, options, killResult)) {
-		return;
-	}
-
-	const timeout = getForceKillAfterTimeout(options);
-	const t = setTimeout(() => {
-		kill('SIGKILL');
-	}, timeout);
-
-	// Guarded because there's no `.unref()` when `execa` is used in the renderer
-	// process in Electron. This cannot be tested since we don't run tests in
-	// Electron.
-	// istanbul ignore else
-	if (t.unref) {
-		t.unref();
-	}
-};
-
-const shouldForceKill = (signal, {forceKillAfterTimeout}, killResult) => {
-	return isSigterm(signal) && forceKillAfterTimeout !== false && killResult;
-};
-
-const isSigterm = signal => {
-	return signal === os.constants.signals.SIGTERM ||
-		(typeof signal === 'string' && signal.toUpperCase() === 'SIGTERM');
-};
-
-const getForceKillAfterTimeout = ({forceKillAfterTimeout = true}) => {
-	if (forceKillAfterTimeout === true) {
-		return DEFAULT_FORCE_KILL_TIMEOUT;
-	}
-
-	if (!Number.isFinite(forceKillAfterTimeout) || forceKillAfterTimeout < 0) {
-		throw new TypeError(`Expected the \`forceKillAfterTimeout\` option to be a non-negative integer, got \`${forceKillAfterTimeout}\` (${typeof forceKillAfterTimeout})`);
-	}
-
-	return forceKillAfterTimeout;
-};
-
-// `childProcess.cancel()`
-const spawnedCancel = (spawned, context) => {
-	const killResult = spawned.kill();
-
-	if (killResult) {
-		context.isCanceled = true;
-	}
-};
-
-const timeoutKill = (spawned, signal, reject) => {
-	spawned.kill(signal);
-	reject(Object.assign(new Error('Timed out'), {timedOut: true, signal}));
-};
-
-// `timeout` option handling
-const setupTimeout = (spawned, {timeout, killSignal = 'SIGTERM'}, spawnedPromise) => {
-	if (timeout === 0 || timeout === undefined) {
-		return spawnedPromise;
-	}
-
-	if (!Number.isFinite(timeout) || timeout < 0) {
-		throw new TypeError(`Expected the \`timeout\` option to be a non-negative integer, got \`${timeout}\` (${typeof timeout})`);
-	}
-
-	let timeoutId;
-	const timeoutPromise = new Promise((resolve, reject) => {
-		timeoutId = setTimeout(() => {
-			timeoutKill(spawned, killSignal, reject);
-		}, timeout);
-	});
-
-	const safeSpawnedPromise = spawnedPromise.finally(() => {
-		clearTimeout(timeoutId);
-	});
-
-	return Promise.race([timeoutPromise, safeSpawnedPromise]);
-};
-
-// `cleanup` option handling
-const setExitHandler = async (spawned, {cleanup, detached}, timedPromise) => {
-	if (!cleanup || detached) {
-		return timedPromise;
-	}
-
-	const removeExitHandler = onExit(() => {
-		spawned.kill();
-	});
-
-	return timedPromise.finally(() => {
-		removeExitHandler();
-	});
-};
-
-module.exports = {
-	spawnedKill,
-	spawnedCancel,
-	setupTimeout,
-	setExitHandler
-};
-
-
-/***/ }),
-
-/***/ 42229:
-/***/ ((module) => {
-
-"use strict";
-
-
-const nativePromisePrototype = (async () => {})().constructor.prototype;
-const descriptors = ['then', 'catch', 'finally'].map(property => [
-	property,
-	Reflect.getOwnPropertyDescriptor(nativePromisePrototype, property)
-]);
-
-// The return value is a mixin of `childProcess` and `Promise`
-const mergePromise = (spawned, promise) => {
-	for (const [property, descriptor] of descriptors) {
-		// Starting the main `promise` is deferred to avoid consuming streams
-		const value = typeof promise === 'function' ?
-			(...args) => Reflect.apply(descriptor.value, promise(), args) :
-			descriptor.value.bind(promise);
-
-		Reflect.defineProperty(spawned, property, {...descriptor, value});
-	}
-
-	return spawned;
-};
-
-// Use promises instead of `child_process` events
-const getSpawnedPromise = spawned => {
-	return new Promise((resolve, reject) => {
-		spawned.on('exit', (exitCode, signal) => {
-			resolve({exitCode, signal});
-		});
-
-		spawned.on('error', error => {
-			reject(error);
-		});
-
-		if (spawned.stdin) {
-			spawned.stdin.on('error', error => {
-				reject(error);
-			});
-		}
-	});
-};
-
-module.exports = {
-	mergePromise,
-	getSpawnedPromise
-};
-
-
-
-/***/ }),
-
-/***/ 87417:
-/***/ ((module) => {
-
-"use strict";
-
-const aliases = ['stdin', 'stdout', 'stderr'];
-
-const hasAlias = options => aliases.some(alias => options[alias] !== undefined);
-
-const normalizeStdio = options => {
-	if (!options) {
-		return;
-	}
-
-	const {stdio} = options;
-
-	if (stdio === undefined) {
-		return aliases.map(alias => options[alias]);
-	}
-
-	if (hasAlias(options)) {
-		throw new Error(`It's not possible to provide \`stdio\` in combination with one of ${aliases.map(alias => `\`${alias}\``).join(', ')}`);
-	}
-
-	if (typeof stdio === 'string') {
-		return stdio;
-	}
-
-	if (!Array.isArray(stdio)) {
-		throw new TypeError(`Expected \`stdio\` to be of type \`string\` or \`Array\`, got \`${typeof stdio}\``);
-	}
-
-	const length = Math.max(stdio.length, aliases.length);
-	return Array.from({length}, (value, index) => stdio[index]);
-};
-
-module.exports = normalizeStdio;
-
-// `ipc` is pushed unless it is already present
-module.exports.node = options => {
-	const stdio = normalizeStdio(options);
-
-	if (stdio === 'ipc') {
-		return 'ipc';
-	}
-
-	if (stdio === undefined || typeof stdio === 'string') {
-		return [stdio, stdio, stdio, 'ipc'];
-	}
-
-	if (stdio.includes('ipc')) {
-		return stdio;
-	}
-
-	return [...stdio, 'ipc'];
-};
-
-
-/***/ }),
-
-/***/ 64614:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-const isStream = __nccwpck_require__(41554);
-const getStream = __nccwpck_require__(21766);
-const mergeStream = __nccwpck_require__(2621);
-
-// `input` option
-const handleInput = (spawned, input) => {
-	// Checking for stdin is workaround for https://github.com/nodejs/node/issues/26852
-	// TODO: Remove `|| spawned.stdin === undefined` once we drop support for Node.js <=12.2.0
-	if (input === undefined || spawned.stdin === undefined) {
-		return;
-	}
-
-	if (isStream(input)) {
-		input.pipe(spawned.stdin);
-	} else {
-		spawned.stdin.end(input);
-	}
-};
-
-// `all` interleaves `stdout` and `stderr`
-const makeAllStream = (spawned, {all}) => {
-	if (!all || (!spawned.stdout && !spawned.stderr)) {
-		return;
-	}
-
-	const mixed = mergeStream();
-
-	if (spawned.stdout) {
-		mixed.add(spawned.stdout);
-	}
-
-	if (spawned.stderr) {
-		mixed.add(spawned.stderr);
-	}
-
-	return mixed;
-};
-
-// On failure, `result.stdout|stderr|all` should contain the currently buffered stream
-const getBufferedData = async (stream, streamPromise) => {
-	if (!stream) {
-		return;
-	}
-
-	stream.destroy();
-
-	try {
-		return await streamPromise;
-	} catch (error) {
-		return error.bufferedData;
-	}
-};
-
-const getStreamPromise = (stream, {encoding, buffer, maxBuffer}) => {
-	if (!stream || !buffer) {
-		return;
-	}
-
-	if (encoding) {
-		return getStream(stream, {encoding, maxBuffer});
-	}
-
-	return getStream.buffer(stream, {maxBuffer});
-};
-
-// Retrieve result of child process: exit code, signal, error, streams (stdout/stderr/all)
-const getSpawnedResult = async ({stdout, stderr, all}, {encoding, buffer, maxBuffer}, processDone) => {
-	const stdoutPromise = getStreamPromise(stdout, {encoding, buffer, maxBuffer});
-	const stderrPromise = getStreamPromise(stderr, {encoding, buffer, maxBuffer});
-	const allPromise = getStreamPromise(all, {encoding, buffer, maxBuffer: maxBuffer * 2});
-
-	try {
-		return await Promise.all([processDone, stdoutPromise, stderrPromise, allPromise]);
-	} catch (error) {
-		return Promise.all([
-			{error, signal: error.signal, timedOut: error.timedOut},
-			getBufferedData(stdout, stdoutPromise),
-			getBufferedData(stderr, stderrPromise),
-			getBufferedData(all, allPromise)
-		]);
-	}
-};
-
-const validateInputSync = ({input}) => {
-	if (isStream(input)) {
-		throw new TypeError('The `input` option cannot be a stream in sync mode');
-	}
-};
-
-module.exports = {
-	handleInput,
-	makeAllStream,
-	getSpawnedResult,
-	validateInputSync
-};
-
-
-
-/***/ }),
-
 /***/ 67551:
 /***/ ((module) => {
 
@@ -218278,7 +216772,7 @@ __export(dist_src_exports, {
 module.exports = __toCommonJS(dist_src_exports);
 
 // pkg/dist-src/version.js
-var VERSION = "10.3.0";
+var VERSION = "10.4.1";
 
 // pkg/dist-src/generated/endpoints.js
 var Endpoints = {
@@ -218632,6 +217126,7 @@ var Endpoints = {
     listWatchersForRepo: ["GET /repos/{owner}/{repo}/subscribers"],
     markNotificationsAsRead: ["PUT /notifications"],
     markRepoNotificationsAsRead: ["PUT /repos/{owner}/{repo}/notifications"],
+    markThreadAsDone: ["DELETE /notifications/threads/{thread_id}"],
     markThreadAsRead: ["PATCH /notifications/threads/{thread_id}"],
     setRepoSubscription: ["PUT /repos/{owner}/{repo}/subscription"],
     setThreadSubscription: [
@@ -218908,10 +217403,10 @@ var Endpoints = {
     updateForAuthenticatedUser: ["PATCH /user/codespaces/{codespace_name}"]
   },
   copilot: {
-    addCopilotForBusinessSeatsForTeams: [
+    addCopilotSeatsForTeams: [
       "POST /orgs/{org}/copilot/billing/selected_teams"
     ],
-    addCopilotForBusinessSeatsForUsers: [
+    addCopilotSeatsForUsers: [
       "POST /orgs/{org}/copilot/billing/selected_users"
     ],
     cancelCopilotSeatAssignmentForTeams: [
@@ -219236,6 +217731,12 @@ var Endpoints = {
     addSecurityManagerTeam: [
       "PUT /orgs/{org}/security-managers/teams/{team_slug}"
     ],
+    assignTeamToOrgRole: [
+      "PUT /orgs/{org}/organization-roles/teams/{team_slug}/{role_id}"
+    ],
+    assignUserToOrgRole: [
+      "PUT /orgs/{org}/organization-roles/users/{username}/{role_id}"
+    ],
     blockUser: ["PUT /orgs/{org}/blocks/{username}"],
     cancelInvitation: ["DELETE /orgs/{org}/invitations/{invitation_id}"],
     checkBlockedUser: ["GET /orgs/{org}/blocks/{username}"],
@@ -219244,6 +217745,7 @@ var Endpoints = {
     convertMemberToOutsideCollaborator: [
       "PUT /orgs/{org}/outside_collaborators/{username}"
     ],
+    createCustomOrganizationRole: ["POST /orgs/{org}/organization-roles"],
     createInvitation: ["POST /orgs/{org}/invitations"],
     createOrUpdateCustomProperties: ["PATCH /orgs/{org}/properties/schema"],
     createOrUpdateCustomPropertiesValuesForRepos: [
@@ -219254,6 +217756,9 @@ var Endpoints = {
     ],
     createWebhook: ["POST /orgs/{org}/hooks"],
     delete: ["DELETE /orgs/{org}"],
+    deleteCustomOrganizationRole: [
+      "DELETE /orgs/{org}/organization-roles/{role_id}"
+    ],
     deleteWebhook: ["DELETE /orgs/{org}/hooks/{hook_id}"],
     enableOrDisableSecurityProductOnAllOrgRepos: [
       "POST /orgs/{org}/{security_product}/{enablement}"
@@ -219265,6 +217770,7 @@ var Endpoints = {
     ],
     getMembershipForAuthenticatedUser: ["GET /user/memberships/orgs/{org}"],
     getMembershipForUser: ["GET /orgs/{org}/memberships/{username}"],
+    getOrgRole: ["GET /orgs/{org}/organization-roles/{role_id}"],
     getWebhook: ["GET /orgs/{org}/hooks/{hook_id}"],
     getWebhookConfigForOrg: ["GET /orgs/{org}/hooks/{hook_id}/config"],
     getWebhookDelivery: [
@@ -219280,6 +217786,12 @@ var Endpoints = {
     listInvitationTeams: ["GET /orgs/{org}/invitations/{invitation_id}/teams"],
     listMembers: ["GET /orgs/{org}/members"],
     listMembershipsForAuthenticatedUser: ["GET /user/memberships/orgs"],
+    listOrgRoleTeams: ["GET /orgs/{org}/organization-roles/{role_id}/teams"],
+    listOrgRoleUsers: ["GET /orgs/{org}/organization-roles/{role_id}/users"],
+    listOrgRoles: ["GET /orgs/{org}/organization-roles"],
+    listOrganizationFineGrainedPermissions: [
+      "GET /orgs/{org}/organization-fine-grained-permissions"
+    ],
     listOutsideCollaborators: ["GET /orgs/{org}/outside_collaborators"],
     listPatGrantRepositories: [
       "GET /orgs/{org}/personal-access-tokens/{pat_id}/repositories"
@@ -219294,6 +217806,9 @@ var Endpoints = {
     listSecurityManagerTeams: ["GET /orgs/{org}/security-managers"],
     listWebhookDeliveries: ["GET /orgs/{org}/hooks/{hook_id}/deliveries"],
     listWebhooks: ["GET /orgs/{org}/hooks"],
+    patchCustomOrganizationRole: [
+      "PATCH /orgs/{org}/organization-roles/{role_id}"
+    ],
     pingWebhook: ["POST /orgs/{org}/hooks/{hook_id}/pings"],
     redeliverWebhookDelivery: [
       "POST /orgs/{org}/hooks/{hook_id}/deliveries/{delivery_id}/attempts"
@@ -219317,6 +217832,18 @@ var Endpoints = {
     ],
     reviewPatGrantRequestsInBulk: [
       "POST /orgs/{org}/personal-access-token-requests"
+    ],
+    revokeAllOrgRolesTeam: [
+      "DELETE /orgs/{org}/organization-roles/teams/{team_slug}"
+    ],
+    revokeAllOrgRolesUser: [
+      "DELETE /orgs/{org}/organization-roles/users/{username}"
+    ],
+    revokeOrgRoleTeam: [
+      "DELETE /orgs/{org}/organization-roles/teams/{team_slug}/{role_id}"
+    ],
+    revokeOrgRoleUser: [
+      "DELETE /orgs/{org}/organization-roles/users/{username}/{role_id}"
     ],
     setMembershipForUser: ["PUT /orgs/{org}/memberships/{username}"],
     setPublicMembershipForAuthenticatedUser: [
@@ -219608,6 +218135,9 @@ var Endpoints = {
       {},
       { mapToData: "users" }
     ],
+    cancelPagesDeployment: [
+      "POST /repos/{owner}/{repo}/pages/deployments/{pages_deployment_id}/cancel"
+    ],
     checkAutomatedSecurityFixes: [
       "GET /repos/{owner}/{repo}/automated-security-fixes"
     ],
@@ -219643,12 +218173,15 @@ var Endpoints = {
     createForAuthenticatedUser: ["POST /user/repos"],
     createFork: ["POST /repos/{owner}/{repo}/forks"],
     createInOrg: ["POST /orgs/{org}/repos"],
+    createOrUpdateCustomPropertiesValues: [
+      "PATCH /repos/{owner}/{repo}/properties/values"
+    ],
     createOrUpdateEnvironment: [
       "PUT /repos/{owner}/{repo}/environments/{environment_name}"
     ],
     createOrUpdateFileContents: ["PUT /repos/{owner}/{repo}/contents/{path}"],
     createOrgRuleset: ["POST /orgs/{org}/rulesets"],
-    createPagesDeployment: ["POST /repos/{owner}/{repo}/pages/deployment"],
+    createPagesDeployment: ["POST /repos/{owner}/{repo}/pages/deployments"],
     createPagesSite: ["POST /repos/{owner}/{repo}/pages"],
     createRelease: ["POST /repos/{owner}/{repo}/releases"],
     createRepoRuleset: ["POST /repos/{owner}/{repo}/rulesets"],
@@ -219801,6 +218334,9 @@ var Endpoints = {
     getOrgRulesets: ["GET /orgs/{org}/rulesets"],
     getPages: ["GET /repos/{owner}/{repo}/pages"],
     getPagesBuild: ["GET /repos/{owner}/{repo}/pages/builds/{build_id}"],
+    getPagesDeployment: [
+      "GET /repos/{owner}/{repo}/pages/deployments/{pages_deployment_id}"
+    ],
     getPagesHealthCheck: ["GET /repos/{owner}/{repo}/pages/health"],
     getParticipationStats: ["GET /repos/{owner}/{repo}/stats/participation"],
     getPullRequestReviewProtection: [
@@ -220011,6 +218547,9 @@ var Endpoints = {
     ]
   },
   securityAdvisories: {
+    createFork: [
+      "POST /repos/{owner}/{repo}/security-advisories/{ghsa_id}/forks"
+    ],
     createPrivateVulnerabilityReport: [
       "POST /repos/{owner}/{repo}/security-advisories/reports"
     ],
@@ -225629,6 +224168,10 @@ class RpcOutputStreamController {
             cmp: [],
         };
         this._closed = false;
+        // --- RpcOutputStream async iterator API
+        // iterator state.
+        // is undefined when no iterator has been acquired yet.
+        this._itState = { q: [] };
     }
     // --- RpcOutputStream callback API
     onNext(callback) {
@@ -225728,10 +224271,6 @@ class RpcOutputStreamController {
      *   messages are queued.
      */
     [Symbol.asyncIterator]() {
-        // init the iterator state, enabling pushIt()
-        if (!this._itState) {
-            this._itState = { q: [] };
-        }
         // if we are closed, we are definitely not receiving any more messages.
         // but we can't let the iterator get stuck. we want to either:
         // a) finish the new iterator immediately, because we are completed
@@ -225764,8 +224303,6 @@ class RpcOutputStreamController {
     // this either resolves a pending promise, or enqueues the result.
     pushIt(result) {
         let state = this._itState;
-        if (!state)
-            return;
         // is the consumer waiting for us?
         if (state.p) {
             // yes, consumer is waiting for this promise.
@@ -227677,6 +226214,7 @@ const reflection_equals_1 = __nccwpck_require__(39473);
 const binary_writer_1 = __nccwpck_require__(44354);
 const binary_reader_1 = __nccwpck_require__(65210);
 const baseDescriptors = Object.getOwnPropertyDescriptors(Object.getPrototypeOf({}));
+const messageTypeDescriptor = baseDescriptors[message_type_contract_1.MESSAGE_TYPE] = {};
 /**
  * This standard message type provides reflection-based
  * operations to work with a message.
@@ -227687,7 +226225,8 @@ class MessageType {
         this.typeName = name;
         this.fields = fields.map(reflection_info_1.normalizeFieldInfo);
         this.options = options !== null && options !== void 0 ? options : {};
-        this.messagePrototype = Object.create(null, Object.assign(Object.assign({}, baseDescriptors), { [message_type_contract_1.MESSAGE_TYPE]: { value: this } }));
+        messageTypeDescriptor.value = this;
+        this.messagePrototype = Object.create(null, baseDescriptors);
         this.refTypeCheck = new reflection_type_check_1.ReflectionTypeCheck(this);
         this.refJsonReader = new reflection_json_reader_1.ReflectionJsonReader(this);
         this.refJsonWriter = new reflection_json_writer_1.ReflectionJsonWriter(this);
@@ -229204,12 +227743,16 @@ class ReflectionJsonReader {
                         target[localName] = field.T().internalJsonRead(jsonValue, options, target[localName]);
                         break;
                     case "enum":
+                        if (jsonValue === null)
+                            continue;
                         let val = this.enum(field.T(), jsonValue, field.name, options.ignoreUnknownFields);
                         if (val === false)
                             continue;
                         target[localName] = val;
                         break;
                     case "scalar":
+                        if (jsonValue === null)
+                            continue;
                         target[localName] = this.scalar(jsonValue, field.T, field.L, field.name);
                         break;
                 }
@@ -252921,46 +251464,6 @@ module.exports = (stack, options) => {
 
 /***/ }),
 
-/***/ 69372:
-/***/ ((module) => {
-
-"use strict";
-
-
-// We define these manually to ensure they're always copied
-// even if they would move up the prototype chain
-// https://nodejs.org/api/http.html#http_class_http_incomingmessage
-const knownProps = [
-	'destroy',
-	'setTimeout',
-	'socket',
-	'headers',
-	'trailers',
-	'rawHeaders',
-	'statusCode',
-	'httpVersion',
-	'httpVersionMinor',
-	'httpVersionMajor',
-	'rawTrailers',
-	'statusMessage'
-];
-
-module.exports = (fromStream, toStream) => {
-	const fromProps = new Set(Object.keys(fromStream).concat(knownProps));
-
-	for (const prop of fromProps) {
-		// Don't overwrite existing properties
-		if (prop in toStream) {
-			continue;
-		}
-
-		toStream[prop] = typeof fromStream[prop] === 'function' ? fromStream[prop].bind(fromStream) : fromStream[prop];
-	}
-};
-
-
-/***/ }),
-
 /***/ 81312:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
@@ -252968,7 +251471,7 @@ module.exports = (fromStream, toStream) => {
 
 
 const PassThrough = (__nccwpck_require__(12781).PassThrough);
-const mimicResponse = __nccwpck_require__(69372);
+const mimicResponse = __nccwpck_require__(42610);
 
 const cloneResponse = response => {
 	if (!(response && response.pipe)) {
@@ -255231,7 +253734,7 @@ formatters.O = function (v) {
 
 const {Transform, PassThrough} = __nccwpck_require__(12781);
 const zlib = __nccwpck_require__(59796);
-const mimicResponse = __nccwpck_require__(42610);
+const mimicResponse = __nccwpck_require__(23877);
 
 module.exports = response => {
 	const contentEncoding = (response.headers['content-encoding'] || '').toLowerCase();
@@ -255285,6 +253788,91 @@ module.exports = response => {
 	response.pipe(checker).pipe(decompressStream).pipe(finalStream);
 
 	return finalStream;
+};
+
+
+/***/ }),
+
+/***/ 23877:
+/***/ ((module) => {
+
+"use strict";
+
+
+// We define these manually to ensure they're always copied
+// even if they would move up the prototype chain
+// https://nodejs.org/api/http.html#http_class_http_incomingmessage
+const knownProperties = [
+	'aborted',
+	'complete',
+	'headers',
+	'httpVersion',
+	'httpVersionMinor',
+	'httpVersionMajor',
+	'method',
+	'rawHeaders',
+	'rawTrailers',
+	'setTimeout',
+	'socket',
+	'statusCode',
+	'statusMessage',
+	'trailers',
+	'url'
+];
+
+module.exports = (fromStream, toStream) => {
+	if (toStream._readableState.autoDestroy) {
+		throw new Error('The second stream must have the `autoDestroy` option set to `false`');
+	}
+
+	const fromProperties = new Set(Object.keys(fromStream).concat(knownProperties));
+
+	const properties = {};
+
+	for (const property of fromProperties) {
+		// Don't overwrite existing properties.
+		if (property in toStream) {
+			continue;
+		}
+
+		properties[property] = {
+			get() {
+				const value = fromStream[property];
+				const isFunction = typeof value === 'function';
+
+				return isFunction ? value.bind(fromStream) : value;
+			},
+			set(value) {
+				fromStream[property] = value;
+			},
+			enumerable: true,
+			configurable: false
+		};
+	}
+
+	Object.defineProperties(toStream, properties);
+
+	fromStream.once('aborted', () => {
+		toStream.destroy();
+
+		toStream.emit('aborted');
+	});
+
+	fromStream.once('close', () => {
+		if (fromStream.complete) {
+			if (toStream.readable) {
+				toStream.once('end', () => {
+					toStream.emit('close');
+				});
+			} else {
+				toStream.emit('close');
+			}
+		} else {
+			toStream.emit('close');
+		}
+	});
+
+	return toStream;
 };
 
 
@@ -255487,599 +254075,6 @@ exports.Deprecation = Deprecation;
 
 /***/ }),
 
-/***/ 13598:
-/***/ ((module) => {
-
-"use strict";
-
-
-function _process (v, mod) {
-  var i
-  var r
-
-  if (typeof mod === 'function') {
-    r = mod(v)
-    if (r !== undefined) {
-      v = r
-    }
-  } else if (Array.isArray(mod)) {
-    for (i = 0; i < mod.length; i++) {
-      r = mod[i](v)
-      if (r !== undefined) {
-        v = r
-      }
-    }
-  }
-
-  return v
-}
-
-function parseKey (key, val) {
-  // detect negative index notation
-  if (key[0] === '-' && Array.isArray(val) && /^-\d+$/.test(key)) {
-    return val.length + parseInt(key, 10)
-  }
-  return key
-}
-
-function isIndex (k) {
-  return /^\d+$/.test(k)
-}
-
-function isObject (val) {
-  return Object.prototype.toString.call(val) === '[object Object]'
-}
-
-function isArrayOrObject (val) {
-  return Object(val) === val
-}
-
-function isEmptyObject (val) {
-  return Object.keys(val).length === 0
-}
-
-var blacklist = ['__proto__', 'prototype', 'constructor']
-var blacklistFilter = function (part) { return blacklist.indexOf(part) === -1 }
-
-function parsePath (path, sep) {
-  if (path.indexOf('[') >= 0) {
-    path = path.replace(/\[/g, sep).replace(/]/g, '')
-  }
-
-  var parts = path.split(sep)
-
-  var check = parts.filter(blacklistFilter)
-
-  if (check.length !== parts.length) {
-    throw Error('Refusing to update blacklisted property ' + path)
-  }
-
-  return parts
-}
-
-var hasOwnProperty = Object.prototype.hasOwnProperty
-
-function DotObject (separator, override, useArray, useBrackets) {
-  if (!(this instanceof DotObject)) {
-    return new DotObject(separator, override, useArray, useBrackets)
-  }
-
-  if (typeof override === 'undefined') override = false
-  if (typeof useArray === 'undefined') useArray = true
-  if (typeof useBrackets === 'undefined') useBrackets = true
-  this.separator = separator || '.'
-  this.override = override
-  this.useArray = useArray
-  this.useBrackets = useBrackets
-  this.keepArray = false
-
-  // contains touched arrays
-  this.cleanup = []
-}
-
-var dotDefault = new DotObject('.', false, true, true)
-function wrap (method) {
-  return function () {
-    return dotDefault[method].apply(dotDefault, arguments)
-  }
-}
-
-DotObject.prototype._fill = function (a, obj, v, mod) {
-  var k = a.shift()
-
-  if (a.length > 0) {
-    obj[k] = obj[k] || (this.useArray && isIndex(a[0]) ? [] : {})
-
-    if (!isArrayOrObject(obj[k])) {
-      if (this.override) {
-        obj[k] = {}
-      } else {
-        if (!(isArrayOrObject(v) && isEmptyObject(v))) {
-          throw new Error(
-            'Trying to redefine `' + k + '` which is a ' + typeof obj[k]
-          )
-        }
-
-        return
-      }
-    }
-
-    this._fill(a, obj[k], v, mod)
-  } else {
-    if (!this.override && isArrayOrObject(obj[k]) && !isEmptyObject(obj[k])) {
-      if (!(isArrayOrObject(v) && isEmptyObject(v))) {
-        throw new Error("Trying to redefine non-empty obj['" + k + "']")
-      }
-
-      return
-    }
-
-    obj[k] = _process(v, mod)
-  }
-}
-
-/**
- *
- * Converts an object with dotted-key/value pairs to it's expanded version
- *
- * Optionally transformed by a set of modifiers.
- *
- * Usage:
- *
- *   var row = {
- *     'nr': 200,
- *     'doc.name': '  My Document  '
- *   }
- *
- *   var mods = {
- *     'doc.name': [_s.trim, _s.underscored]
- *   }
- *
- *   dot.object(row, mods)
- *
- * @param {Object} obj
- * @param {Object} mods
- */
-DotObject.prototype.object = function (obj, mods) {
-  var self = this
-
-  Object.keys(obj).forEach(function (k) {
-    var mod = mods === undefined ? null : mods[k]
-    // normalize array notation.
-    var ok = parsePath(k, self.separator).join(self.separator)
-
-    if (ok.indexOf(self.separator) !== -1) {
-      self._fill(ok.split(self.separator), obj, obj[k], mod)
-      delete obj[k]
-    } else {
-      obj[k] = _process(obj[k], mod)
-    }
-  })
-
-  return obj
-}
-
-/**
- * @param {String} path dotted path
- * @param {String} v value to be set
- * @param {Object} obj object to be modified
- * @param {Function|Array} mod optional modifier
- */
-DotObject.prototype.str = function (path, v, obj, mod) {
-  var ok = parsePath(path, this.separator).join(this.separator)
-
-  if (path.indexOf(this.separator) !== -1) {
-    this._fill(ok.split(this.separator), obj, v, mod)
-  } else {
-    obj[path] = _process(v, mod)
-  }
-
-  return obj
-}
-
-/**
- *
- * Pick a value from an object using dot notation.
- *
- * Optionally remove the value
- *
- * @param {String} path
- * @param {Object} obj
- * @param {Boolean} remove
- */
-DotObject.prototype.pick = function (path, obj, remove, reindexArray) {
-  var i
-  var keys
-  var val
-  var key
-  var cp
-
-  keys = parsePath(path, this.separator)
-  for (i = 0; i < keys.length; i++) {
-    key = parseKey(keys[i], obj)
-    if (obj && typeof obj === 'object' && key in obj) {
-      if (i === keys.length - 1) {
-        if (remove) {
-          val = obj[key]
-          if (reindexArray && Array.isArray(obj)) {
-            obj.splice(key, 1)
-          } else {
-            delete obj[key]
-          }
-          if (Array.isArray(obj)) {
-            cp = keys.slice(0, -1).join('.')
-            if (this.cleanup.indexOf(cp) === -1) {
-              this.cleanup.push(cp)
-            }
-          }
-          return val
-        } else {
-          return obj[key]
-        }
-      } else {
-        obj = obj[key]
-      }
-    } else {
-      return undefined
-    }
-  }
-  if (remove && Array.isArray(obj)) {
-    obj = obj.filter(function (n) {
-      return n !== undefined
-    })
-  }
-  return obj
-}
-/**
- *
- * Delete value from an object using dot notation.
- *
- * @param {String} path
- * @param {Object} obj
- * @return {any} The removed value
- */
-DotObject.prototype.delete = function (path, obj) {
-  return this.remove(path, obj, true)
-}
-
-/**
- *
- * Remove value from an object using dot notation.
- *
- * Will remove multiple items if path is an array.
- * In this case array indexes will be retained until all
- * removals have been processed.
- *
- * Use dot.delete() to automatically  re-index arrays.
- *
- * @param {String|Array<String>} path
- * @param {Object} obj
- * @param {Boolean} reindexArray
- * @return {any} The removed value
- */
-DotObject.prototype.remove = function (path, obj, reindexArray) {
-  var i
-
-  this.cleanup = []
-  if (Array.isArray(path)) {
-    for (i = 0; i < path.length; i++) {
-      this.pick(path[i], obj, true, reindexArray)
-    }
-    if (!reindexArray) {
-      this._cleanup(obj)
-    }
-    return obj
-  } else {
-    return this.pick(path, obj, true, reindexArray)
-  }
-}
-
-DotObject.prototype._cleanup = function (obj) {
-  var ret
-  var i
-  var keys
-  var root
-  if (this.cleanup.length) {
-    for (i = 0; i < this.cleanup.length; i++) {
-      keys = this.cleanup[i].split('.')
-      root = keys.splice(0, -1).join('.')
-      ret = root ? this.pick(root, obj) : obj
-      ret = ret[keys[0]].filter(function (v) {
-        return v !== undefined
-      })
-      this.set(this.cleanup[i], ret, obj)
-    }
-    this.cleanup = []
-  }
-}
-
-/**
- * Alias method  for `dot.remove`
- *
- * Note: this is not an alias for dot.delete()
- *
- * @param {String|Array<String>} path
- * @param {Object} obj
- * @param {Boolean} reindexArray
- * @return {any} The removed value
- */
-DotObject.prototype.del = DotObject.prototype.remove
-
-/**
- *
- * Move a property from one place to the other.
- *
- * If the source path does not exist (undefined)
- * the target property will not be set.
- *
- * @param {String} source
- * @param {String} target
- * @param {Object} obj
- * @param {Function|Array} mods
- * @param {Boolean} merge
- */
-DotObject.prototype.move = function (source, target, obj, mods, merge) {
-  if (typeof mods === 'function' || Array.isArray(mods)) {
-    this.set(target, _process(this.pick(source, obj, true), mods), obj, merge)
-  } else {
-    merge = mods
-    this.set(target, this.pick(source, obj, true), obj, merge)
-  }
-
-  return obj
-}
-
-/**
- *
- * Transfer a property from one object to another object.
- *
- * If the source path does not exist (undefined)
- * the property on the other object will not be set.
- *
- * @param {String} source
- * @param {String} target
- * @param {Object} obj1
- * @param {Object} obj2
- * @param {Function|Array} mods
- * @param {Boolean} merge
- */
-DotObject.prototype.transfer = function (
-  source,
-  target,
-  obj1,
-  obj2,
-  mods,
-  merge
-) {
-  if (typeof mods === 'function' || Array.isArray(mods)) {
-    this.set(
-      target,
-      _process(this.pick(source, obj1, true), mods),
-      obj2,
-      merge
-    )
-  } else {
-    merge = mods
-    this.set(target, this.pick(source, obj1, true), obj2, merge)
-  }
-
-  return obj2
-}
-
-/**
- *
- * Copy a property from one object to another object.
- *
- * If the source path does not exist (undefined)
- * the property on the other object will not be set.
- *
- * @param {String} source
- * @param {String} target
- * @param {Object} obj1
- * @param {Object} obj2
- * @param {Function|Array} mods
- * @param {Boolean} merge
- */
-DotObject.prototype.copy = function (source, target, obj1, obj2, mods, merge) {
-  if (typeof mods === 'function' || Array.isArray(mods)) {
-    this.set(
-      target,
-      _process(
-        // clone what is picked
-        JSON.parse(JSON.stringify(this.pick(source, obj1, false))),
-        mods
-      ),
-      obj2,
-      merge
-    )
-  } else {
-    merge = mods
-    this.set(target, this.pick(source, obj1, false), obj2, merge)
-  }
-
-  return obj2
-}
-
-/**
- *
- * Set a property on an object using dot notation.
- *
- * @param {String} path
- * @param {any} val
- * @param {Object} obj
- * @param {Boolean} merge
- */
-DotObject.prototype.set = function (path, val, obj, merge) {
-  var i
-  var k
-  var keys
-  var key
-
-  // Do not operate if the value is undefined.
-  if (typeof val === 'undefined') {
-    return obj
-  }
-  keys = parsePath(path, this.separator)
-
-  for (i = 0; i < keys.length; i++) {
-    key = keys[i]
-    if (i === keys.length - 1) {
-      if (merge && isObject(val) && isObject(obj[key])) {
-        for (k in val) {
-          if (hasOwnProperty.call(val, k)) {
-            obj[key][k] = val[k]
-          }
-        }
-      } else if (merge && Array.isArray(obj[key]) && Array.isArray(val)) {
-        for (var j = 0; j < val.length; j++) {
-          obj[keys[i]].push(val[j])
-        }
-      } else {
-        obj[key] = val
-      }
-    } else if (
-      // force the value to be an object
-      !hasOwnProperty.call(obj, key) ||
-      (!isObject(obj[key]) && !Array.isArray(obj[key]))
-    ) {
-      // initialize as array if next key is numeric
-      if (/^\d+$/.test(keys[i + 1])) {
-        obj[key] = []
-      } else {
-        obj[key] = {}
-      }
-    }
-    obj = obj[key]
-  }
-  return obj
-}
-
-/**
- *
- * Transform an object
- *
- * Usage:
- *
- *   var obj = {
- *     "id": 1,
- *    "some": {
- *      "thing": "else"
- *    }
- *   }
- *
- *   var transform = {
- *     "id": "nr",
- *    "some.thing": "name"
- *   }
- *
- *   var tgt = dot.transform(transform, obj)
- *
- * @param {Object} recipe Transform recipe
- * @param {Object} obj Object to be transformed
- * @param {Array} mods modifiers for the target
- */
-DotObject.prototype.transform = function (recipe, obj, tgt) {
-  obj = obj || {}
-  tgt = tgt || {}
-  Object.keys(recipe).forEach(
-    function (key) {
-      this.set(recipe[key], this.pick(key, obj), tgt)
-    }.bind(this)
-  )
-  return tgt
-}
-
-/**
- *
- * Convert object to dotted-key/value pair
- *
- * Usage:
- *
- *   var tgt = dot.dot(obj)
- *
- *   or
- *
- *   var tgt = {}
- *   dot.dot(obj, tgt)
- *
- * @param {Object} obj source object
- * @param {Object} tgt target object
- * @param {Array} path path array (internal)
- */
-DotObject.prototype.dot = function (obj, tgt, path) {
-  tgt = tgt || {}
-  path = path || []
-  var isArray = Array.isArray(obj)
-
-  Object.keys(obj).forEach(
-    function (key) {
-      var index = isArray && this.useBrackets ? '[' + key + ']' : key
-      if (
-        isArrayOrObject(obj[key]) &&
-        ((isObject(obj[key]) && !isEmptyObject(obj[key])) ||
-          (Array.isArray(obj[key]) && !this.keepArray && obj[key].length !== 0))
-      ) {
-        if (isArray && this.useBrackets) {
-          var previousKey = path[path.length - 1] || ''
-          return this.dot(
-            obj[key],
-            tgt,
-            path.slice(0, -1).concat(previousKey + index)
-          )
-        } else {
-          return this.dot(obj[key], tgt, path.concat(index))
-        }
-      } else {
-        if (isArray && this.useBrackets) {
-          tgt[path.join(this.separator).concat('[' + key + ']')] = obj[key]
-        } else {
-          tgt[path.concat(index).join(this.separator)] = obj[key]
-        }
-      }
-    }.bind(this)
-  )
-  return tgt
-}
-
-DotObject.pick = wrap('pick')
-DotObject.move = wrap('move')
-DotObject.transfer = wrap('transfer')
-DotObject.transform = wrap('transform')
-DotObject.copy = wrap('copy')
-DotObject.object = wrap('object')
-DotObject.str = wrap('str')
-DotObject.set = wrap('set')
-DotObject.delete = wrap('delete')
-DotObject.del = DotObject.remove = wrap('remove')
-DotObject.dot = wrap('dot');
-['override', 'overwrite'].forEach(function (prop) {
-  Object.defineProperty(DotObject, prop, {
-    get: function () {
-      return dotDefault.override
-    },
-    set: function (val) {
-      dotDefault.override = !!val
-    }
-  })
-});
-['useArray', 'keepArray', 'useBrackets'].forEach(function (prop) {
-  Object.defineProperty(DotObject, prop, {
-    get: function () {
-      return dotDefault[prop]
-    },
-    set: function (val) {
-      dotDefault[prop] = val
-    }
-  })
-})
-
-DotObject._process = _process
-
-module.exports = DotObject
-
-
-/***/ }),
-
 /***/ 62693:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
@@ -256087,7 +254082,7 @@ module.exports = DotObject
 
 
 var callBind = __nccwpck_require__(86815);
-var gOPD = __nccwpck_require__(34709);
+var gOPD = __nccwpck_require__(18501);
 
 var hasProtoAccessor;
 try {
@@ -256114,41 +254109,6 @@ module.exports = desc && typeof desc.get === 'function'
 			return $getPrototypeOf(value == null ? value : $Object(value));
 		}
 		: false;
-
-
-/***/ }),
-
-/***/ 19185:
-/***/ ((module) => {
-
-"use strict";
-
-
-/** @type {import('./gOPD')} */
-module.exports = Object.getOwnPropertyDescriptor;
-
-
-/***/ }),
-
-/***/ 34709:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-/** @type {import('.')} */
-var $gOPD = __nccwpck_require__(19185);
-
-if ($gOPD) {
-	try {
-		$gOPD([], 'length');
-	} catch (e) {
-		// IE 8 has a broken gOPD
-		$gOPD = null;
-	}
-}
-
-module.exports = $gOPD;
 
 
 /***/ }),
@@ -257188,11 +255148,11 @@ module.exports = Object;
 "use strict";
 
 
-var GetIntrinsic = __nccwpck_require__(99276);
+var GetIntrinsic = __nccwpck_require__(74538);
 
 var $defineProperty = GetIntrinsic('%Object.defineProperty%', true);
 
-var hasToStringTag = __nccwpck_require__(50499)();
+var hasToStringTag = __nccwpck_require__(99038)();
 var hasOwn = __nccwpck_require__(62157);
 var $TypeError = __nccwpck_require__(6361);
 
@@ -257225,514 +255185,741 @@ module.exports = function setToStringTag(object, value) {
 
 /***/ }),
 
-/***/ 99276:
+/***/ 55447:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
+const path = __nccwpck_require__(71017);
+const childProcess = __nccwpck_require__(32081);
+const crossSpawn = __nccwpck_require__(72746);
+const stripFinalNewline = __nccwpck_require__(88174);
+const npmRunPath = __nccwpck_require__(20502);
+const onetime = __nccwpck_require__(89082);
+const makeError = __nccwpck_require__(62187);
+const normalizeStdio = __nccwpck_require__(10166);
+const {spawnedKill, spawnedCancel, setupTimeout, setExitHandler} = __nccwpck_require__(39819);
+const {handleInput, getSpawnedResult, makeAllStream, validateInputSync} = __nccwpck_require__(32592);
+const {mergePromise, getSpawnedPromise} = __nccwpck_require__(97814);
+const {joinCommand, parseCommand} = __nccwpck_require__(88286);
 
-var undefined;
+const DEFAULT_MAX_BUFFER = 1000 * 1000 * 100;
 
-var $Object = __nccwpck_require__(78308);
+const getEnv = ({env: envOption, extendEnv, preferLocal, localDir, execPath}) => {
+	const env = extendEnv ? {...process.env, ...envOption} : envOption;
 
-var $Error = __nccwpck_require__(28015);
-var $EvalError = __nccwpck_require__(91933);
-var $RangeError = __nccwpck_require__(54415);
-var $ReferenceError = __nccwpck_require__(46279);
-var $SyntaxError = __nccwpck_require__(75474);
-var $TypeError = __nccwpck_require__(6361);
-var $URIError = __nccwpck_require__(5065);
-
-var abs = __nccwpck_require__(19775);
-var floor = __nccwpck_require__(60924);
-var max = __nccwpck_require__(52419);
-var min = __nccwpck_require__(73373);
-var pow = __nccwpck_require__(78029);
-var round = __nccwpck_require__(59396);
-var sign = __nccwpck_require__(39091);
-
-var $Function = Function;
-
-// eslint-disable-next-line consistent-return
-var getEvalledConstructor = function (expressionSyntax) {
-	try {
-		return $Function('"use strict"; return (' + expressionSyntax + ').constructor;')();
-	} catch (e) {}
-};
-
-var $gOPD = __nccwpck_require__(64868);
-var $defineProperty = __nccwpck_require__(6123);
-
-var throwTypeError = function () {
-	throw new $TypeError();
-};
-var ThrowTypeError = $gOPD
-	? (function () {
-		try {
-			// eslint-disable-next-line no-unused-expressions, no-caller, no-restricted-properties
-			arguments.callee; // IE 8 does not throw here
-			return throwTypeError;
-		} catch (calleeThrows) {
-			try {
-				// IE 8 throws on Object.getOwnPropertyDescriptor(arguments, '')
-				return $gOPD(arguments, 'callee').get;
-			} catch (gOPDthrows) {
-				return throwTypeError;
-			}
-		}
-	}())
-	: throwTypeError;
-
-var hasSymbols = __nccwpck_require__(36546)();
-
-var getProto = __nccwpck_require__(13592);
-var $ObjectGPO = __nccwpck_require__(5045);
-var $ReflectGPO = __nccwpck_require__(78859);
-
-var $apply = __nccwpck_require__(54177);
-var $call = __nccwpck_require__(2808);
-
-var needsEval = {};
-
-var TypedArray = typeof Uint8Array === 'undefined' || !getProto ? undefined : getProto(Uint8Array);
-
-var INTRINSICS = {
-	__proto__: null,
-	'%AggregateError%': typeof AggregateError === 'undefined' ? undefined : AggregateError,
-	'%Array%': Array,
-	'%ArrayBuffer%': typeof ArrayBuffer === 'undefined' ? undefined : ArrayBuffer,
-	'%ArrayIteratorPrototype%': hasSymbols && getProto ? getProto([][Symbol.iterator]()) : undefined,
-	'%AsyncFromSyncIteratorPrototype%': undefined,
-	'%AsyncFunction%': needsEval,
-	'%AsyncGenerator%': needsEval,
-	'%AsyncGeneratorFunction%': needsEval,
-	'%AsyncIteratorPrototype%': needsEval,
-	'%Atomics%': typeof Atomics === 'undefined' ? undefined : Atomics,
-	'%BigInt%': typeof BigInt === 'undefined' ? undefined : BigInt,
-	'%BigInt64Array%': typeof BigInt64Array === 'undefined' ? undefined : BigInt64Array,
-	'%BigUint64Array%': typeof BigUint64Array === 'undefined' ? undefined : BigUint64Array,
-	'%Boolean%': Boolean,
-	'%DataView%': typeof DataView === 'undefined' ? undefined : DataView,
-	'%Date%': Date,
-	'%decodeURI%': decodeURI,
-	'%decodeURIComponent%': decodeURIComponent,
-	'%encodeURI%': encodeURI,
-	'%encodeURIComponent%': encodeURIComponent,
-	'%Error%': $Error,
-	'%eval%': eval, // eslint-disable-line no-eval
-	'%EvalError%': $EvalError,
-	'%Float16Array%': typeof Float16Array === 'undefined' ? undefined : Float16Array,
-	'%Float32Array%': typeof Float32Array === 'undefined' ? undefined : Float32Array,
-	'%Float64Array%': typeof Float64Array === 'undefined' ? undefined : Float64Array,
-	'%FinalizationRegistry%': typeof FinalizationRegistry === 'undefined' ? undefined : FinalizationRegistry,
-	'%Function%': $Function,
-	'%GeneratorFunction%': needsEval,
-	'%Int8Array%': typeof Int8Array === 'undefined' ? undefined : Int8Array,
-	'%Int16Array%': typeof Int16Array === 'undefined' ? undefined : Int16Array,
-	'%Int32Array%': typeof Int32Array === 'undefined' ? undefined : Int32Array,
-	'%isFinite%': isFinite,
-	'%isNaN%': isNaN,
-	'%IteratorPrototype%': hasSymbols && getProto ? getProto(getProto([][Symbol.iterator]())) : undefined,
-	'%JSON%': typeof JSON === 'object' ? JSON : undefined,
-	'%Map%': typeof Map === 'undefined' ? undefined : Map,
-	'%MapIteratorPrototype%': typeof Map === 'undefined' || !hasSymbols || !getProto ? undefined : getProto(new Map()[Symbol.iterator]()),
-	'%Math%': Math,
-	'%Number%': Number,
-	'%Object%': $Object,
-	'%Object.getOwnPropertyDescriptor%': $gOPD,
-	'%parseFloat%': parseFloat,
-	'%parseInt%': parseInt,
-	'%Promise%': typeof Promise === 'undefined' ? undefined : Promise,
-	'%Proxy%': typeof Proxy === 'undefined' ? undefined : Proxy,
-	'%RangeError%': $RangeError,
-	'%ReferenceError%': $ReferenceError,
-	'%Reflect%': typeof Reflect === 'undefined' ? undefined : Reflect,
-	'%RegExp%': RegExp,
-	'%Set%': typeof Set === 'undefined' ? undefined : Set,
-	'%SetIteratorPrototype%': typeof Set === 'undefined' || !hasSymbols || !getProto ? undefined : getProto(new Set()[Symbol.iterator]()),
-	'%SharedArrayBuffer%': typeof SharedArrayBuffer === 'undefined' ? undefined : SharedArrayBuffer,
-	'%String%': String,
-	'%StringIteratorPrototype%': hasSymbols && getProto ? getProto(''[Symbol.iterator]()) : undefined,
-	'%Symbol%': hasSymbols ? Symbol : undefined,
-	'%SyntaxError%': $SyntaxError,
-	'%ThrowTypeError%': ThrowTypeError,
-	'%TypedArray%': TypedArray,
-	'%TypeError%': $TypeError,
-	'%Uint8Array%': typeof Uint8Array === 'undefined' ? undefined : Uint8Array,
-	'%Uint8ClampedArray%': typeof Uint8ClampedArray === 'undefined' ? undefined : Uint8ClampedArray,
-	'%Uint16Array%': typeof Uint16Array === 'undefined' ? undefined : Uint16Array,
-	'%Uint32Array%': typeof Uint32Array === 'undefined' ? undefined : Uint32Array,
-	'%URIError%': $URIError,
-	'%WeakMap%': typeof WeakMap === 'undefined' ? undefined : WeakMap,
-	'%WeakRef%': typeof WeakRef === 'undefined' ? undefined : WeakRef,
-	'%WeakSet%': typeof WeakSet === 'undefined' ? undefined : WeakSet,
-
-	'%Function.prototype.call%': $call,
-	'%Function.prototype.apply%': $apply,
-	'%Object.defineProperty%': $defineProperty,
-	'%Object.getPrototypeOf%': $ObjectGPO,
-	'%Math.abs%': abs,
-	'%Math.floor%': floor,
-	'%Math.max%': max,
-	'%Math.min%': min,
-	'%Math.pow%': pow,
-	'%Math.round%': round,
-	'%Math.sign%': sign,
-	'%Reflect.getPrototypeOf%': $ReflectGPO
-};
-
-if (getProto) {
-	try {
-		null.error; // eslint-disable-line no-unused-expressions
-	} catch (e) {
-		// https://github.com/tc39/proposal-shadowrealm/pull/384#issuecomment-1364264229
-		var errorProto = getProto(getProto(e));
-		INTRINSICS['%Error.prototype%'] = errorProto;
-	}
-}
-
-var doEval = function doEval(name) {
-	var value;
-	if (name === '%AsyncFunction%') {
-		value = getEvalledConstructor('async function () {}');
-	} else if (name === '%GeneratorFunction%') {
-		value = getEvalledConstructor('function* () {}');
-	} else if (name === '%AsyncGeneratorFunction%') {
-		value = getEvalledConstructor('async function* () {}');
-	} else if (name === '%AsyncGenerator%') {
-		var fn = doEval('%AsyncGeneratorFunction%');
-		if (fn) {
-			value = fn.prototype;
-		}
-	} else if (name === '%AsyncIteratorPrototype%') {
-		var gen = doEval('%AsyncGenerator%');
-		if (gen && getProto) {
-			value = getProto(gen.prototype);
-		}
+	if (preferLocal) {
+		return npmRunPath.env({env, cwd: localDir, execPath});
 	}
 
-	INTRINSICS[name] = value;
+	return env;
+};
+
+const handleArguments = (file, args, options = {}) => {
+	const parsed = crossSpawn._parse(file, args, options);
+	file = parsed.command;
+	args = parsed.args;
+	options = parsed.options;
+
+	options = {
+		maxBuffer: DEFAULT_MAX_BUFFER,
+		buffer: true,
+		stripFinalNewline: true,
+		extendEnv: true,
+		preferLocal: false,
+		localDir: options.cwd || process.cwd(),
+		execPath: process.execPath,
+		encoding: 'utf8',
+		reject: true,
+		cleanup: true,
+		all: false,
+		windowsHide: true,
+		...options
+	};
+
+	options.env = getEnv(options);
+
+	options.stdio = normalizeStdio(options);
+
+	if (process.platform === 'win32' && path.basename(file, '.exe') === 'cmd') {
+		// #116
+		args.unshift('/q');
+	}
+
+	return {file, args, options, parsed};
+};
+
+const handleOutput = (options, value, error) => {
+	if (typeof value !== 'string' && !Buffer.isBuffer(value)) {
+		// When `execa.sync()` errors, we normalize it to '' to mimic `execa()`
+		return error === undefined ? undefined : '';
+	}
+
+	if (options.stripFinalNewline) {
+		return stripFinalNewline(value);
+	}
 
 	return value;
 };
 
-var LEGACY_ALIASES = {
-	__proto__: null,
-	'%ArrayBufferPrototype%': ['ArrayBuffer', 'prototype'],
-	'%ArrayPrototype%': ['Array', 'prototype'],
-	'%ArrayProto_entries%': ['Array', 'prototype', 'entries'],
-	'%ArrayProto_forEach%': ['Array', 'prototype', 'forEach'],
-	'%ArrayProto_keys%': ['Array', 'prototype', 'keys'],
-	'%ArrayProto_values%': ['Array', 'prototype', 'values'],
-	'%AsyncFunctionPrototype%': ['AsyncFunction', 'prototype'],
-	'%AsyncGenerator%': ['AsyncGeneratorFunction', 'prototype'],
-	'%AsyncGeneratorPrototype%': ['AsyncGeneratorFunction', 'prototype', 'prototype'],
-	'%BooleanPrototype%': ['Boolean', 'prototype'],
-	'%DataViewPrototype%': ['DataView', 'prototype'],
-	'%DatePrototype%': ['Date', 'prototype'],
-	'%ErrorPrototype%': ['Error', 'prototype'],
-	'%EvalErrorPrototype%': ['EvalError', 'prototype'],
-	'%Float32ArrayPrototype%': ['Float32Array', 'prototype'],
-	'%Float64ArrayPrototype%': ['Float64Array', 'prototype'],
-	'%FunctionPrototype%': ['Function', 'prototype'],
-	'%Generator%': ['GeneratorFunction', 'prototype'],
-	'%GeneratorPrototype%': ['GeneratorFunction', 'prototype', 'prototype'],
-	'%Int8ArrayPrototype%': ['Int8Array', 'prototype'],
-	'%Int16ArrayPrototype%': ['Int16Array', 'prototype'],
-	'%Int32ArrayPrototype%': ['Int32Array', 'prototype'],
-	'%JSONParse%': ['JSON', 'parse'],
-	'%JSONStringify%': ['JSON', 'stringify'],
-	'%MapPrototype%': ['Map', 'prototype'],
-	'%NumberPrototype%': ['Number', 'prototype'],
-	'%ObjectPrototype%': ['Object', 'prototype'],
-	'%ObjProto_toString%': ['Object', 'prototype', 'toString'],
-	'%ObjProto_valueOf%': ['Object', 'prototype', 'valueOf'],
-	'%PromisePrototype%': ['Promise', 'prototype'],
-	'%PromiseProto_then%': ['Promise', 'prototype', 'then'],
-	'%Promise_all%': ['Promise', 'all'],
-	'%Promise_reject%': ['Promise', 'reject'],
-	'%Promise_resolve%': ['Promise', 'resolve'],
-	'%RangeErrorPrototype%': ['RangeError', 'prototype'],
-	'%ReferenceErrorPrototype%': ['ReferenceError', 'prototype'],
-	'%RegExpPrototype%': ['RegExp', 'prototype'],
-	'%SetPrototype%': ['Set', 'prototype'],
-	'%SharedArrayBufferPrototype%': ['SharedArrayBuffer', 'prototype'],
-	'%StringPrototype%': ['String', 'prototype'],
-	'%SymbolPrototype%': ['Symbol', 'prototype'],
-	'%SyntaxErrorPrototype%': ['SyntaxError', 'prototype'],
-	'%TypedArrayPrototype%': ['TypedArray', 'prototype'],
-	'%TypeErrorPrototype%': ['TypeError', 'prototype'],
-	'%Uint8ArrayPrototype%': ['Uint8Array', 'prototype'],
-	'%Uint8ClampedArrayPrototype%': ['Uint8ClampedArray', 'prototype'],
-	'%Uint16ArrayPrototype%': ['Uint16Array', 'prototype'],
-	'%Uint32ArrayPrototype%': ['Uint32Array', 'prototype'],
-	'%URIErrorPrototype%': ['URIError', 'prototype'],
-	'%WeakMapPrototype%': ['WeakMap', 'prototype'],
-	'%WeakSetPrototype%': ['WeakSet', 'prototype']
-};
+const execa = (file, args, options) => {
+	const parsed = handleArguments(file, args, options);
+	const command = joinCommand(file, args);
 
-var bind = __nccwpck_require__(88334);
-var hasOwn = __nccwpck_require__(62157);
-var $concat = bind.call($call, Array.prototype.concat);
-var $spliceApply = bind.call($apply, Array.prototype.splice);
-var $replace = bind.call($call, String.prototype.replace);
-var $strSlice = bind.call($call, String.prototype.slice);
-var $exec = bind.call($call, RegExp.prototype.exec);
-
-/* adapted from https://github.com/lodash/lodash/blob/4.17.15/dist/lodash.js#L6735-L6744 */
-var rePropName = /[^%.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(?:\.|\[\])(?:\.|\[\]|%$))/g;
-var reEscapeChar = /\\(\\)?/g; /** Used to match backslashes in property paths. */
-var stringToPath = function stringToPath(string) {
-	var first = $strSlice(string, 0, 1);
-	var last = $strSlice(string, -1);
-	if (first === '%' && last !== '%') {
-		throw new $SyntaxError('invalid intrinsic syntax, expected closing `%`');
-	} else if (last === '%' && first !== '%') {
-		throw new $SyntaxError('invalid intrinsic syntax, expected opening `%`');
-	}
-	var result = [];
-	$replace(string, rePropName, function (match, number, quote, subString) {
-		result[result.length] = quote ? $replace(subString, reEscapeChar, '$1') : number || match;
-	});
-	return result;
-};
-/* end adaptation */
-
-var getBaseIntrinsic = function getBaseIntrinsic(name, allowMissing) {
-	var intrinsicName = name;
-	var alias;
-	if (hasOwn(LEGACY_ALIASES, intrinsicName)) {
-		alias = LEGACY_ALIASES[intrinsicName];
-		intrinsicName = '%' + alias[0] + '%';
+	let spawned;
+	try {
+		spawned = childProcess.spawn(parsed.file, parsed.args, parsed.options);
+	} catch (error) {
+		// Ensure the returned error is always both a promise and a child process
+		const dummySpawned = new childProcess.ChildProcess();
+		const errorPromise = Promise.reject(makeError({
+			error,
+			stdout: '',
+			stderr: '',
+			all: '',
+			command,
+			parsed,
+			timedOut: false,
+			isCanceled: false,
+			killed: false
+		}));
+		return mergePromise(dummySpawned, errorPromise);
 	}
 
-	if (hasOwn(INTRINSICS, intrinsicName)) {
-		var value = INTRINSICS[intrinsicName];
-		if (value === needsEval) {
-			value = doEval(intrinsicName);
-		}
-		if (typeof value === 'undefined' && !allowMissing) {
-			throw new $TypeError('intrinsic ' + name + ' exists, but is not available. Please file an issue!');
+	const spawnedPromise = getSpawnedPromise(spawned);
+	const timedPromise = setupTimeout(spawned, parsed.options, spawnedPromise);
+	const processDone = setExitHandler(spawned, parsed.options, timedPromise);
+
+	const context = {isCanceled: false};
+
+	spawned.kill = spawnedKill.bind(null, spawned.kill.bind(spawned));
+	spawned.cancel = spawnedCancel.bind(null, spawned, context);
+
+	const handlePromise = async () => {
+		const [{error, exitCode, signal, timedOut}, stdoutResult, stderrResult, allResult] = await getSpawnedResult(spawned, parsed.options, processDone);
+		const stdout = handleOutput(parsed.options, stdoutResult);
+		const stderr = handleOutput(parsed.options, stderrResult);
+		const all = handleOutput(parsed.options, allResult);
+
+		if (error || exitCode !== 0 || signal !== null) {
+			const returnedError = makeError({
+				error,
+				exitCode,
+				signal,
+				stdout,
+				stderr,
+				all,
+				command,
+				parsed,
+				timedOut,
+				isCanceled: context.isCanceled,
+				killed: spawned.killed
+			});
+
+			if (!parsed.options.reject) {
+				return returnedError;
+			}
+
+			throw returnedError;
 		}
 
 		return {
-			alias: alias,
-			name: intrinsicName,
-			value: value
+			command,
+			exitCode: 0,
+			stdout,
+			stderr,
+			all,
+			failed: false,
+			timedOut: false,
+			isCanceled: false,
+			killed: false
 		};
-	}
+	};
 
-	throw new $SyntaxError('intrinsic ' + name + ' does not exist!');
+	const handlePromiseOnce = onetime(handlePromise);
+
+	handleInput(spawned, parsed.options.input);
+
+	spawned.all = makeAllStream(spawned, parsed.options);
+
+	return mergePromise(spawned, handlePromiseOnce);
 };
 
-module.exports = function GetIntrinsic(name, allowMissing) {
-	if (typeof name !== 'string' || name.length === 0) {
-		throw new $TypeError('intrinsic name must be a non-empty string');
-	}
-	if (arguments.length > 1 && typeof allowMissing !== 'boolean') {
-		throw new $TypeError('"allowMissing" argument must be a boolean');
-	}
+module.exports = execa;
 
-	if ($exec(/^%?[^%]*%?$/, name) === null) {
-		throw new $SyntaxError('`%` may not be present anywhere but at the beginning and end of the intrinsic name');
-	}
-	var parts = stringToPath(name);
-	var intrinsicBaseName = parts.length > 0 ? parts[0] : '';
+module.exports.sync = (file, args, options) => {
+	const parsed = handleArguments(file, args, options);
+	const command = joinCommand(file, args);
 
-	var intrinsic = getBaseIntrinsic('%' + intrinsicBaseName + '%', allowMissing);
-	var intrinsicRealName = intrinsic.name;
-	var value = intrinsic.value;
-	var skipFurtherCaching = false;
+	validateInputSync(parsed.options);
 
-	var alias = intrinsic.alias;
-	if (alias) {
-		intrinsicBaseName = alias[0];
-		$spliceApply(parts, $concat([0, 1], alias));
-	}
-
-	for (var i = 1, isOwn = true; i < parts.length; i += 1) {
-		var part = parts[i];
-		var first = $strSlice(part, 0, 1);
-		var last = $strSlice(part, -1);
-		if (
-			(
-				(first === '"' || first === "'" || first === '`')
-				|| (last === '"' || last === "'" || last === '`')
-			)
-			&& first !== last
-		) {
-			throw new $SyntaxError('property names with quotes must have matching quotes');
-		}
-		if (part === 'constructor' || !isOwn) {
-			skipFurtherCaching = true;
-		}
-
-		intrinsicBaseName += '.' + part;
-		intrinsicRealName = '%' + intrinsicBaseName + '%';
-
-		if (hasOwn(INTRINSICS, intrinsicRealName)) {
-			value = INTRINSICS[intrinsicRealName];
-		} else if (value != null) {
-			if (!(part in value)) {
-				if (!allowMissing) {
-					throw new $TypeError('base intrinsic for ' + name + ' exists, but the property is not available.');
-				}
-				return void undefined;
-			}
-			if ($gOPD && (i + 1) >= parts.length) {
-				var desc = $gOPD(value, part);
-				isOwn = !!desc;
-
-				// By convention, when a data property is converted to an accessor
-				// property to emulate a data property that does not suffer from
-				// the override mistake, that accessor's getter is marked with
-				// an `originalValue` property. Here, when we detect this, we
-				// uphold the illusion by pretending to see that original data
-				// property, i.e., returning the value rather than the getter
-				// itself.
-				if (isOwn && 'get' in desc && !('originalValue' in desc.get)) {
-					value = desc.get;
-				} else {
-					value = value[part];
-				}
-			} else {
-				isOwn = hasOwn(value, part);
-				value = value[part];
-			}
-
-			if (isOwn && !skipFurtherCaching) {
-				INTRINSICS[intrinsicRealName] = value;
-			}
-		}
-	}
-	return value;
-};
-
-
-/***/ }),
-
-/***/ 36546:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-var origSymbol = typeof Symbol !== 'undefined' && Symbol;
-var hasSymbolSham = __nccwpck_require__(85968);
-
-/** @type {import('.')} */
-module.exports = function hasNativeSymbols() {
-	if (typeof origSymbol !== 'function') { return false; }
-	if (typeof Symbol !== 'function') { return false; }
-	if (typeof origSymbol('foo') !== 'symbol') { return false; }
-	if (typeof Symbol('bar') !== 'symbol') { return false; }
-
-	return hasSymbolSham();
-};
-
-
-/***/ }),
-
-/***/ 85968:
-/***/ ((module) => {
-
-"use strict";
-
-
-/** @type {import('./shams')} */
-/* eslint complexity: [2, 18], max-statements: [2, 33] */
-module.exports = function hasSymbols() {
-	if (typeof Symbol !== 'function' || typeof Object.getOwnPropertySymbols !== 'function') { return false; }
-	if (typeof Symbol.iterator === 'symbol') { return true; }
-
-	/** @type {{ [k in symbol]?: unknown }} */
-	var obj = {};
-	var sym = Symbol('test');
-	var symObj = Object(sym);
-	if (typeof sym === 'string') { return false; }
-
-	if (Object.prototype.toString.call(sym) !== '[object Symbol]') { return false; }
-	if (Object.prototype.toString.call(symObj) !== '[object Symbol]') { return false; }
-
-	// temp disabled per https://github.com/ljharb/object.assign/issues/17
-	// if (sym instanceof Symbol) { return false; }
-	// temp disabled per https://github.com/WebReflection/get-own-property-symbols/issues/4
-	// if (!(symObj instanceof Symbol)) { return false; }
-
-	// if (typeof Symbol.prototype.toString !== 'function') { return false; }
-	// if (String(sym) !== Symbol.prototype.toString.call(sym)) { return false; }
-
-	var symVal = 42;
-	obj[sym] = symVal;
-	for (var _ in obj) { return false; } // eslint-disable-line no-restricted-syntax, no-unreachable-loop
-	if (typeof Object.keys === 'function' && Object.keys(obj).length !== 0) { return false; }
-
-	if (typeof Object.getOwnPropertyNames === 'function' && Object.getOwnPropertyNames(obj).length !== 0) { return false; }
-
-	var syms = Object.getOwnPropertySymbols(obj);
-	if (syms.length !== 1 || syms[0] !== sym) { return false; }
-
-	if (!Object.prototype.propertyIsEnumerable.call(obj, sym)) { return false; }
-
-	if (typeof Object.getOwnPropertyDescriptor === 'function') {
-		// eslint-disable-next-line no-extra-parens
-		var descriptor = /** @type {PropertyDescriptor} */ (Object.getOwnPropertyDescriptor(obj, sym));
-		if (descriptor.value !== symVal || descriptor.enumerable !== true) { return false; }
-	}
-
-	return true;
-};
-
-
-/***/ }),
-
-/***/ 13752:
-/***/ ((module) => {
-
-"use strict";
-
-
-/** @type {import('./gOPD')} */
-module.exports = Object.getOwnPropertyDescriptor;
-
-
-/***/ }),
-
-/***/ 64868:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-/** @type {import('.')} */
-var $gOPD = __nccwpck_require__(13752);
-
-if ($gOPD) {
+	let result;
 	try {
-		$gOPD([], 'length');
-	} catch (e) {
-		// IE 8 has a broken gOPD
-		$gOPD = null;
+		result = childProcess.spawnSync(parsed.file, parsed.args, parsed.options);
+	} catch (error) {
+		throw makeError({
+			error,
+			stdout: '',
+			stderr: '',
+			all: '',
+			command,
+			parsed,
+			timedOut: false,
+			isCanceled: false,
+			killed: false
+		});
 	}
-}
 
-module.exports = $gOPD;
+	const stdout = handleOutput(parsed.options, result.stdout, result.error);
+	const stderr = handleOutput(parsed.options, result.stderr, result.error);
+
+	if (result.error || result.status !== 0 || result.signal !== null) {
+		const error = makeError({
+			stdout,
+			stderr,
+			error: result.error,
+			signal: result.signal,
+			exitCode: result.status,
+			command,
+			parsed,
+			timedOut: result.error && result.error.code === 'ETIMEDOUT',
+			isCanceled: false,
+			killed: result.signal !== null
+		});
+
+		if (!parsed.options.reject) {
+			return error;
+		}
+
+		throw error;
+	}
+
+	return {
+		command,
+		exitCode: 0,
+		stdout,
+		stderr,
+		failed: false,
+		timedOut: false,
+		isCanceled: false,
+		killed: false
+	};
+};
+
+module.exports.command = (command, options) => {
+	const [file, ...args] = parseCommand(command);
+	return execa(file, args, options);
+};
+
+module.exports.commandSync = (command, options) => {
+	const [file, ...args] = parseCommand(command);
+	return execa.sync(file, args, options);
+};
+
+module.exports.node = (scriptPath, args, options = {}) => {
+	if (args && !Array.isArray(args) && typeof args === 'object') {
+		options = args;
+		args = [];
+	}
+
+	const stdio = normalizeStdio.node(options);
+	const defaultExecArgv = process.execArgv.filter(arg => !arg.startsWith('--inspect'));
+
+	const {
+		nodePath = process.execPath,
+		nodeOptions = defaultExecArgv
+	} = options;
+
+	return execa(
+		nodePath,
+		[
+			...nodeOptions,
+			scriptPath,
+			...(Array.isArray(args) ? args : [])
+		],
+		{
+			...options,
+			stdin: undefined,
+			stdout: undefined,
+			stderr: undefined,
+			stdio,
+			shell: false
+		}
+	);
+};
 
 
 /***/ }),
 
-/***/ 50499:
+/***/ 88286:
+/***/ ((module) => {
+
+"use strict";
+
+const SPACES_REGEXP = / +/g;
+
+const joinCommand = (file, args = []) => {
+	if (!Array.isArray(args)) {
+		return file;
+	}
+
+	return [file, ...args].join(' ');
+};
+
+// Handle `execa.command()`
+const parseCommand = command => {
+	const tokens = [];
+	for (const token of command.trim().split(SPACES_REGEXP)) {
+		// Allow spaces to be escaped by a backslash if not meant as a delimiter
+		const previousToken = tokens[tokens.length - 1];
+		if (previousToken && previousToken.endsWith('\\')) {
+			// Merge previous token with current one
+			tokens[tokens.length - 1] = `${previousToken.slice(0, -1)} ${token}`;
+		} else {
+			tokens.push(token);
+		}
+	}
+
+	return tokens;
+};
+
+module.exports = {
+	joinCommand,
+	parseCommand
+};
+
+
+/***/ }),
+
+/***/ 62187:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
+const {signalsByName} = __nccwpck_require__(2779);
 
-var hasSymbols = __nccwpck_require__(57747);
+const getErrorPrefix = ({timedOut, timeout, errorCode, signal, signalDescription, exitCode, isCanceled}) => {
+	if (timedOut) {
+		return `timed out after ${timeout} milliseconds`;
+	}
 
-/** @type {import('.')} */
-module.exports = function hasToStringTagShams() {
-	return hasSymbols() && !!Symbol.toStringTag;
+	if (isCanceled) {
+		return 'was canceled';
+	}
+
+	if (errorCode !== undefined) {
+		return `failed with ${errorCode}`;
+	}
+
+	if (signal !== undefined) {
+		return `was killed with ${signal} (${signalDescription})`;
+	}
+
+	if (exitCode !== undefined) {
+		return `failed with exit code ${exitCode}`;
+	}
+
+	return 'failed';
 };
+
+const makeError = ({
+	stdout,
+	stderr,
+	all,
+	error,
+	signal,
+	exitCode,
+	command,
+	timedOut,
+	isCanceled,
+	killed,
+	parsed: {options: {timeout}}
+}) => {
+	// `signal` and `exitCode` emitted on `spawned.on('exit')` event can be `null`.
+	// We normalize them to `undefined`
+	exitCode = exitCode === null ? undefined : exitCode;
+	signal = signal === null ? undefined : signal;
+	const signalDescription = signal === undefined ? undefined : signalsByName[signal].description;
+
+	const errorCode = error && error.code;
+
+	const prefix = getErrorPrefix({timedOut, timeout, errorCode, signal, signalDescription, exitCode, isCanceled});
+	const execaMessage = `Command ${prefix}: ${command}`;
+	const isError = Object.prototype.toString.call(error) === '[object Error]';
+	const shortMessage = isError ? `${execaMessage}\n${error.message}` : execaMessage;
+	const message = [shortMessage, stderr, stdout].filter(Boolean).join('\n');
+
+	if (isError) {
+		error.originalMessage = error.message;
+		error.message = message;
+	} else {
+		error = new Error(message);
+	}
+
+	error.shortMessage = shortMessage;
+	error.command = command;
+	error.exitCode = exitCode;
+	error.signal = signal;
+	error.signalDescription = signalDescription;
+	error.stdout = stdout;
+	error.stderr = stderr;
+
+	if (all !== undefined) {
+		error.all = all;
+	}
+
+	if ('bufferedData' in error) {
+		delete error.bufferedData;
+	}
+
+	error.failed = true;
+	error.timedOut = Boolean(timedOut);
+	error.isCanceled = isCanceled;
+	error.killed = killed && !timedOut;
+
+	return error;
+};
+
+module.exports = makeError;
+
+
+/***/ }),
+
+/***/ 39819:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+const os = __nccwpck_require__(22037);
+const onExit = __nccwpck_require__(24931);
+
+const DEFAULT_FORCE_KILL_TIMEOUT = 1000 * 5;
+
+// Monkey-patches `childProcess.kill()` to add `forceKillAfterTimeout` behavior
+const spawnedKill = (kill, signal = 'SIGTERM', options = {}) => {
+	const killResult = kill(signal);
+	setKillTimeout(kill, signal, options, killResult);
+	return killResult;
+};
+
+const setKillTimeout = (kill, signal, options, killResult) => {
+	if (!shouldForceKill(signal, options, killResult)) {
+		return;
+	}
+
+	const timeout = getForceKillAfterTimeout(options);
+	const t = setTimeout(() => {
+		kill('SIGKILL');
+	}, timeout);
+
+	// Guarded because there's no `.unref()` when `execa` is used in the renderer
+	// process in Electron. This cannot be tested since we don't run tests in
+	// Electron.
+	// istanbul ignore else
+	if (t.unref) {
+		t.unref();
+	}
+};
+
+const shouldForceKill = (signal, {forceKillAfterTimeout}, killResult) => {
+	return isSigterm(signal) && forceKillAfterTimeout !== false && killResult;
+};
+
+const isSigterm = signal => {
+	return signal === os.constants.signals.SIGTERM ||
+		(typeof signal === 'string' && signal.toUpperCase() === 'SIGTERM');
+};
+
+const getForceKillAfterTimeout = ({forceKillAfterTimeout = true}) => {
+	if (forceKillAfterTimeout === true) {
+		return DEFAULT_FORCE_KILL_TIMEOUT;
+	}
+
+	if (!Number.isFinite(forceKillAfterTimeout) || forceKillAfterTimeout < 0) {
+		throw new TypeError(`Expected the \`forceKillAfterTimeout\` option to be a non-negative integer, got \`${forceKillAfterTimeout}\` (${typeof forceKillAfterTimeout})`);
+	}
+
+	return forceKillAfterTimeout;
+};
+
+// `childProcess.cancel()`
+const spawnedCancel = (spawned, context) => {
+	const killResult = spawned.kill();
+
+	if (killResult) {
+		context.isCanceled = true;
+	}
+};
+
+const timeoutKill = (spawned, signal, reject) => {
+	spawned.kill(signal);
+	reject(Object.assign(new Error('Timed out'), {timedOut: true, signal}));
+};
+
+// `timeout` option handling
+const setupTimeout = (spawned, {timeout, killSignal = 'SIGTERM'}, spawnedPromise) => {
+	if (timeout === 0 || timeout === undefined) {
+		return spawnedPromise;
+	}
+
+	if (!Number.isFinite(timeout) || timeout < 0) {
+		throw new TypeError(`Expected the \`timeout\` option to be a non-negative integer, got \`${timeout}\` (${typeof timeout})`);
+	}
+
+	let timeoutId;
+	const timeoutPromise = new Promise((resolve, reject) => {
+		timeoutId = setTimeout(() => {
+			timeoutKill(spawned, killSignal, reject);
+		}, timeout);
+	});
+
+	const safeSpawnedPromise = spawnedPromise.finally(() => {
+		clearTimeout(timeoutId);
+	});
+
+	return Promise.race([timeoutPromise, safeSpawnedPromise]);
+};
+
+// `cleanup` option handling
+const setExitHandler = async (spawned, {cleanup, detached}, timedPromise) => {
+	if (!cleanup || detached) {
+		return timedPromise;
+	}
+
+	const removeExitHandler = onExit(() => {
+		spawned.kill();
+	});
+
+	return timedPromise.finally(() => {
+		removeExitHandler();
+	});
+};
+
+module.exports = {
+	spawnedKill,
+	spawnedCancel,
+	setupTimeout,
+	setExitHandler
+};
+
+
+/***/ }),
+
+/***/ 97814:
+/***/ ((module) => {
+
+"use strict";
+
+
+const nativePromisePrototype = (async () => {})().constructor.prototype;
+const descriptors = ['then', 'catch', 'finally'].map(property => [
+	property,
+	Reflect.getOwnPropertyDescriptor(nativePromisePrototype, property)
+]);
+
+// The return value is a mixin of `childProcess` and `Promise`
+const mergePromise = (spawned, promise) => {
+	for (const [property, descriptor] of descriptors) {
+		// Starting the main `promise` is deferred to avoid consuming streams
+		const value = typeof promise === 'function' ?
+			(...args) => Reflect.apply(descriptor.value, promise(), args) :
+			descriptor.value.bind(promise);
+
+		Reflect.defineProperty(spawned, property, {...descriptor, value});
+	}
+
+	return spawned;
+};
+
+// Use promises instead of `child_process` events
+const getSpawnedPromise = spawned => {
+	return new Promise((resolve, reject) => {
+		spawned.on('exit', (exitCode, signal) => {
+			resolve({exitCode, signal});
+		});
+
+		spawned.on('error', error => {
+			reject(error);
+		});
+
+		if (spawned.stdin) {
+			spawned.stdin.on('error', error => {
+				reject(error);
+			});
+		}
+	});
+};
+
+module.exports = {
+	mergePromise,
+	getSpawnedPromise
+};
+
+
+
+/***/ }),
+
+/***/ 10166:
+/***/ ((module) => {
+
+"use strict";
+
+const aliases = ['stdin', 'stdout', 'stderr'];
+
+const hasAlias = options => aliases.some(alias => options[alias] !== undefined);
+
+const normalizeStdio = options => {
+	if (!options) {
+		return;
+	}
+
+	const {stdio} = options;
+
+	if (stdio === undefined) {
+		return aliases.map(alias => options[alias]);
+	}
+
+	if (hasAlias(options)) {
+		throw new Error(`It's not possible to provide \`stdio\` in combination with one of ${aliases.map(alias => `\`${alias}\``).join(', ')}`);
+	}
+
+	if (typeof stdio === 'string') {
+		return stdio;
+	}
+
+	if (!Array.isArray(stdio)) {
+		throw new TypeError(`Expected \`stdio\` to be of type \`string\` or \`Array\`, got \`${typeof stdio}\``);
+	}
+
+	const length = Math.max(stdio.length, aliases.length);
+	return Array.from({length}, (value, index) => stdio[index]);
+};
+
+module.exports = normalizeStdio;
+
+// `ipc` is pushed unless it is already present
+module.exports.node = options => {
+	const stdio = normalizeStdio(options);
+
+	if (stdio === 'ipc') {
+		return 'ipc';
+	}
+
+	if (stdio === undefined || typeof stdio === 'string') {
+		return [stdio, stdio, stdio, 'ipc'];
+	}
+
+	if (stdio.includes('ipc')) {
+		return stdio;
+	}
+
+	return [...stdio, 'ipc'];
+};
+
+
+/***/ }),
+
+/***/ 32592:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+const isStream = __nccwpck_require__(41554);
+const getStream = __nccwpck_require__(21766);
+const mergeStream = __nccwpck_require__(2621);
+
+// `input` option
+const handleInput = (spawned, input) => {
+	// Checking for stdin is workaround for https://github.com/nodejs/node/issues/26852
+	// TODO: Remove `|| spawned.stdin === undefined` once we drop support for Node.js <=12.2.0
+	if (input === undefined || spawned.stdin === undefined) {
+		return;
+	}
+
+	if (isStream(input)) {
+		input.pipe(spawned.stdin);
+	} else {
+		spawned.stdin.end(input);
+	}
+};
+
+// `all` interleaves `stdout` and `stderr`
+const makeAllStream = (spawned, {all}) => {
+	if (!all || (!spawned.stdout && !spawned.stderr)) {
+		return;
+	}
+
+	const mixed = mergeStream();
+
+	if (spawned.stdout) {
+		mixed.add(spawned.stdout);
+	}
+
+	if (spawned.stderr) {
+		mixed.add(spawned.stderr);
+	}
+
+	return mixed;
+};
+
+// On failure, `result.stdout|stderr|all` should contain the currently buffered stream
+const getBufferedData = async (stream, streamPromise) => {
+	if (!stream) {
+		return;
+	}
+
+	stream.destroy();
+
+	try {
+		return await streamPromise;
+	} catch (error) {
+		return error.bufferedData;
+	}
+};
+
+const getStreamPromise = (stream, {encoding, buffer, maxBuffer}) => {
+	if (!stream || !buffer) {
+		return;
+	}
+
+	if (encoding) {
+		return getStream(stream, {encoding, maxBuffer});
+	}
+
+	return getStream.buffer(stream, {maxBuffer});
+};
+
+// Retrieve result of child process: exit code, signal, error, streams (stdout/stderr/all)
+const getSpawnedResult = async ({stdout, stderr, all}, {encoding, buffer, maxBuffer}, processDone) => {
+	const stdoutPromise = getStreamPromise(stdout, {encoding, buffer, maxBuffer});
+	const stderrPromise = getStreamPromise(stderr, {encoding, buffer, maxBuffer});
+	const allPromise = getStreamPromise(all, {encoding, buffer, maxBuffer: maxBuffer * 2});
+
+	try {
+		return await Promise.all([processDone, stdoutPromise, stderrPromise, allPromise]);
+	} catch (error) {
+		return Promise.all([
+			{error, signal: error.signal, timedOut: error.timedOut},
+			getBufferedData(stdout, stdoutPromise),
+			getBufferedData(stderr, stderrPromise),
+			getBufferedData(all, allPromise)
+		]);
+	}
+};
+
+const validateInputSync = ({input}) => {
+	if (isStream(input)) {
+		throw new TypeError('The `input` option cannot be a stream in sync mode');
+	}
+};
+
+module.exports = {
+	handleInput,
+	makeAllStream,
+	getSpawnedResult,
+	validateInputSync
+};
+
 
 
 /***/ }),
@@ -261062,7 +259249,7 @@ function createConnectionSSL (port, host, options) {
 
 "use strict";
 
-const MiniPass = __nccwpck_require__(41077)
+const MiniPass = __nccwpck_require__(52505)
 const EE = (__nccwpck_require__(82361).EventEmitter)
 const fs = __nccwpck_require__(57147)
 
@@ -261483,6 +259670,663 @@ exports.ReadStreamSync = ReadStreamSync
 
 exports.WriteStream = WriteStream
 exports.WriteStreamSync = WriteStreamSync
+
+
+/***/ }),
+
+/***/ 52505:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+const proc = typeof process === 'object' && process ? process : {
+  stdout: null,
+  stderr: null,
+}
+const EE = __nccwpck_require__(82361)
+const Stream = __nccwpck_require__(12781)
+const SD = (__nccwpck_require__(71576).StringDecoder)
+
+const EOF = Symbol('EOF')
+const MAYBE_EMIT_END = Symbol('maybeEmitEnd')
+const EMITTED_END = Symbol('emittedEnd')
+const EMITTING_END = Symbol('emittingEnd')
+const EMITTED_ERROR = Symbol('emittedError')
+const CLOSED = Symbol('closed')
+const READ = Symbol('read')
+const FLUSH = Symbol('flush')
+const FLUSHCHUNK = Symbol('flushChunk')
+const ENCODING = Symbol('encoding')
+const DECODER = Symbol('decoder')
+const FLOWING = Symbol('flowing')
+const PAUSED = Symbol('paused')
+const RESUME = Symbol('resume')
+const BUFFERLENGTH = Symbol('bufferLength')
+const BUFFERPUSH = Symbol('bufferPush')
+const BUFFERSHIFT = Symbol('bufferShift')
+const OBJECTMODE = Symbol('objectMode')
+const DESTROYED = Symbol('destroyed')
+const EMITDATA = Symbol('emitData')
+const EMITEND = Symbol('emitEnd')
+const EMITEND2 = Symbol('emitEnd2')
+const ASYNC = Symbol('async')
+
+const defer = fn => Promise.resolve().then(fn)
+
+// TODO remove when Node v8 support drops
+const doIter = global._MP_NO_ITERATOR_SYMBOLS_  !== '1'
+const ASYNCITERATOR = doIter && Symbol.asyncIterator
+  || Symbol('asyncIterator not implemented')
+const ITERATOR = doIter && Symbol.iterator
+  || Symbol('iterator not implemented')
+
+// events that mean 'the stream is over'
+// these are treated specially, and re-emitted
+// if they are listened for after emitting.
+const isEndish = ev =>
+  ev === 'end' ||
+  ev === 'finish' ||
+  ev === 'prefinish'
+
+const isArrayBuffer = b => b instanceof ArrayBuffer ||
+  typeof b === 'object' &&
+  b.constructor &&
+  b.constructor.name === 'ArrayBuffer' &&
+  b.byteLength >= 0
+
+const isArrayBufferView = b => !Buffer.isBuffer(b) && ArrayBuffer.isView(b)
+
+class Pipe {
+  constructor (src, dest, opts) {
+    this.src = src
+    this.dest = dest
+    this.opts = opts
+    this.ondrain = () => src[RESUME]()
+    dest.on('drain', this.ondrain)
+  }
+  unpipe () {
+    this.dest.removeListener('drain', this.ondrain)
+  }
+  // istanbul ignore next - only here for the prototype
+  proxyErrors () {}
+  end () {
+    this.unpipe()
+    if (this.opts.end)
+      this.dest.end()
+  }
+}
+
+class PipeProxyErrors extends Pipe {
+  unpipe () {
+    this.src.removeListener('error', this.proxyErrors)
+    super.unpipe()
+  }
+  constructor (src, dest, opts) {
+    super(src, dest, opts)
+    this.proxyErrors = er => dest.emit('error', er)
+    src.on('error', this.proxyErrors)
+  }
+}
+
+module.exports = class Minipass extends Stream {
+  constructor (options) {
+    super()
+    this[FLOWING] = false
+    // whether we're explicitly paused
+    this[PAUSED] = false
+    this.pipes = []
+    this.buffer = []
+    this[OBJECTMODE] = options && options.objectMode || false
+    if (this[OBJECTMODE])
+      this[ENCODING] = null
+    else
+      this[ENCODING] = options && options.encoding || null
+    if (this[ENCODING] === 'buffer')
+      this[ENCODING] = null
+    this[ASYNC] = options && !!options.async || false
+    this[DECODER] = this[ENCODING] ? new SD(this[ENCODING]) : null
+    this[EOF] = false
+    this[EMITTED_END] = false
+    this[EMITTING_END] = false
+    this[CLOSED] = false
+    this[EMITTED_ERROR] = null
+    this.writable = true
+    this.readable = true
+    this[BUFFERLENGTH] = 0
+    this[DESTROYED] = false
+  }
+
+  get bufferLength () { return this[BUFFERLENGTH] }
+
+  get encoding () { return this[ENCODING] }
+  set encoding (enc) {
+    if (this[OBJECTMODE])
+      throw new Error('cannot set encoding in objectMode')
+
+    if (this[ENCODING] && enc !== this[ENCODING] &&
+        (this[DECODER] && this[DECODER].lastNeed || this[BUFFERLENGTH]))
+      throw new Error('cannot change encoding')
+
+    if (this[ENCODING] !== enc) {
+      this[DECODER] = enc ? new SD(enc) : null
+      if (this.buffer.length)
+        this.buffer = this.buffer.map(chunk => this[DECODER].write(chunk))
+    }
+
+    this[ENCODING] = enc
+  }
+
+  setEncoding (enc) {
+    this.encoding = enc
+  }
+
+  get objectMode () { return this[OBJECTMODE] }
+  set objectMode (om) { this[OBJECTMODE] = this[OBJECTMODE] || !!om }
+
+  get ['async'] () { return this[ASYNC] }
+  set ['async'] (a) { this[ASYNC] = this[ASYNC] || !!a }
+
+  write (chunk, encoding, cb) {
+    if (this[EOF])
+      throw new Error('write after end')
+
+    if (this[DESTROYED]) {
+      this.emit('error', Object.assign(
+        new Error('Cannot call write after a stream was destroyed'),
+        { code: 'ERR_STREAM_DESTROYED' }
+      ))
+      return true
+    }
+
+    if (typeof encoding === 'function')
+      cb = encoding, encoding = 'utf8'
+
+    if (!encoding)
+      encoding = 'utf8'
+
+    const fn = this[ASYNC] ? defer : f => f()
+
+    // convert array buffers and typed array views into buffers
+    // at some point in the future, we may want to do the opposite!
+    // leave strings and buffers as-is
+    // anything else switches us into object mode
+    if (!this[OBJECTMODE] && !Buffer.isBuffer(chunk)) {
+      if (isArrayBufferView(chunk))
+        chunk = Buffer.from(chunk.buffer, chunk.byteOffset, chunk.byteLength)
+      else if (isArrayBuffer(chunk))
+        chunk = Buffer.from(chunk)
+      else if (typeof chunk !== 'string')
+        // use the setter so we throw if we have encoding set
+        this.objectMode = true
+    }
+
+    // handle object mode up front, since it's simpler
+    // this yields better performance, fewer checks later.
+    if (this[OBJECTMODE]) {
+      /* istanbul ignore if - maybe impossible? */
+      if (this.flowing && this[BUFFERLENGTH] !== 0)
+        this[FLUSH](true)
+
+      if (this.flowing)
+        this.emit('data', chunk)
+      else
+        this[BUFFERPUSH](chunk)
+
+      if (this[BUFFERLENGTH] !== 0)
+        this.emit('readable')
+
+      if (cb)
+        fn(cb)
+
+      return this.flowing
+    }
+
+    // at this point the chunk is a buffer or string
+    // don't buffer it up or send it to the decoder
+    if (!chunk.length) {
+      if (this[BUFFERLENGTH] !== 0)
+        this.emit('readable')
+      if (cb)
+        fn(cb)
+      return this.flowing
+    }
+
+    // fast-path writing strings of same encoding to a stream with
+    // an empty buffer, skipping the buffer/decoder dance
+    if (typeof chunk === 'string' &&
+        // unless it is a string already ready for us to use
+        !(encoding === this[ENCODING] && !this[DECODER].lastNeed)) {
+      chunk = Buffer.from(chunk, encoding)
+    }
+
+    if (Buffer.isBuffer(chunk) && this[ENCODING])
+      chunk = this[DECODER].write(chunk)
+
+    // Note: flushing CAN potentially switch us into not-flowing mode
+    if (this.flowing && this[BUFFERLENGTH] !== 0)
+      this[FLUSH](true)
+
+    if (this.flowing)
+      this.emit('data', chunk)
+    else
+      this[BUFFERPUSH](chunk)
+
+    if (this[BUFFERLENGTH] !== 0)
+      this.emit('readable')
+
+    if (cb)
+      fn(cb)
+
+    return this.flowing
+  }
+
+  read (n) {
+    if (this[DESTROYED])
+      return null
+
+    if (this[BUFFERLENGTH] === 0 || n === 0 || n > this[BUFFERLENGTH]) {
+      this[MAYBE_EMIT_END]()
+      return null
+    }
+
+    if (this[OBJECTMODE])
+      n = null
+
+    if (this.buffer.length > 1 && !this[OBJECTMODE]) {
+      if (this.encoding)
+        this.buffer = [this.buffer.join('')]
+      else
+        this.buffer = [Buffer.concat(this.buffer, this[BUFFERLENGTH])]
+    }
+
+    const ret = this[READ](n || null, this.buffer[0])
+    this[MAYBE_EMIT_END]()
+    return ret
+  }
+
+  [READ] (n, chunk) {
+    if (n === chunk.length || n === null)
+      this[BUFFERSHIFT]()
+    else {
+      this.buffer[0] = chunk.slice(n)
+      chunk = chunk.slice(0, n)
+      this[BUFFERLENGTH] -= n
+    }
+
+    this.emit('data', chunk)
+
+    if (!this.buffer.length && !this[EOF])
+      this.emit('drain')
+
+    return chunk
+  }
+
+  end (chunk, encoding, cb) {
+    if (typeof chunk === 'function')
+      cb = chunk, chunk = null
+    if (typeof encoding === 'function')
+      cb = encoding, encoding = 'utf8'
+    if (chunk)
+      this.write(chunk, encoding)
+    if (cb)
+      this.once('end', cb)
+    this[EOF] = true
+    this.writable = false
+
+    // if we haven't written anything, then go ahead and emit,
+    // even if we're not reading.
+    // we'll re-emit if a new 'end' listener is added anyway.
+    // This makes MP more suitable to write-only use cases.
+    if (this.flowing || !this[PAUSED])
+      this[MAYBE_EMIT_END]()
+    return this
+  }
+
+  // don't let the internal resume be overwritten
+  [RESUME] () {
+    if (this[DESTROYED])
+      return
+
+    this[PAUSED] = false
+    this[FLOWING] = true
+    this.emit('resume')
+    if (this.buffer.length)
+      this[FLUSH]()
+    else if (this[EOF])
+      this[MAYBE_EMIT_END]()
+    else
+      this.emit('drain')
+  }
+
+  resume () {
+    return this[RESUME]()
+  }
+
+  pause () {
+    this[FLOWING] = false
+    this[PAUSED] = true
+  }
+
+  get destroyed () {
+    return this[DESTROYED]
+  }
+
+  get flowing () {
+    return this[FLOWING]
+  }
+
+  get paused () {
+    return this[PAUSED]
+  }
+
+  [BUFFERPUSH] (chunk) {
+    if (this[OBJECTMODE])
+      this[BUFFERLENGTH] += 1
+    else
+      this[BUFFERLENGTH] += chunk.length
+    this.buffer.push(chunk)
+  }
+
+  [BUFFERSHIFT] () {
+    if (this.buffer.length) {
+      if (this[OBJECTMODE])
+        this[BUFFERLENGTH] -= 1
+      else
+        this[BUFFERLENGTH] -= this.buffer[0].length
+    }
+    return this.buffer.shift()
+  }
+
+  [FLUSH] (noDrain) {
+    do {} while (this[FLUSHCHUNK](this[BUFFERSHIFT]()))
+
+    if (!noDrain && !this.buffer.length && !this[EOF])
+      this.emit('drain')
+  }
+
+  [FLUSHCHUNK] (chunk) {
+    return chunk ? (this.emit('data', chunk), this.flowing) : false
+  }
+
+  pipe (dest, opts) {
+    if (this[DESTROYED])
+      return
+
+    const ended = this[EMITTED_END]
+    opts = opts || {}
+    if (dest === proc.stdout || dest === proc.stderr)
+      opts.end = false
+    else
+      opts.end = opts.end !== false
+    opts.proxyErrors = !!opts.proxyErrors
+
+    // piping an ended stream ends immediately
+    if (ended) {
+      if (opts.end)
+        dest.end()
+    } else {
+      this.pipes.push(!opts.proxyErrors ? new Pipe(this, dest, opts)
+        : new PipeProxyErrors(this, dest, opts))
+      if (this[ASYNC])
+        defer(() => this[RESUME]())
+      else
+        this[RESUME]()
+    }
+
+    return dest
+  }
+
+  unpipe (dest) {
+    const p = this.pipes.find(p => p.dest === dest)
+    if (p) {
+      this.pipes.splice(this.pipes.indexOf(p), 1)
+      p.unpipe()
+    }
+  }
+
+  addListener (ev, fn) {
+    return this.on(ev, fn)
+  }
+
+  on (ev, fn) {
+    const ret = super.on(ev, fn)
+    if (ev === 'data' && !this.pipes.length && !this.flowing)
+      this[RESUME]()
+    else if (ev === 'readable' && this[BUFFERLENGTH] !== 0)
+      super.emit('readable')
+    else if (isEndish(ev) && this[EMITTED_END]) {
+      super.emit(ev)
+      this.removeAllListeners(ev)
+    } else if (ev === 'error' && this[EMITTED_ERROR]) {
+      if (this[ASYNC])
+        defer(() => fn.call(this, this[EMITTED_ERROR]))
+      else
+        fn.call(this, this[EMITTED_ERROR])
+    }
+    return ret
+  }
+
+  get emittedEnd () {
+    return this[EMITTED_END]
+  }
+
+  [MAYBE_EMIT_END] () {
+    if (!this[EMITTING_END] &&
+        !this[EMITTED_END] &&
+        !this[DESTROYED] &&
+        this.buffer.length === 0 &&
+        this[EOF]) {
+      this[EMITTING_END] = true
+      this.emit('end')
+      this.emit('prefinish')
+      this.emit('finish')
+      if (this[CLOSED])
+        this.emit('close')
+      this[EMITTING_END] = false
+    }
+  }
+
+  emit (ev, data, ...extra) {
+    // error and close are only events allowed after calling destroy()
+    if (ev !== 'error' && ev !== 'close' && ev !== DESTROYED && this[DESTROYED])
+      return
+    else if (ev === 'data') {
+      return !data ? false
+        : this[ASYNC] ? defer(() => this[EMITDATA](data))
+        : this[EMITDATA](data)
+    } else if (ev === 'end') {
+      return this[EMITEND]()
+    } else if (ev === 'close') {
+      this[CLOSED] = true
+      // don't emit close before 'end' and 'finish'
+      if (!this[EMITTED_END] && !this[DESTROYED])
+        return
+      const ret = super.emit('close')
+      this.removeAllListeners('close')
+      return ret
+    } else if (ev === 'error') {
+      this[EMITTED_ERROR] = data
+      const ret = super.emit('error', data)
+      this[MAYBE_EMIT_END]()
+      return ret
+    } else if (ev === 'resume') {
+      const ret = super.emit('resume')
+      this[MAYBE_EMIT_END]()
+      return ret
+    } else if (ev === 'finish' || ev === 'prefinish') {
+      const ret = super.emit(ev)
+      this.removeAllListeners(ev)
+      return ret
+    }
+
+    // Some other unknown event
+    const ret = super.emit(ev, data, ...extra)
+    this[MAYBE_EMIT_END]()
+    return ret
+  }
+
+  [EMITDATA] (data) {
+    for (const p of this.pipes) {
+      if (p.dest.write(data) === false)
+        this.pause()
+    }
+    const ret = super.emit('data', data)
+    this[MAYBE_EMIT_END]()
+    return ret
+  }
+
+  [EMITEND] () {
+    if (this[EMITTED_END])
+      return
+
+    this[EMITTED_END] = true
+    this.readable = false
+    if (this[ASYNC])
+      defer(() => this[EMITEND2]())
+    else
+      this[EMITEND2]()
+  }
+
+  [EMITEND2] () {
+    if (this[DECODER]) {
+      const data = this[DECODER].end()
+      if (data) {
+        for (const p of this.pipes) {
+          p.dest.write(data)
+        }
+        super.emit('data', data)
+      }
+    }
+
+    for (const p of this.pipes) {
+      p.end()
+    }
+    const ret = super.emit('end')
+    this.removeAllListeners('end')
+    return ret
+  }
+
+  // const all = await stream.collect()
+  collect () {
+    const buf = []
+    if (!this[OBJECTMODE])
+      buf.dataLength = 0
+    // set the promise first, in case an error is raised
+    // by triggering the flow here.
+    const p = this.promise()
+    this.on('data', c => {
+      buf.push(c)
+      if (!this[OBJECTMODE])
+        buf.dataLength += c.length
+    })
+    return p.then(() => buf)
+  }
+
+  // const data = await stream.concat()
+  concat () {
+    return this[OBJECTMODE]
+      ? Promise.reject(new Error('cannot concat in objectMode'))
+      : this.collect().then(buf =>
+          this[OBJECTMODE]
+            ? Promise.reject(new Error('cannot concat in objectMode'))
+            : this[ENCODING] ? buf.join('') : Buffer.concat(buf, buf.dataLength))
+  }
+
+  // stream.promise().then(() => done, er => emitted error)
+  promise () {
+    return new Promise((resolve, reject) => {
+      this.on(DESTROYED, () => reject(new Error('stream destroyed')))
+      this.on('error', er => reject(er))
+      this.on('end', () => resolve())
+    })
+  }
+
+  // for await (let chunk of stream)
+  [ASYNCITERATOR] () {
+    const next = () => {
+      const res = this.read()
+      if (res !== null)
+        return Promise.resolve({ done: false, value: res })
+
+      if (this[EOF])
+        return Promise.resolve({ done: true })
+
+      let resolve = null
+      let reject = null
+      const onerr = er => {
+        this.removeListener('data', ondata)
+        this.removeListener('end', onend)
+        reject(er)
+      }
+      const ondata = value => {
+        this.removeListener('error', onerr)
+        this.removeListener('end', onend)
+        this.pause()
+        resolve({ value: value, done: !!this[EOF] })
+      }
+      const onend = () => {
+        this.removeListener('error', onerr)
+        this.removeListener('data', ondata)
+        resolve({ done: true })
+      }
+      const ondestroy = () => onerr(new Error('stream destroyed'))
+      return new Promise((res, rej) => {
+        reject = rej
+        resolve = res
+        this.once(DESTROYED, ondestroy)
+        this.once('error', onerr)
+        this.once('end', onend)
+        this.once('data', ondata)
+      })
+    }
+
+    return { next }
+  }
+
+  // for (let chunk of stream)
+  [ITERATOR] () {
+    const next = () => {
+      const value = this.read()
+      const done = value === null
+      return { value, done }
+    }
+    return { next }
+  }
+
+  destroy (er) {
+    if (this[DESTROYED]) {
+      if (er)
+        this.emit('error', er)
+      else
+        this.emit(DESTROYED)
+      return this
+    }
+
+    this[DESTROYED] = true
+
+    // throw away all buffered data, it's never coming out
+    this.buffer.length = 0
+    this[BUFFERLENGTH] = 0
+
+    if (typeof this.close === 'function' && !this[CLOSED])
+      this.close()
+
+    if (er)
+      this.emit('error', er)
+    else // if no error to emit, still reject pending promises
+      this.emit(DESTROYED)
+
+    return this
+  }
+
+  static isStream (s) {
+    return !!s && (s instanceof Minipass || s instanceof Stream ||
+      s instanceof EE && (
+        typeof s.pipe === 'function' || // readable
+        (typeof s.write === 'function' && typeof s.end === 'function') // writable
+      ))
+  }
+}
 
 
 /***/ }),
@@ -261971,6 +260815,392 @@ module.exports = function bind(that) {
 var implementation = __nccwpck_require__(19320);
 
 module.exports = Function.prototype.bind || implementation;
+
+
+/***/ }),
+
+/***/ 74538:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var undefined;
+
+var $Object = __nccwpck_require__(78308);
+
+var $Error = __nccwpck_require__(28015);
+var $EvalError = __nccwpck_require__(91933);
+var $RangeError = __nccwpck_require__(54415);
+var $ReferenceError = __nccwpck_require__(46279);
+var $SyntaxError = __nccwpck_require__(75474);
+var $TypeError = __nccwpck_require__(6361);
+var $URIError = __nccwpck_require__(5065);
+
+var abs = __nccwpck_require__(19775);
+var floor = __nccwpck_require__(60924);
+var max = __nccwpck_require__(52419);
+var min = __nccwpck_require__(73373);
+var pow = __nccwpck_require__(78029);
+var round = __nccwpck_require__(59396);
+var sign = __nccwpck_require__(39091);
+
+var $Function = Function;
+
+// eslint-disable-next-line consistent-return
+var getEvalledConstructor = function (expressionSyntax) {
+	try {
+		return $Function('"use strict"; return (' + expressionSyntax + ').constructor;')();
+	} catch (e) {}
+};
+
+var $gOPD = __nccwpck_require__(18501);
+var $defineProperty = __nccwpck_require__(6123);
+
+var throwTypeError = function () {
+	throw new $TypeError();
+};
+var ThrowTypeError = $gOPD
+	? (function () {
+		try {
+			// eslint-disable-next-line no-unused-expressions, no-caller, no-restricted-properties
+			arguments.callee; // IE 8 does not throw here
+			return throwTypeError;
+		} catch (calleeThrows) {
+			try {
+				// IE 8 throws on Object.getOwnPropertyDescriptor(arguments, '')
+				return $gOPD(arguments, 'callee').get;
+			} catch (gOPDthrows) {
+				return throwTypeError;
+			}
+		}
+	}())
+	: throwTypeError;
+
+var hasSymbols = __nccwpck_require__(40587)();
+
+var getProto = __nccwpck_require__(13592);
+var $ObjectGPO = __nccwpck_require__(5045);
+var $ReflectGPO = __nccwpck_require__(78859);
+
+var $apply = __nccwpck_require__(54177);
+var $call = __nccwpck_require__(2808);
+
+var needsEval = {};
+
+var TypedArray = typeof Uint8Array === 'undefined' || !getProto ? undefined : getProto(Uint8Array);
+
+var INTRINSICS = {
+	__proto__: null,
+	'%AggregateError%': typeof AggregateError === 'undefined' ? undefined : AggregateError,
+	'%Array%': Array,
+	'%ArrayBuffer%': typeof ArrayBuffer === 'undefined' ? undefined : ArrayBuffer,
+	'%ArrayIteratorPrototype%': hasSymbols && getProto ? getProto([][Symbol.iterator]()) : undefined,
+	'%AsyncFromSyncIteratorPrototype%': undefined,
+	'%AsyncFunction%': needsEval,
+	'%AsyncGenerator%': needsEval,
+	'%AsyncGeneratorFunction%': needsEval,
+	'%AsyncIteratorPrototype%': needsEval,
+	'%Atomics%': typeof Atomics === 'undefined' ? undefined : Atomics,
+	'%BigInt%': typeof BigInt === 'undefined' ? undefined : BigInt,
+	'%BigInt64Array%': typeof BigInt64Array === 'undefined' ? undefined : BigInt64Array,
+	'%BigUint64Array%': typeof BigUint64Array === 'undefined' ? undefined : BigUint64Array,
+	'%Boolean%': Boolean,
+	'%DataView%': typeof DataView === 'undefined' ? undefined : DataView,
+	'%Date%': Date,
+	'%decodeURI%': decodeURI,
+	'%decodeURIComponent%': decodeURIComponent,
+	'%encodeURI%': encodeURI,
+	'%encodeURIComponent%': encodeURIComponent,
+	'%Error%': $Error,
+	'%eval%': eval, // eslint-disable-line no-eval
+	'%EvalError%': $EvalError,
+	'%Float16Array%': typeof Float16Array === 'undefined' ? undefined : Float16Array,
+	'%Float32Array%': typeof Float32Array === 'undefined' ? undefined : Float32Array,
+	'%Float64Array%': typeof Float64Array === 'undefined' ? undefined : Float64Array,
+	'%FinalizationRegistry%': typeof FinalizationRegistry === 'undefined' ? undefined : FinalizationRegistry,
+	'%Function%': $Function,
+	'%GeneratorFunction%': needsEval,
+	'%Int8Array%': typeof Int8Array === 'undefined' ? undefined : Int8Array,
+	'%Int16Array%': typeof Int16Array === 'undefined' ? undefined : Int16Array,
+	'%Int32Array%': typeof Int32Array === 'undefined' ? undefined : Int32Array,
+	'%isFinite%': isFinite,
+	'%isNaN%': isNaN,
+	'%IteratorPrototype%': hasSymbols && getProto ? getProto(getProto([][Symbol.iterator]())) : undefined,
+	'%JSON%': typeof JSON === 'object' ? JSON : undefined,
+	'%Map%': typeof Map === 'undefined' ? undefined : Map,
+	'%MapIteratorPrototype%': typeof Map === 'undefined' || !hasSymbols || !getProto ? undefined : getProto(new Map()[Symbol.iterator]()),
+	'%Math%': Math,
+	'%Number%': Number,
+	'%Object%': $Object,
+	'%Object.getOwnPropertyDescriptor%': $gOPD,
+	'%parseFloat%': parseFloat,
+	'%parseInt%': parseInt,
+	'%Promise%': typeof Promise === 'undefined' ? undefined : Promise,
+	'%Proxy%': typeof Proxy === 'undefined' ? undefined : Proxy,
+	'%RangeError%': $RangeError,
+	'%ReferenceError%': $ReferenceError,
+	'%Reflect%': typeof Reflect === 'undefined' ? undefined : Reflect,
+	'%RegExp%': RegExp,
+	'%Set%': typeof Set === 'undefined' ? undefined : Set,
+	'%SetIteratorPrototype%': typeof Set === 'undefined' || !hasSymbols || !getProto ? undefined : getProto(new Set()[Symbol.iterator]()),
+	'%SharedArrayBuffer%': typeof SharedArrayBuffer === 'undefined' ? undefined : SharedArrayBuffer,
+	'%String%': String,
+	'%StringIteratorPrototype%': hasSymbols && getProto ? getProto(''[Symbol.iterator]()) : undefined,
+	'%Symbol%': hasSymbols ? Symbol : undefined,
+	'%SyntaxError%': $SyntaxError,
+	'%ThrowTypeError%': ThrowTypeError,
+	'%TypedArray%': TypedArray,
+	'%TypeError%': $TypeError,
+	'%Uint8Array%': typeof Uint8Array === 'undefined' ? undefined : Uint8Array,
+	'%Uint8ClampedArray%': typeof Uint8ClampedArray === 'undefined' ? undefined : Uint8ClampedArray,
+	'%Uint16Array%': typeof Uint16Array === 'undefined' ? undefined : Uint16Array,
+	'%Uint32Array%': typeof Uint32Array === 'undefined' ? undefined : Uint32Array,
+	'%URIError%': $URIError,
+	'%WeakMap%': typeof WeakMap === 'undefined' ? undefined : WeakMap,
+	'%WeakRef%': typeof WeakRef === 'undefined' ? undefined : WeakRef,
+	'%WeakSet%': typeof WeakSet === 'undefined' ? undefined : WeakSet,
+
+	'%Function.prototype.call%': $call,
+	'%Function.prototype.apply%': $apply,
+	'%Object.defineProperty%': $defineProperty,
+	'%Object.getPrototypeOf%': $ObjectGPO,
+	'%Math.abs%': abs,
+	'%Math.floor%': floor,
+	'%Math.max%': max,
+	'%Math.min%': min,
+	'%Math.pow%': pow,
+	'%Math.round%': round,
+	'%Math.sign%': sign,
+	'%Reflect.getPrototypeOf%': $ReflectGPO
+};
+
+if (getProto) {
+	try {
+		null.error; // eslint-disable-line no-unused-expressions
+	} catch (e) {
+		// https://github.com/tc39/proposal-shadowrealm/pull/384#issuecomment-1364264229
+		var errorProto = getProto(getProto(e));
+		INTRINSICS['%Error.prototype%'] = errorProto;
+	}
+}
+
+var doEval = function doEval(name) {
+	var value;
+	if (name === '%AsyncFunction%') {
+		value = getEvalledConstructor('async function () {}');
+	} else if (name === '%GeneratorFunction%') {
+		value = getEvalledConstructor('function* () {}');
+	} else if (name === '%AsyncGeneratorFunction%') {
+		value = getEvalledConstructor('async function* () {}');
+	} else if (name === '%AsyncGenerator%') {
+		var fn = doEval('%AsyncGeneratorFunction%');
+		if (fn) {
+			value = fn.prototype;
+		}
+	} else if (name === '%AsyncIteratorPrototype%') {
+		var gen = doEval('%AsyncGenerator%');
+		if (gen && getProto) {
+			value = getProto(gen.prototype);
+		}
+	}
+
+	INTRINSICS[name] = value;
+
+	return value;
+};
+
+var LEGACY_ALIASES = {
+	__proto__: null,
+	'%ArrayBufferPrototype%': ['ArrayBuffer', 'prototype'],
+	'%ArrayPrototype%': ['Array', 'prototype'],
+	'%ArrayProto_entries%': ['Array', 'prototype', 'entries'],
+	'%ArrayProto_forEach%': ['Array', 'prototype', 'forEach'],
+	'%ArrayProto_keys%': ['Array', 'prototype', 'keys'],
+	'%ArrayProto_values%': ['Array', 'prototype', 'values'],
+	'%AsyncFunctionPrototype%': ['AsyncFunction', 'prototype'],
+	'%AsyncGenerator%': ['AsyncGeneratorFunction', 'prototype'],
+	'%AsyncGeneratorPrototype%': ['AsyncGeneratorFunction', 'prototype', 'prototype'],
+	'%BooleanPrototype%': ['Boolean', 'prototype'],
+	'%DataViewPrototype%': ['DataView', 'prototype'],
+	'%DatePrototype%': ['Date', 'prototype'],
+	'%ErrorPrototype%': ['Error', 'prototype'],
+	'%EvalErrorPrototype%': ['EvalError', 'prototype'],
+	'%Float32ArrayPrototype%': ['Float32Array', 'prototype'],
+	'%Float64ArrayPrototype%': ['Float64Array', 'prototype'],
+	'%FunctionPrototype%': ['Function', 'prototype'],
+	'%Generator%': ['GeneratorFunction', 'prototype'],
+	'%GeneratorPrototype%': ['GeneratorFunction', 'prototype', 'prototype'],
+	'%Int8ArrayPrototype%': ['Int8Array', 'prototype'],
+	'%Int16ArrayPrototype%': ['Int16Array', 'prototype'],
+	'%Int32ArrayPrototype%': ['Int32Array', 'prototype'],
+	'%JSONParse%': ['JSON', 'parse'],
+	'%JSONStringify%': ['JSON', 'stringify'],
+	'%MapPrototype%': ['Map', 'prototype'],
+	'%NumberPrototype%': ['Number', 'prototype'],
+	'%ObjectPrototype%': ['Object', 'prototype'],
+	'%ObjProto_toString%': ['Object', 'prototype', 'toString'],
+	'%ObjProto_valueOf%': ['Object', 'prototype', 'valueOf'],
+	'%PromisePrototype%': ['Promise', 'prototype'],
+	'%PromiseProto_then%': ['Promise', 'prototype', 'then'],
+	'%Promise_all%': ['Promise', 'all'],
+	'%Promise_reject%': ['Promise', 'reject'],
+	'%Promise_resolve%': ['Promise', 'resolve'],
+	'%RangeErrorPrototype%': ['RangeError', 'prototype'],
+	'%ReferenceErrorPrototype%': ['ReferenceError', 'prototype'],
+	'%RegExpPrototype%': ['RegExp', 'prototype'],
+	'%SetPrototype%': ['Set', 'prototype'],
+	'%SharedArrayBufferPrototype%': ['SharedArrayBuffer', 'prototype'],
+	'%StringPrototype%': ['String', 'prototype'],
+	'%SymbolPrototype%': ['Symbol', 'prototype'],
+	'%SyntaxErrorPrototype%': ['SyntaxError', 'prototype'],
+	'%TypedArrayPrototype%': ['TypedArray', 'prototype'],
+	'%TypeErrorPrototype%': ['TypeError', 'prototype'],
+	'%Uint8ArrayPrototype%': ['Uint8Array', 'prototype'],
+	'%Uint8ClampedArrayPrototype%': ['Uint8ClampedArray', 'prototype'],
+	'%Uint16ArrayPrototype%': ['Uint16Array', 'prototype'],
+	'%Uint32ArrayPrototype%': ['Uint32Array', 'prototype'],
+	'%URIErrorPrototype%': ['URIError', 'prototype'],
+	'%WeakMapPrototype%': ['WeakMap', 'prototype'],
+	'%WeakSetPrototype%': ['WeakSet', 'prototype']
+};
+
+var bind = __nccwpck_require__(88334);
+var hasOwn = __nccwpck_require__(62157);
+var $concat = bind.call($call, Array.prototype.concat);
+var $spliceApply = bind.call($apply, Array.prototype.splice);
+var $replace = bind.call($call, String.prototype.replace);
+var $strSlice = bind.call($call, String.prototype.slice);
+var $exec = bind.call($call, RegExp.prototype.exec);
+
+/* adapted from https://github.com/lodash/lodash/blob/4.17.15/dist/lodash.js#L6735-L6744 */
+var rePropName = /[^%.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(?:\.|\[\])(?:\.|\[\]|%$))/g;
+var reEscapeChar = /\\(\\)?/g; /** Used to match backslashes in property paths. */
+var stringToPath = function stringToPath(string) {
+	var first = $strSlice(string, 0, 1);
+	var last = $strSlice(string, -1);
+	if (first === '%' && last !== '%') {
+		throw new $SyntaxError('invalid intrinsic syntax, expected closing `%`');
+	} else if (last === '%' && first !== '%') {
+		throw new $SyntaxError('invalid intrinsic syntax, expected opening `%`');
+	}
+	var result = [];
+	$replace(string, rePropName, function (match, number, quote, subString) {
+		result[result.length] = quote ? $replace(subString, reEscapeChar, '$1') : number || match;
+	});
+	return result;
+};
+/* end adaptation */
+
+var getBaseIntrinsic = function getBaseIntrinsic(name, allowMissing) {
+	var intrinsicName = name;
+	var alias;
+	if (hasOwn(LEGACY_ALIASES, intrinsicName)) {
+		alias = LEGACY_ALIASES[intrinsicName];
+		intrinsicName = '%' + alias[0] + '%';
+	}
+
+	if (hasOwn(INTRINSICS, intrinsicName)) {
+		var value = INTRINSICS[intrinsicName];
+		if (value === needsEval) {
+			value = doEval(intrinsicName);
+		}
+		if (typeof value === 'undefined' && !allowMissing) {
+			throw new $TypeError('intrinsic ' + name + ' exists, but is not available. Please file an issue!');
+		}
+
+		return {
+			alias: alias,
+			name: intrinsicName,
+			value: value
+		};
+	}
+
+	throw new $SyntaxError('intrinsic ' + name + ' does not exist!');
+};
+
+module.exports = function GetIntrinsic(name, allowMissing) {
+	if (typeof name !== 'string' || name.length === 0) {
+		throw new $TypeError('intrinsic name must be a non-empty string');
+	}
+	if (arguments.length > 1 && typeof allowMissing !== 'boolean') {
+		throw new $TypeError('"allowMissing" argument must be a boolean');
+	}
+
+	if ($exec(/^%?[^%]*%?$/, name) === null) {
+		throw new $SyntaxError('`%` may not be present anywhere but at the beginning and end of the intrinsic name');
+	}
+	var parts = stringToPath(name);
+	var intrinsicBaseName = parts.length > 0 ? parts[0] : '';
+
+	var intrinsic = getBaseIntrinsic('%' + intrinsicBaseName + '%', allowMissing);
+	var intrinsicRealName = intrinsic.name;
+	var value = intrinsic.value;
+	var skipFurtherCaching = false;
+
+	var alias = intrinsic.alias;
+	if (alias) {
+		intrinsicBaseName = alias[0];
+		$spliceApply(parts, $concat([0, 1], alias));
+	}
+
+	for (var i = 1, isOwn = true; i < parts.length; i += 1) {
+		var part = parts[i];
+		var first = $strSlice(part, 0, 1);
+		var last = $strSlice(part, -1);
+		if (
+			(
+				(first === '"' || first === "'" || first === '`')
+				|| (last === '"' || last === "'" || last === '`')
+			)
+			&& first !== last
+		) {
+			throw new $SyntaxError('property names with quotes must have matching quotes');
+		}
+		if (part === 'constructor' || !isOwn) {
+			skipFurtherCaching = true;
+		}
+
+		intrinsicBaseName += '.' + part;
+		intrinsicRealName = '%' + intrinsicBaseName + '%';
+
+		if (hasOwn(INTRINSICS, intrinsicRealName)) {
+			value = INTRINSICS[intrinsicRealName];
+		} else if (value != null) {
+			if (!(part in value)) {
+				if (!allowMissing) {
+					throw new $TypeError('base intrinsic for ' + name + ' exists, but the property is not available.');
+				}
+				return void undefined;
+			}
+			if ($gOPD && (i + 1) >= parts.length) {
+				var desc = $gOPD(value, part);
+				isOwn = !!desc;
+
+				// By convention, when a data property is converted to an accessor
+				// property to emulate a data property that does not suffer from
+				// the override mistake, that accessor's getter is marked with
+				// an `originalValue` property. Here, when we detect this, we
+				// uphold the illusion by pretending to see that original data
+				// property, i.e., returning the value rather than the getter
+				// itself.
+				if (isOwn && 'get' in desc && !('originalValue' in desc.get)) {
+					value = desc.get;
+				} else {
+					value = value[part];
+				}
+			} else {
+				isOwn = hasOwn(value, part);
+				value = value[part];
+			}
+
+			if (isOwn && !skipFurtherCaching) {
+				INTRINSICS[intrinsicRealName] = value;
+			}
+		}
+	}
+	return value;
+};
 
 
 /***/ }),
@@ -263696,6 +262926,41 @@ GlobSync.prototype._mark = function (p) {
 GlobSync.prototype._makeAbs = function (f) {
   return common.makeAbs(this, f)
 }
+
+
+/***/ }),
+
+/***/ 57087:
+/***/ ((module) => {
+
+"use strict";
+
+
+/** @type {import('./gOPD')} */
+module.exports = Object.getOwnPropertyDescriptor;
+
+
+/***/ }),
+
+/***/ 18501:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+/** @type {import('.')} */
+var $gOPD = __nccwpck_require__(57087);
+
+if ($gOPD) {
+	try {
+		$gOPD([], 'length');
+	} catch (e) {
+		// IE 8 has a broken gOPD
+		$gOPD = null;
+	}
+}
+
+module.exports = $gOPD;
 
 
 /***/ }),
@@ -290562,7 +289827,82 @@ module.exports = (flag, argv = process.argv) => {
 
 /***/ }),
 
+/***/ 40587:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var origSymbol = typeof Symbol !== 'undefined' && Symbol;
+var hasSymbolSham = __nccwpck_require__(57747);
+
+/** @type {import('.')} */
+module.exports = function hasNativeSymbols() {
+	if (typeof origSymbol !== 'function') { return false; }
+	if (typeof Symbol !== 'function') { return false; }
+	if (typeof origSymbol('foo') !== 'symbol') { return false; }
+	if (typeof Symbol('bar') !== 'symbol') { return false; }
+
+	return hasSymbolSham();
+};
+
+
+/***/ }),
+
 /***/ 57747:
+/***/ ((module) => {
+
+"use strict";
+
+
+/** @type {import('./shams')} */
+/* eslint complexity: [2, 18], max-statements: [2, 33] */
+module.exports = function hasSymbols() {
+	if (typeof Symbol !== 'function' || typeof Object.getOwnPropertySymbols !== 'function') { return false; }
+	if (typeof Symbol.iterator === 'symbol') { return true; }
+
+	/** @type {{ [k in symbol]?: unknown }} */
+	var obj = {};
+	var sym = Symbol('test');
+	var symObj = Object(sym);
+	if (typeof sym === 'string') { return false; }
+
+	if (Object.prototype.toString.call(sym) !== '[object Symbol]') { return false; }
+	if (Object.prototype.toString.call(symObj) !== '[object Symbol]') { return false; }
+
+	// temp disabled per https://github.com/ljharb/object.assign/issues/17
+	// if (sym instanceof Symbol) { return false; }
+	// temp disabled per https://github.com/WebReflection/get-own-property-symbols/issues/4
+	// if (!(symObj instanceof Symbol)) { return false; }
+
+	// if (typeof Symbol.prototype.toString !== 'function') { return false; }
+	// if (String(sym) !== Symbol.prototype.toString.call(sym)) { return false; }
+
+	var symVal = 42;
+	obj[sym] = symVal;
+	for (var _ in obj) { return false; } // eslint-disable-line no-restricted-syntax, no-unreachable-loop
+	if (typeof Object.keys === 'function' && Object.keys(obj).length !== 0) { return false; }
+
+	if (typeof Object.getOwnPropertyNames === 'function' && Object.getOwnPropertyNames(obj).length !== 0) { return false; }
+
+	var syms = Object.getOwnPropertySymbols(obj);
+	if (syms.length !== 1 || syms[0] !== sym) { return false; }
+
+	if (!Object.prototype.propertyIsEnumerable.call(obj, sym)) { return false; }
+
+	if (typeof Object.getOwnPropertyDescriptor === 'function') {
+		// eslint-disable-next-line no-extra-parens
+		var descriptor = /** @type {PropertyDescriptor} */ (Object.getOwnPropertyDescriptor(obj, sym));
+		if (descriptor.value !== symVal || descriptor.enumerable !== true) { return false; }
+	}
+
+	return true;
+};
+
+
+/***/ }),
+
+/***/ 56529:
 /***/ ((module) => {
 
 "use strict";
@@ -290607,6 +289947,22 @@ module.exports = function hasSymbols() {
 	}
 
 	return true;
+};
+
+
+/***/ }),
+
+/***/ 99038:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+var hasSymbols = __nccwpck_require__(56529);
+
+/** @type {import('.')} */
+module.exports = function hasToStringTagShams() {
+	return hasSymbols() && !!Symbol.toStringTag;
 };
 
 
@@ -309351,77 +308707,32 @@ module.exports["default"] = mimicFn;
 // We define these manually to ensure they're always copied
 // even if they would move up the prototype chain
 // https://nodejs.org/api/http.html#http_class_http_incomingmessage
-const knownProperties = [
-	'aborted',
-	'complete',
+const knownProps = [
+	'destroy',
+	'setTimeout',
+	'socket',
 	'headers',
+	'trailers',
+	'rawHeaders',
+	'statusCode',
 	'httpVersion',
 	'httpVersionMinor',
 	'httpVersionMajor',
-	'method',
-	'rawHeaders',
 	'rawTrailers',
-	'setTimeout',
-	'socket',
-	'statusCode',
-	'statusMessage',
-	'trailers',
-	'url'
+	'statusMessage'
 ];
 
 module.exports = (fromStream, toStream) => {
-	if (toStream._readableState.autoDestroy) {
-		throw new Error('The second stream must have the `autoDestroy` option set to `false`');
-	}
+	const fromProps = new Set(Object.keys(fromStream).concat(knownProps));
 
-	const fromProperties = new Set(Object.keys(fromStream).concat(knownProperties));
-
-	const properties = {};
-
-	for (const property of fromProperties) {
-		// Don't overwrite existing properties.
-		if (property in toStream) {
+	for (const prop of fromProps) {
+		// Don't overwrite existing properties
+		if (prop in toStream) {
 			continue;
 		}
 
-		properties[property] = {
-			get() {
-				const value = fromStream[property];
-				const isFunction = typeof value === 'function';
-
-				return isFunction ? value.bind(fromStream) : value;
-			},
-			set(value) {
-				fromStream[property] = value;
-			},
-			enumerable: true,
-			configurable: false
-		};
+		toStream[prop] = typeof fromStream[prop] === 'function' ? fromStream[prop].bind(fromStream) : fromStream[prop];
 	}
-
-	Object.defineProperties(toStream, properties);
-
-	fromStream.once('aborted', () => {
-		toStream.destroy();
-
-		toStream.emit('aborted');
-	});
-
-	fromStream.once('close', () => {
-		if (fromStream.complete) {
-			if (toStream.readable) {
-				toStream.once('end', () => {
-					toStream.emit('close');
-				});
-			} else {
-				toStream.emit('close');
-			}
-		} else {
-			toStream.emit('close');
-		}
-	});
-
-	return toStream;
 };
 
 
@@ -310439,7 +309750,485 @@ function regExpEscape (s) {
 
 /***/ }),
 
-/***/ 41077:
+/***/ 6769:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+// Update with any zlib constants that are added or changed in the future.
+// Node v6 didn't export this, so we just hard code the version and rely
+// on all the other hard-coded values from zlib v4736.  When node v6
+// support drops, we can just export the realZlibConstants object.
+const realZlibConstants = (__nccwpck_require__(59796).constants) ||
+  /* istanbul ignore next */ { ZLIB_VERNUM: 4736 }
+
+module.exports = Object.freeze(Object.assign(Object.create(null), {
+  Z_NO_FLUSH: 0,
+  Z_PARTIAL_FLUSH: 1,
+  Z_SYNC_FLUSH: 2,
+  Z_FULL_FLUSH: 3,
+  Z_FINISH: 4,
+  Z_BLOCK: 5,
+  Z_OK: 0,
+  Z_STREAM_END: 1,
+  Z_NEED_DICT: 2,
+  Z_ERRNO: -1,
+  Z_STREAM_ERROR: -2,
+  Z_DATA_ERROR: -3,
+  Z_MEM_ERROR: -4,
+  Z_BUF_ERROR: -5,
+  Z_VERSION_ERROR: -6,
+  Z_NO_COMPRESSION: 0,
+  Z_BEST_SPEED: 1,
+  Z_BEST_COMPRESSION: 9,
+  Z_DEFAULT_COMPRESSION: -1,
+  Z_FILTERED: 1,
+  Z_HUFFMAN_ONLY: 2,
+  Z_RLE: 3,
+  Z_FIXED: 4,
+  Z_DEFAULT_STRATEGY: 0,
+  DEFLATE: 1,
+  INFLATE: 2,
+  GZIP: 3,
+  GUNZIP: 4,
+  DEFLATERAW: 5,
+  INFLATERAW: 6,
+  UNZIP: 7,
+  BROTLI_DECODE: 8,
+  BROTLI_ENCODE: 9,
+  Z_MIN_WINDOWBITS: 8,
+  Z_MAX_WINDOWBITS: 15,
+  Z_DEFAULT_WINDOWBITS: 15,
+  Z_MIN_CHUNK: 64,
+  Z_MAX_CHUNK: Infinity,
+  Z_DEFAULT_CHUNK: 16384,
+  Z_MIN_MEMLEVEL: 1,
+  Z_MAX_MEMLEVEL: 9,
+  Z_DEFAULT_MEMLEVEL: 8,
+  Z_MIN_LEVEL: -1,
+  Z_MAX_LEVEL: 9,
+  Z_DEFAULT_LEVEL: -1,
+  BROTLI_OPERATION_PROCESS: 0,
+  BROTLI_OPERATION_FLUSH: 1,
+  BROTLI_OPERATION_FINISH: 2,
+  BROTLI_OPERATION_EMIT_METADATA: 3,
+  BROTLI_MODE_GENERIC: 0,
+  BROTLI_MODE_TEXT: 1,
+  BROTLI_MODE_FONT: 2,
+  BROTLI_DEFAULT_MODE: 0,
+  BROTLI_MIN_QUALITY: 0,
+  BROTLI_MAX_QUALITY: 11,
+  BROTLI_DEFAULT_QUALITY: 11,
+  BROTLI_MIN_WINDOW_BITS: 10,
+  BROTLI_MAX_WINDOW_BITS: 24,
+  BROTLI_LARGE_MAX_WINDOW_BITS: 30,
+  BROTLI_DEFAULT_WINDOW: 22,
+  BROTLI_MIN_INPUT_BLOCK_BITS: 16,
+  BROTLI_MAX_INPUT_BLOCK_BITS: 24,
+  BROTLI_PARAM_MODE: 0,
+  BROTLI_PARAM_QUALITY: 1,
+  BROTLI_PARAM_LGWIN: 2,
+  BROTLI_PARAM_LGBLOCK: 3,
+  BROTLI_PARAM_DISABLE_LITERAL_CONTEXT_MODELING: 4,
+  BROTLI_PARAM_SIZE_HINT: 5,
+  BROTLI_PARAM_LARGE_WINDOW: 6,
+  BROTLI_PARAM_NPOSTFIX: 7,
+  BROTLI_PARAM_NDIRECT: 8,
+  BROTLI_DECODER_RESULT_ERROR: 0,
+  BROTLI_DECODER_RESULT_SUCCESS: 1,
+  BROTLI_DECODER_RESULT_NEEDS_MORE_INPUT: 2,
+  BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT: 3,
+  BROTLI_DECODER_PARAM_DISABLE_RING_BUFFER_REALLOCATION: 0,
+  BROTLI_DECODER_PARAM_LARGE_WINDOW: 1,
+  BROTLI_DECODER_NO_ERROR: 0,
+  BROTLI_DECODER_SUCCESS: 1,
+  BROTLI_DECODER_NEEDS_MORE_INPUT: 2,
+  BROTLI_DECODER_NEEDS_MORE_OUTPUT: 3,
+  BROTLI_DECODER_ERROR_FORMAT_EXUBERANT_NIBBLE: -1,
+  BROTLI_DECODER_ERROR_FORMAT_RESERVED: -2,
+  BROTLI_DECODER_ERROR_FORMAT_EXUBERANT_META_NIBBLE: -3,
+  BROTLI_DECODER_ERROR_FORMAT_SIMPLE_HUFFMAN_ALPHABET: -4,
+  BROTLI_DECODER_ERROR_FORMAT_SIMPLE_HUFFMAN_SAME: -5,
+  BROTLI_DECODER_ERROR_FORMAT_CL_SPACE: -6,
+  BROTLI_DECODER_ERROR_FORMAT_HUFFMAN_SPACE: -7,
+  BROTLI_DECODER_ERROR_FORMAT_CONTEXT_MAP_REPEAT: -8,
+  BROTLI_DECODER_ERROR_FORMAT_BLOCK_LENGTH_1: -9,
+  BROTLI_DECODER_ERROR_FORMAT_BLOCK_LENGTH_2: -10,
+  BROTLI_DECODER_ERROR_FORMAT_TRANSFORM: -11,
+  BROTLI_DECODER_ERROR_FORMAT_DICTIONARY: -12,
+  BROTLI_DECODER_ERROR_FORMAT_WINDOW_BITS: -13,
+  BROTLI_DECODER_ERROR_FORMAT_PADDING_1: -14,
+  BROTLI_DECODER_ERROR_FORMAT_PADDING_2: -15,
+  BROTLI_DECODER_ERROR_FORMAT_DISTANCE: -16,
+  BROTLI_DECODER_ERROR_DICTIONARY_NOT_SET: -19,
+  BROTLI_DECODER_ERROR_INVALID_ARGUMENTS: -20,
+  BROTLI_DECODER_ERROR_ALLOC_CONTEXT_MODES: -21,
+  BROTLI_DECODER_ERROR_ALLOC_TREE_GROUPS: -22,
+  BROTLI_DECODER_ERROR_ALLOC_CONTEXT_MAP: -25,
+  BROTLI_DECODER_ERROR_ALLOC_RING_BUFFER_1: -26,
+  BROTLI_DECODER_ERROR_ALLOC_RING_BUFFER_2: -27,
+  BROTLI_DECODER_ERROR_ALLOC_BLOCK_TYPE_TREES: -30,
+  BROTLI_DECODER_ERROR_UNREACHABLE: -31,
+}, realZlibConstants))
+
+
+/***/ }),
+
+/***/ 33486:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+const assert = __nccwpck_require__(39491)
+const Buffer = (__nccwpck_require__(14300).Buffer)
+const realZlib = __nccwpck_require__(59796)
+
+const constants = exports.constants = __nccwpck_require__(6769)
+const Minipass = __nccwpck_require__(47557)
+
+const OriginalBufferConcat = Buffer.concat
+
+const _superWrite = Symbol('_superWrite')
+class ZlibError extends Error {
+  constructor (err) {
+    super('zlib: ' + err.message)
+    this.code = err.code
+    this.errno = err.errno
+    /* istanbul ignore if */
+    if (!this.code)
+      this.code = 'ZLIB_ERROR'
+
+    this.message = 'zlib: ' + err.message
+    Error.captureStackTrace(this, this.constructor)
+  }
+
+  get name () {
+    return 'ZlibError'
+  }
+}
+
+// the Zlib class they all inherit from
+// This thing manages the queue of requests, and returns
+// true or false if there is anything in the queue when
+// you call the .write() method.
+const _opts = Symbol('opts')
+const _flushFlag = Symbol('flushFlag')
+const _finishFlushFlag = Symbol('finishFlushFlag')
+const _fullFlushFlag = Symbol('fullFlushFlag')
+const _handle = Symbol('handle')
+const _onError = Symbol('onError')
+const _sawError = Symbol('sawError')
+const _level = Symbol('level')
+const _strategy = Symbol('strategy')
+const _ended = Symbol('ended')
+const _defaultFullFlush = Symbol('_defaultFullFlush')
+
+class ZlibBase extends Minipass {
+  constructor (opts, mode) {
+    if (!opts || typeof opts !== 'object')
+      throw new TypeError('invalid options for ZlibBase constructor')
+
+    super(opts)
+    this[_sawError] = false
+    this[_ended] = false
+    this[_opts] = opts
+
+    this[_flushFlag] = opts.flush
+    this[_finishFlushFlag] = opts.finishFlush
+    // this will throw if any options are invalid for the class selected
+    try {
+      this[_handle] = new realZlib[mode](opts)
+    } catch (er) {
+      // make sure that all errors get decorated properly
+      throw new ZlibError(er)
+    }
+
+    this[_onError] = (err) => {
+      // no sense raising multiple errors, since we abort on the first one.
+      if (this[_sawError])
+        return
+
+      this[_sawError] = true
+
+      // there is no way to cleanly recover.
+      // continuing only obscures problems.
+      this.close()
+      this.emit('error', err)
+    }
+
+    this[_handle].on('error', er => this[_onError](new ZlibError(er)))
+    this.once('end', () => this.close)
+  }
+
+  close () {
+    if (this[_handle]) {
+      this[_handle].close()
+      this[_handle] = null
+      this.emit('close')
+    }
+  }
+
+  reset () {
+    if (!this[_sawError]) {
+      assert(this[_handle], 'zlib binding closed')
+      return this[_handle].reset()
+    }
+  }
+
+  flush (flushFlag) {
+    if (this.ended)
+      return
+
+    if (typeof flushFlag !== 'number')
+      flushFlag = this[_fullFlushFlag]
+    this.write(Object.assign(Buffer.alloc(0), { [_flushFlag]: flushFlag }))
+  }
+
+  end (chunk, encoding, cb) {
+    if (chunk)
+      this.write(chunk, encoding)
+    this.flush(this[_finishFlushFlag])
+    this[_ended] = true
+    return super.end(null, null, cb)
+  }
+
+  get ended () {
+    return this[_ended]
+  }
+
+  write (chunk, encoding, cb) {
+    // process the chunk using the sync process
+    // then super.write() all the outputted chunks
+    if (typeof encoding === 'function')
+      cb = encoding, encoding = 'utf8'
+
+    if (typeof chunk === 'string')
+      chunk = Buffer.from(chunk, encoding)
+
+    if (this[_sawError])
+      return
+    assert(this[_handle], 'zlib binding closed')
+
+    // _processChunk tries to .close() the native handle after it's done, so we
+    // intercept that by temporarily making it a no-op.
+    const nativeHandle = this[_handle]._handle
+    const originalNativeClose = nativeHandle.close
+    nativeHandle.close = () => {}
+    const originalClose = this[_handle].close
+    this[_handle].close = () => {}
+    // It also calls `Buffer.concat()` at the end, which may be convenient
+    // for some, but which we are not interested in as it slows us down.
+    Buffer.concat = (args) => args
+    let result
+    try {
+      const flushFlag = typeof chunk[_flushFlag] === 'number'
+        ? chunk[_flushFlag] : this[_flushFlag]
+      result = this[_handle]._processChunk(chunk, flushFlag)
+      // if we don't throw, reset it back how it was
+      Buffer.concat = OriginalBufferConcat
+    } catch (err) {
+      // or if we do, put Buffer.concat() back before we emit error
+      // Error events call into user code, which may call Buffer.concat()
+      Buffer.concat = OriginalBufferConcat
+      this[_onError](new ZlibError(err))
+    } finally {
+      if (this[_handle]) {
+        // Core zlib resets `_handle` to null after attempting to close the
+        // native handle. Our no-op handler prevented actual closure, but we
+        // need to restore the `._handle` property.
+        this[_handle]._handle = nativeHandle
+        nativeHandle.close = originalNativeClose
+        this[_handle].close = originalClose
+        // `_processChunk()` adds an 'error' listener. If we don't remove it
+        // after each call, these handlers start piling up.
+        this[_handle].removeAllListeners('error')
+        // make sure OUR error listener is still attached tho
+      }
+    }
+
+    if (this[_handle])
+      this[_handle].on('error', er => this[_onError](new ZlibError(er)))
+
+    let writeReturn
+    if (result) {
+      if (Array.isArray(result) && result.length > 0) {
+        // The first buffer is always `handle._outBuffer`, which would be
+        // re-used for later invocations; so, we always have to copy that one.
+        writeReturn = this[_superWrite](Buffer.from(result[0]))
+        for (let i = 1; i < result.length; i++) {
+          writeReturn = this[_superWrite](result[i])
+        }
+      } else {
+        writeReturn = this[_superWrite](Buffer.from(result))
+      }
+    }
+
+    if (cb)
+      cb()
+    return writeReturn
+  }
+
+  [_superWrite] (data) {
+    return super.write(data)
+  }
+}
+
+class Zlib extends ZlibBase {
+  constructor (opts, mode) {
+    opts = opts || {}
+
+    opts.flush = opts.flush || constants.Z_NO_FLUSH
+    opts.finishFlush = opts.finishFlush || constants.Z_FINISH
+    super(opts, mode)
+
+    this[_fullFlushFlag] = constants.Z_FULL_FLUSH
+    this[_level] = opts.level
+    this[_strategy] = opts.strategy
+  }
+
+  params (level, strategy) {
+    if (this[_sawError])
+      return
+
+    if (!this[_handle])
+      throw new Error('cannot switch params when binding is closed')
+
+    // no way to test this without also not supporting params at all
+    /* istanbul ignore if */
+    if (!this[_handle].params)
+      throw new Error('not supported in this implementation')
+
+    if (this[_level] !== level || this[_strategy] !== strategy) {
+      this.flush(constants.Z_SYNC_FLUSH)
+      assert(this[_handle], 'zlib binding closed')
+      // .params() calls .flush(), but the latter is always async in the
+      // core zlib. We override .flush() temporarily to intercept that and
+      // flush synchronously.
+      const origFlush = this[_handle].flush
+      this[_handle].flush = (flushFlag, cb) => {
+        this.flush(flushFlag)
+        cb()
+      }
+      try {
+        this[_handle].params(level, strategy)
+      } finally {
+        this[_handle].flush = origFlush
+      }
+      /* istanbul ignore else */
+      if (this[_handle]) {
+        this[_level] = level
+        this[_strategy] = strategy
+      }
+    }
+  }
+}
+
+// minimal 2-byte header
+class Deflate extends Zlib {
+  constructor (opts) {
+    super(opts, 'Deflate')
+  }
+}
+
+class Inflate extends Zlib {
+  constructor (opts) {
+    super(opts, 'Inflate')
+  }
+}
+
+// gzip - bigger header, same deflate compression
+const _portable = Symbol('_portable')
+class Gzip extends Zlib {
+  constructor (opts) {
+    super(opts, 'Gzip')
+    this[_portable] = opts && !!opts.portable
+  }
+
+  [_superWrite] (data) {
+    if (!this[_portable])
+      return super[_superWrite](data)
+
+    // we'll always get the header emitted in one first chunk
+    // overwrite the OS indicator byte with 0xFF
+    this[_portable] = false
+    data[9] = 255
+    return super[_superWrite](data)
+  }
+}
+
+class Gunzip extends Zlib {
+  constructor (opts) {
+    super(opts, 'Gunzip')
+  }
+}
+
+// raw - no header
+class DeflateRaw extends Zlib {
+  constructor (opts) {
+    super(opts, 'DeflateRaw')
+  }
+}
+
+class InflateRaw extends Zlib {
+  constructor (opts) {
+    super(opts, 'InflateRaw')
+  }
+}
+
+// auto-detect header.
+class Unzip extends Zlib {
+  constructor (opts) {
+    super(opts, 'Unzip')
+  }
+}
+
+class Brotli extends ZlibBase {
+  constructor (opts, mode) {
+    opts = opts || {}
+
+    opts.flush = opts.flush || constants.BROTLI_OPERATION_PROCESS
+    opts.finishFlush = opts.finishFlush || constants.BROTLI_OPERATION_FINISH
+
+    super(opts, mode)
+
+    this[_fullFlushFlag] = constants.BROTLI_OPERATION_FLUSH
+  }
+}
+
+class BrotliCompress extends Brotli {
+  constructor (opts) {
+    super(opts, 'BrotliCompress')
+  }
+}
+
+class BrotliDecompress extends Brotli {
+  constructor (opts) {
+    super(opts, 'BrotliDecompress')
+  }
+}
+
+exports.Deflate = Deflate
+exports.Inflate = Inflate
+exports.Gzip = Gzip
+exports.Gunzip = Gunzip
+exports.DeflateRaw = DeflateRaw
+exports.InflateRaw = InflateRaw
+exports.Unzip = Unzip
+/* istanbul ignore else */
+if (typeof realZlib.BrotliCompress === 'function') {
+  exports.BrotliCompress = BrotliCompress
+  exports.BrotliDecompress = BrotliDecompress
+} else {
+  exports.BrotliCompress = exports.BrotliDecompress = class {
+    constructor () {
+      throw new Error('Brotli is not supported in this version of Node.js')
+    }
+  }
+}
+
+
+/***/ }),
+
+/***/ 47557:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -311090,484 +310879,6 @@ module.exports = class Minipass extends Stream {
         typeof s.pipe === 'function' || // readable
         (typeof s.write === 'function' && typeof s.end === 'function') // writable
       ))
-  }
-}
-
-
-/***/ }),
-
-/***/ 6769:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-// Update with any zlib constants that are added or changed in the future.
-// Node v6 didn't export this, so we just hard code the version and rely
-// on all the other hard-coded values from zlib v4736.  When node v6
-// support drops, we can just export the realZlibConstants object.
-const realZlibConstants = (__nccwpck_require__(59796).constants) ||
-  /* istanbul ignore next */ { ZLIB_VERNUM: 4736 }
-
-module.exports = Object.freeze(Object.assign(Object.create(null), {
-  Z_NO_FLUSH: 0,
-  Z_PARTIAL_FLUSH: 1,
-  Z_SYNC_FLUSH: 2,
-  Z_FULL_FLUSH: 3,
-  Z_FINISH: 4,
-  Z_BLOCK: 5,
-  Z_OK: 0,
-  Z_STREAM_END: 1,
-  Z_NEED_DICT: 2,
-  Z_ERRNO: -1,
-  Z_STREAM_ERROR: -2,
-  Z_DATA_ERROR: -3,
-  Z_MEM_ERROR: -4,
-  Z_BUF_ERROR: -5,
-  Z_VERSION_ERROR: -6,
-  Z_NO_COMPRESSION: 0,
-  Z_BEST_SPEED: 1,
-  Z_BEST_COMPRESSION: 9,
-  Z_DEFAULT_COMPRESSION: -1,
-  Z_FILTERED: 1,
-  Z_HUFFMAN_ONLY: 2,
-  Z_RLE: 3,
-  Z_FIXED: 4,
-  Z_DEFAULT_STRATEGY: 0,
-  DEFLATE: 1,
-  INFLATE: 2,
-  GZIP: 3,
-  GUNZIP: 4,
-  DEFLATERAW: 5,
-  INFLATERAW: 6,
-  UNZIP: 7,
-  BROTLI_DECODE: 8,
-  BROTLI_ENCODE: 9,
-  Z_MIN_WINDOWBITS: 8,
-  Z_MAX_WINDOWBITS: 15,
-  Z_DEFAULT_WINDOWBITS: 15,
-  Z_MIN_CHUNK: 64,
-  Z_MAX_CHUNK: Infinity,
-  Z_DEFAULT_CHUNK: 16384,
-  Z_MIN_MEMLEVEL: 1,
-  Z_MAX_MEMLEVEL: 9,
-  Z_DEFAULT_MEMLEVEL: 8,
-  Z_MIN_LEVEL: -1,
-  Z_MAX_LEVEL: 9,
-  Z_DEFAULT_LEVEL: -1,
-  BROTLI_OPERATION_PROCESS: 0,
-  BROTLI_OPERATION_FLUSH: 1,
-  BROTLI_OPERATION_FINISH: 2,
-  BROTLI_OPERATION_EMIT_METADATA: 3,
-  BROTLI_MODE_GENERIC: 0,
-  BROTLI_MODE_TEXT: 1,
-  BROTLI_MODE_FONT: 2,
-  BROTLI_DEFAULT_MODE: 0,
-  BROTLI_MIN_QUALITY: 0,
-  BROTLI_MAX_QUALITY: 11,
-  BROTLI_DEFAULT_QUALITY: 11,
-  BROTLI_MIN_WINDOW_BITS: 10,
-  BROTLI_MAX_WINDOW_BITS: 24,
-  BROTLI_LARGE_MAX_WINDOW_BITS: 30,
-  BROTLI_DEFAULT_WINDOW: 22,
-  BROTLI_MIN_INPUT_BLOCK_BITS: 16,
-  BROTLI_MAX_INPUT_BLOCK_BITS: 24,
-  BROTLI_PARAM_MODE: 0,
-  BROTLI_PARAM_QUALITY: 1,
-  BROTLI_PARAM_LGWIN: 2,
-  BROTLI_PARAM_LGBLOCK: 3,
-  BROTLI_PARAM_DISABLE_LITERAL_CONTEXT_MODELING: 4,
-  BROTLI_PARAM_SIZE_HINT: 5,
-  BROTLI_PARAM_LARGE_WINDOW: 6,
-  BROTLI_PARAM_NPOSTFIX: 7,
-  BROTLI_PARAM_NDIRECT: 8,
-  BROTLI_DECODER_RESULT_ERROR: 0,
-  BROTLI_DECODER_RESULT_SUCCESS: 1,
-  BROTLI_DECODER_RESULT_NEEDS_MORE_INPUT: 2,
-  BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT: 3,
-  BROTLI_DECODER_PARAM_DISABLE_RING_BUFFER_REALLOCATION: 0,
-  BROTLI_DECODER_PARAM_LARGE_WINDOW: 1,
-  BROTLI_DECODER_NO_ERROR: 0,
-  BROTLI_DECODER_SUCCESS: 1,
-  BROTLI_DECODER_NEEDS_MORE_INPUT: 2,
-  BROTLI_DECODER_NEEDS_MORE_OUTPUT: 3,
-  BROTLI_DECODER_ERROR_FORMAT_EXUBERANT_NIBBLE: -1,
-  BROTLI_DECODER_ERROR_FORMAT_RESERVED: -2,
-  BROTLI_DECODER_ERROR_FORMAT_EXUBERANT_META_NIBBLE: -3,
-  BROTLI_DECODER_ERROR_FORMAT_SIMPLE_HUFFMAN_ALPHABET: -4,
-  BROTLI_DECODER_ERROR_FORMAT_SIMPLE_HUFFMAN_SAME: -5,
-  BROTLI_DECODER_ERROR_FORMAT_CL_SPACE: -6,
-  BROTLI_DECODER_ERROR_FORMAT_HUFFMAN_SPACE: -7,
-  BROTLI_DECODER_ERROR_FORMAT_CONTEXT_MAP_REPEAT: -8,
-  BROTLI_DECODER_ERROR_FORMAT_BLOCK_LENGTH_1: -9,
-  BROTLI_DECODER_ERROR_FORMAT_BLOCK_LENGTH_2: -10,
-  BROTLI_DECODER_ERROR_FORMAT_TRANSFORM: -11,
-  BROTLI_DECODER_ERROR_FORMAT_DICTIONARY: -12,
-  BROTLI_DECODER_ERROR_FORMAT_WINDOW_BITS: -13,
-  BROTLI_DECODER_ERROR_FORMAT_PADDING_1: -14,
-  BROTLI_DECODER_ERROR_FORMAT_PADDING_2: -15,
-  BROTLI_DECODER_ERROR_FORMAT_DISTANCE: -16,
-  BROTLI_DECODER_ERROR_DICTIONARY_NOT_SET: -19,
-  BROTLI_DECODER_ERROR_INVALID_ARGUMENTS: -20,
-  BROTLI_DECODER_ERROR_ALLOC_CONTEXT_MODES: -21,
-  BROTLI_DECODER_ERROR_ALLOC_TREE_GROUPS: -22,
-  BROTLI_DECODER_ERROR_ALLOC_CONTEXT_MAP: -25,
-  BROTLI_DECODER_ERROR_ALLOC_RING_BUFFER_1: -26,
-  BROTLI_DECODER_ERROR_ALLOC_RING_BUFFER_2: -27,
-  BROTLI_DECODER_ERROR_ALLOC_BLOCK_TYPE_TREES: -30,
-  BROTLI_DECODER_ERROR_UNREACHABLE: -31,
-}, realZlibConstants))
-
-
-/***/ }),
-
-/***/ 33486:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-
-const assert = __nccwpck_require__(39491)
-const Buffer = (__nccwpck_require__(14300).Buffer)
-const realZlib = __nccwpck_require__(59796)
-
-const constants = exports.constants = __nccwpck_require__(6769)
-const Minipass = __nccwpck_require__(41077)
-
-const OriginalBufferConcat = Buffer.concat
-
-const _superWrite = Symbol('_superWrite')
-class ZlibError extends Error {
-  constructor (err) {
-    super('zlib: ' + err.message)
-    this.code = err.code
-    this.errno = err.errno
-    /* istanbul ignore if */
-    if (!this.code)
-      this.code = 'ZLIB_ERROR'
-
-    this.message = 'zlib: ' + err.message
-    Error.captureStackTrace(this, this.constructor)
-  }
-
-  get name () {
-    return 'ZlibError'
-  }
-}
-
-// the Zlib class they all inherit from
-// This thing manages the queue of requests, and returns
-// true or false if there is anything in the queue when
-// you call the .write() method.
-const _opts = Symbol('opts')
-const _flushFlag = Symbol('flushFlag')
-const _finishFlushFlag = Symbol('finishFlushFlag')
-const _fullFlushFlag = Symbol('fullFlushFlag')
-const _handle = Symbol('handle')
-const _onError = Symbol('onError')
-const _sawError = Symbol('sawError')
-const _level = Symbol('level')
-const _strategy = Symbol('strategy')
-const _ended = Symbol('ended')
-const _defaultFullFlush = Symbol('_defaultFullFlush')
-
-class ZlibBase extends Minipass {
-  constructor (opts, mode) {
-    if (!opts || typeof opts !== 'object')
-      throw new TypeError('invalid options for ZlibBase constructor')
-
-    super(opts)
-    this[_sawError] = false
-    this[_ended] = false
-    this[_opts] = opts
-
-    this[_flushFlag] = opts.flush
-    this[_finishFlushFlag] = opts.finishFlush
-    // this will throw if any options are invalid for the class selected
-    try {
-      this[_handle] = new realZlib[mode](opts)
-    } catch (er) {
-      // make sure that all errors get decorated properly
-      throw new ZlibError(er)
-    }
-
-    this[_onError] = (err) => {
-      // no sense raising multiple errors, since we abort on the first one.
-      if (this[_sawError])
-        return
-
-      this[_sawError] = true
-
-      // there is no way to cleanly recover.
-      // continuing only obscures problems.
-      this.close()
-      this.emit('error', err)
-    }
-
-    this[_handle].on('error', er => this[_onError](new ZlibError(er)))
-    this.once('end', () => this.close)
-  }
-
-  close () {
-    if (this[_handle]) {
-      this[_handle].close()
-      this[_handle] = null
-      this.emit('close')
-    }
-  }
-
-  reset () {
-    if (!this[_sawError]) {
-      assert(this[_handle], 'zlib binding closed')
-      return this[_handle].reset()
-    }
-  }
-
-  flush (flushFlag) {
-    if (this.ended)
-      return
-
-    if (typeof flushFlag !== 'number')
-      flushFlag = this[_fullFlushFlag]
-    this.write(Object.assign(Buffer.alloc(0), { [_flushFlag]: flushFlag }))
-  }
-
-  end (chunk, encoding, cb) {
-    if (chunk)
-      this.write(chunk, encoding)
-    this.flush(this[_finishFlushFlag])
-    this[_ended] = true
-    return super.end(null, null, cb)
-  }
-
-  get ended () {
-    return this[_ended]
-  }
-
-  write (chunk, encoding, cb) {
-    // process the chunk using the sync process
-    // then super.write() all the outputted chunks
-    if (typeof encoding === 'function')
-      cb = encoding, encoding = 'utf8'
-
-    if (typeof chunk === 'string')
-      chunk = Buffer.from(chunk, encoding)
-
-    if (this[_sawError])
-      return
-    assert(this[_handle], 'zlib binding closed')
-
-    // _processChunk tries to .close() the native handle after it's done, so we
-    // intercept that by temporarily making it a no-op.
-    const nativeHandle = this[_handle]._handle
-    const originalNativeClose = nativeHandle.close
-    nativeHandle.close = () => {}
-    const originalClose = this[_handle].close
-    this[_handle].close = () => {}
-    // It also calls `Buffer.concat()` at the end, which may be convenient
-    // for some, but which we are not interested in as it slows us down.
-    Buffer.concat = (args) => args
-    let result
-    try {
-      const flushFlag = typeof chunk[_flushFlag] === 'number'
-        ? chunk[_flushFlag] : this[_flushFlag]
-      result = this[_handle]._processChunk(chunk, flushFlag)
-      // if we don't throw, reset it back how it was
-      Buffer.concat = OriginalBufferConcat
-    } catch (err) {
-      // or if we do, put Buffer.concat() back before we emit error
-      // Error events call into user code, which may call Buffer.concat()
-      Buffer.concat = OriginalBufferConcat
-      this[_onError](new ZlibError(err))
-    } finally {
-      if (this[_handle]) {
-        // Core zlib resets `_handle` to null after attempting to close the
-        // native handle. Our no-op handler prevented actual closure, but we
-        // need to restore the `._handle` property.
-        this[_handle]._handle = nativeHandle
-        nativeHandle.close = originalNativeClose
-        this[_handle].close = originalClose
-        // `_processChunk()` adds an 'error' listener. If we don't remove it
-        // after each call, these handlers start piling up.
-        this[_handle].removeAllListeners('error')
-        // make sure OUR error listener is still attached tho
-      }
-    }
-
-    if (this[_handle])
-      this[_handle].on('error', er => this[_onError](new ZlibError(er)))
-
-    let writeReturn
-    if (result) {
-      if (Array.isArray(result) && result.length > 0) {
-        // The first buffer is always `handle._outBuffer`, which would be
-        // re-used for later invocations; so, we always have to copy that one.
-        writeReturn = this[_superWrite](Buffer.from(result[0]))
-        for (let i = 1; i < result.length; i++) {
-          writeReturn = this[_superWrite](result[i])
-        }
-      } else {
-        writeReturn = this[_superWrite](Buffer.from(result))
-      }
-    }
-
-    if (cb)
-      cb()
-    return writeReturn
-  }
-
-  [_superWrite] (data) {
-    return super.write(data)
-  }
-}
-
-class Zlib extends ZlibBase {
-  constructor (opts, mode) {
-    opts = opts || {}
-
-    opts.flush = opts.flush || constants.Z_NO_FLUSH
-    opts.finishFlush = opts.finishFlush || constants.Z_FINISH
-    super(opts, mode)
-
-    this[_fullFlushFlag] = constants.Z_FULL_FLUSH
-    this[_level] = opts.level
-    this[_strategy] = opts.strategy
-  }
-
-  params (level, strategy) {
-    if (this[_sawError])
-      return
-
-    if (!this[_handle])
-      throw new Error('cannot switch params when binding is closed')
-
-    // no way to test this without also not supporting params at all
-    /* istanbul ignore if */
-    if (!this[_handle].params)
-      throw new Error('not supported in this implementation')
-
-    if (this[_level] !== level || this[_strategy] !== strategy) {
-      this.flush(constants.Z_SYNC_FLUSH)
-      assert(this[_handle], 'zlib binding closed')
-      // .params() calls .flush(), but the latter is always async in the
-      // core zlib. We override .flush() temporarily to intercept that and
-      // flush synchronously.
-      const origFlush = this[_handle].flush
-      this[_handle].flush = (flushFlag, cb) => {
-        this.flush(flushFlag)
-        cb()
-      }
-      try {
-        this[_handle].params(level, strategy)
-      } finally {
-        this[_handle].flush = origFlush
-      }
-      /* istanbul ignore else */
-      if (this[_handle]) {
-        this[_level] = level
-        this[_strategy] = strategy
-      }
-    }
-  }
-}
-
-// minimal 2-byte header
-class Deflate extends Zlib {
-  constructor (opts) {
-    super(opts, 'Deflate')
-  }
-}
-
-class Inflate extends Zlib {
-  constructor (opts) {
-    super(opts, 'Inflate')
-  }
-}
-
-// gzip - bigger header, same deflate compression
-const _portable = Symbol('_portable')
-class Gzip extends Zlib {
-  constructor (opts) {
-    super(opts, 'Gzip')
-    this[_portable] = opts && !!opts.portable
-  }
-
-  [_superWrite] (data) {
-    if (!this[_portable])
-      return super[_superWrite](data)
-
-    // we'll always get the header emitted in one first chunk
-    // overwrite the OS indicator byte with 0xFF
-    this[_portable] = false
-    data[9] = 255
-    return super[_superWrite](data)
-  }
-}
-
-class Gunzip extends Zlib {
-  constructor (opts) {
-    super(opts, 'Gunzip')
-  }
-}
-
-// raw - no header
-class DeflateRaw extends Zlib {
-  constructor (opts) {
-    super(opts, 'DeflateRaw')
-  }
-}
-
-class InflateRaw extends Zlib {
-  constructor (opts) {
-    super(opts, 'InflateRaw')
-  }
-}
-
-// auto-detect header.
-class Unzip extends Zlib {
-  constructor (opts) {
-    super(opts, 'Unzip')
-  }
-}
-
-class Brotli extends ZlibBase {
-  constructor (opts, mode) {
-    opts = opts || {}
-
-    opts.flush = opts.flush || constants.BROTLI_OPERATION_PROCESS
-    opts.finishFlush = opts.finishFlush || constants.BROTLI_OPERATION_FINISH
-
-    super(opts, mode)
-
-    this[_fullFlushFlag] = constants.BROTLI_OPERATION_FLUSH
-  }
-}
-
-class BrotliCompress extends Brotli {
-  constructor (opts) {
-    super(opts, 'BrotliCompress')
-  }
-}
-
-class BrotliDecompress extends Brotli {
-  constructor (opts) {
-    super(opts, 'BrotliDecompress')
-  }
-}
-
-exports.Deflate = Deflate
-exports.Inflate = Inflate
-exports.Gzip = Gzip
-exports.Gunzip = Gunzip
-exports.DeflateRaw = DeflateRaw
-exports.InflateRaw = InflateRaw
-exports.Unzip = Unzip
-/* istanbul ignore else */
-if (typeof realZlib.BrotliCompress === 'function') {
-  exports.BrotliCompress = BrotliCompress
-  exports.BrotliDecompress = BrotliDecompress
-} else {
-  exports.BrotliCompress = exports.BrotliDecompress = class {
-    constructor () {
-      throw new Error('Brotli is not supported in this version of Node.js')
-    }
   }
 }
 
@@ -314963,7 +314274,7 @@ const {
   CALLBACK_PROPERTIES, CLIENT_DEFAULTS, JWT_CONTENT, CLOCK_TOLERANCE,
 } = __nccwpck_require__(27556);
 const issuerRegistry = __nccwpck_require__(30730);
-const instance = __nccwpck_require__(27702);
+const instance = __nccwpck_require__(36546);
 const { authenticatedPost, resolveResponseType, resolveRedirectUri } = __nccwpck_require__(7619);
 const DeviceFlowHandle = __nccwpck_require__(23979);
 
@@ -316679,7 +315990,7 @@ module.exports.BaseClient = BaseClient;
 const { inspect } = __nccwpck_require__(73837);
 
 const { RPError, OPError } = __nccwpck_require__(45061);
-const instance = __nccwpck_require__(27702);
+const instance = __nccwpck_require__(36546);
 const now = __nccwpck_require__(8542);
 const { authenticatedPost } = __nccwpck_require__(7619);
 const processResponse = __nccwpck_require__(28576);
@@ -316927,7 +316238,7 @@ const { assertIssuerConfiguration } = __nccwpck_require__(63217);
 const { random } = __nccwpck_require__(75421);
 const now = __nccwpck_require__(8542);
 const request = __nccwpck_require__(92946);
-const instance = __nccwpck_require__(27702);
+const instance = __nccwpck_require__(36546);
 const merge = __nccwpck_require__(2494);
 
 const formUrlEncode = (value) => encodeURIComponent(value).replace(/%20/g, '+');
@@ -317444,7 +316755,7 @@ module.exports = () => Math.floor(Date.now() / 1000);
 
 /***/ }),
 
-/***/ 27702:
+/***/ 36546:
 /***/ ((module) => {
 
 const privateProps = new WeakMap();
@@ -317587,7 +316898,7 @@ const getClient = __nccwpck_require__(28300);
 const registry = __nccwpck_require__(30730);
 const processResponse = __nccwpck_require__(28576);
 const webfingerNormalize = __nccwpck_require__(27416);
-const instance = __nccwpck_require__(27702);
+const instance = __nccwpck_require__(36546);
 const request = __nccwpck_require__(92946);
 const { assertIssuerConfiguration } = __nccwpck_require__(63217);
 const {
@@ -326325,6 +325636,9 @@ module.exports = safer
 /***/ 91532:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const ANY = Symbol('SemVer ANY')
 // hoisted class for cyclic dependency
 class Comparator {
@@ -326473,6 +325787,11 @@ const Range = __nccwpck_require__(9828)
 /***/ 9828:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
+const SPACE_CHARACTERS = /\s+/g
+
 // hoisted class for cyclic dependency
 class Range {
   constructor (range, options) {
@@ -326493,7 +325812,7 @@ class Range {
       // just put it in the set and return
       this.raw = range.value
       this.set = [[range]]
-      this.format()
+      this.formatted = undefined
       return this
     }
 
@@ -326504,10 +325823,7 @@ class Range {
     // First reduce all whitespace as much as possible so we do not have to rely
     // on potentially slow regexes like \s*. This is then stored and used for
     // future error messages as well.
-    this.raw = range
-      .trim()
-      .split(/\s+/)
-      .join(' ')
+    this.raw = range.trim().replace(SPACE_CHARACTERS, ' ')
 
     // First, split on ||
     this.set = this.raw
@@ -326541,14 +325857,29 @@ class Range {
       }
     }
 
-    this.format()
+    this.formatted = undefined
+  }
+
+  get range () {
+    if (this.formatted === undefined) {
+      this.formatted = ''
+      for (let i = 0; i < this.set.length; i++) {
+        if (i > 0) {
+          this.formatted += '||'
+        }
+        const comps = this.set[i]
+        for (let k = 0; k < comps.length; k++) {
+          if (k > 0) {
+            this.formatted += ' '
+          }
+          this.formatted += comps[k].toString().trim()
+        }
+      }
+    }
+    return this.formatted
   }
 
   format () {
-    this.range = this.set
-      .map((comps) => comps.join(' ').trim())
-      .join('||')
-      .trim()
     return this.range
   }
 
@@ -326557,6 +325888,9 @@ class Range {
   }
 
   parseRange (range) {
+    // strip build metadata so it can't bleed into the version
+    range = range.replace(BUILDSTRIPRE, '')
+
     // memoize range parsing for performance.
     // this is a very hot path, and fully deterministic.
     const memoOpts =
@@ -326673,8 +326007,8 @@ class Range {
 
 module.exports = Range
 
-const LRU = __nccwpck_require__(7129)
-const cache = new LRU({ max: 1000 })
+const LRU = __nccwpck_require__(15339)
+const cache = new LRU()
 
 const parseOptions = __nccwpck_require__(40785)
 const Comparator = __nccwpck_require__(91532)
@@ -326682,12 +326016,16 @@ const debug = __nccwpck_require__(50427)
 const SemVer = __nccwpck_require__(48088)
 const {
   safeRe: re,
+  src,
   t,
   comparatorTrimReplace,
   tildeTrimReplace,
   caretTrimReplace,
 } = __nccwpck_require__(9523)
 const { FLAG_INCLUDE_PRERELEASE, FLAG_LOOSE } = __nccwpck_require__(42293)
+
+// unbounded global build-metadata stripper used by parseRange
+const BUILDSTRIPRE = new RegExp(src[t.BUILD], 'g')
 
 const isNullSet = c => c.value === '<0.0.0-0'
 const isAny = c => c.value === ''
@@ -326714,6 +326052,7 @@ const isSatisfiable = (comparators, options) => {
 // already replaced the hyphen ranges
 // turn into a set of JUST comparators.
 const parseComparator = (comp, options) => {
+  comp = comp.replace(re[t.BUILD], '')
   debug('comp', comp, options)
   comp = replaceCarets(comp, options)
   debug('caret', comp)
@@ -326727,6 +326066,11 @@ const parseComparator = (comp, options) => {
 }
 
 const isX = id => !id || id.toLowerCase() === 'x' || id === '*'
+
+const invalidXRangeOrder = (M, m, p) => (
+  (isX(M) && !isX(m)) ||
+  (isX(m) && p && !isX(p))
+)
 
 // ~, ~> --> * (any, kinda silly)
 // ~2, ~2.x, ~2.x.x, ~>2, ~>2.x ~>2.x.x --> >=2.0.0 <3.0.0-0
@@ -326745,6 +326089,10 @@ const replaceTildes = (comp, options) => {
 
 const replaceTilde = (comp, options) => {
   const r = options.loose ? re[t.TILDELOOSE] : re[t.TILDE]
+  // if we're including prereleases in the match, then the lower bound is
+  // -0, the lowest possible prerelease value, just like x-ranges and carets.
+  // this keeps `~1.2` equivalent to the `1.2.x` x-range it's documented as.
+  const z = options.includePrerelease ? '-0' : ''
   return comp.replace(r, (_, M, m, p, pr) => {
     debug('tilde', comp, _, M, m, p, pr)
     let ret
@@ -326752,10 +326100,10 @@ const replaceTilde = (comp, options) => {
     if (isX(M)) {
       ret = ''
     } else if (isX(m)) {
-      ret = `>=${M}.0.0 <${+M + 1}.0.0-0`
+      ret = `>=${M}.0.0${z} <${+M + 1}.0.0-0`
     } else if (isX(p)) {
       // ~1.2 == >=1.2.0 <1.3.0-0
-      ret = `>=${M}.${m}.0 <${M}.${+m + 1}.0-0`
+      ret = `>=${M}.${m}.0${z} <${M}.${+m + 1}.0-0`
     } else if (pr) {
       debug('replaceTilde pr', pr)
       ret = `>=${M}.${m}.${p}-${pr
@@ -326824,10 +326172,10 @@ const replaceCaret = (comp, options) => {
       if (M === '0') {
         if (m === '0') {
           ret = `>=${M}.${m}.${p
-          }${z} <${M}.${m}.${+p + 1}-0`
+          } <${M}.${m}.${+p + 1}-0`
         } else {
           ret = `>=${M}.${m}.${p
-          }${z} <${M}.${+m + 1}.0-0`
+          } <${M}.${+m + 1}.0-0`
         }
       } else {
         ret = `>=${M}.${m}.${p
@@ -326853,6 +326201,10 @@ const replaceXRange = (comp, options) => {
   const r = options.loose ? re[t.XRANGELOOSE] : re[t.XRANGE]
   return comp.replace(r, (ret, gtlt, M, m, p, pr) => {
     debug('xRange', comp, ret, gtlt, M, m, p, pr)
+    if (invalidXRangeOrder(M, m, p)) {
+      return comp
+    }
+
     const xM = isX(M)
     const xm = xM || isX(m)
     const xp = xm || isX(p)
@@ -326945,9 +326297,10 @@ const replaceGTE0 = (comp, options) => {
 // 1.2 - 3.4.5 => >=1.2.0 <=3.4.5
 // 1.2.3 - 3.4 => >=1.2.0 <3.5.0-0 Any 3.4.x will do
 // 1.2 - 3.4 => >=1.2.0 <3.5.0-0
+// TODO build?
 const hyphenReplace = incPr => ($0,
   from, fM, fm, fp, fpr, fb,
-  to, tM, tm, tp, tpr, tb) => {
+  to, tM, tm, tp, tpr) => {
   if (isX(fM)) {
     from = ''
   } else if (isX(fm)) {
@@ -327019,19 +326372,38 @@ const testSet = (set, version, options) => {
 /***/ 48088:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const debug = __nccwpck_require__(50427)
 const { MAX_LENGTH, MAX_SAFE_INTEGER } = __nccwpck_require__(42293)
 const { safeRe: re, t } = __nccwpck_require__(9523)
 
 const parseOptions = __nccwpck_require__(40785)
 const { compareIdentifiers } = __nccwpck_require__(92463)
+
+const isPrereleaseIdentifier = (prerelease, identifier) => {
+  const identifiers = identifier.split('.')
+  if (identifiers.length > prerelease.length) {
+    return false
+  }
+
+  for (let i = 0; i < identifiers.length; i++) {
+    if (compareIdentifiers(prerelease[i], identifiers[i]) !== 0) {
+      return false
+    }
+  }
+
+  return true
+}
+
 class SemVer {
   constructor (version, options) {
     options = parseOptions(options)
 
     if (version instanceof SemVer) {
       if (version.loose === !!options.loose &&
-          version.includePrerelease === !!options.includePrerelease) {
+        version.includePrerelease === !!options.includePrerelease) {
         return version
       } else {
         version = version.version
@@ -327130,11 +326502,25 @@ class SemVer {
       other = new SemVer(other, this.options)
     }
 
-    return (
-      compareIdentifiers(this.major, other.major) ||
-      compareIdentifiers(this.minor, other.minor) ||
-      compareIdentifiers(this.patch, other.patch)
-    )
+    if (this.major < other.major) {
+      return -1
+    }
+    if (this.major > other.major) {
+      return 1
+    }
+    if (this.minor < other.minor) {
+      return -1
+    }
+    if (this.minor > other.minor) {
+      return 1
+    }
+    if (this.patch < other.patch) {
+      return -1
+    }
+    if (this.patch > other.patch) {
+      return 1
+    }
+    return 0
   }
 
   comparePre (other) {
@@ -327179,7 +326565,7 @@ class SemVer {
     do {
       const a = this.build[i]
       const b = other.build[i]
-      debug('prerelease compare', i, a, b)
+      debug('build compare', i, a, b)
       if (a === undefined && b === undefined) {
         return 0
       } else if (b === undefined) {
@@ -327197,6 +326583,19 @@ class SemVer {
   // preminor will bump the version up to the next minor release, and immediately
   // down to pre-release. premajor and prepatch work the same way.
   inc (release, identifier, identifierBase) {
+    if (release.startsWith('pre')) {
+      if (!identifier && identifierBase === false) {
+        throw new Error('invalid increment argument: identifier is empty')
+      }
+      // Avoid an invalid semver results
+      if (identifier) {
+        const match = `-${identifier}`.match(this.options.loose ? re[t.PRERELEASELOOSE] : re[t.PRERELEASE])
+        if (!match || match[1] !== identifier) {
+          throw new Error(`invalid identifier: ${identifier}`)
+        }
+      }
+    }
+
     switch (release) {
       case 'premajor':
         this.prerelease.length = 0
@@ -327226,6 +326625,12 @@ class SemVer {
           this.inc('patch', identifier, identifierBase)
         }
         this.inc('pre', identifier, identifierBase)
+        break
+      case 'release':
+        if (this.prerelease.length === 0) {
+          throw new Error(`version ${this.raw} is not a prerelease`)
+        }
+        this.prerelease.length = 0
         break
 
       case 'major':
@@ -327270,10 +326675,6 @@ class SemVer {
       case 'pre': {
         const base = Number(identifierBase) ? 1 : 0
 
-        if (!identifier && identifierBase === false) {
-          throw new Error('invalid increment argument: identifier is empty')
-        }
-
         if (this.prerelease.length === 0) {
           this.prerelease = [base]
         } else {
@@ -327299,8 +326700,9 @@ class SemVer {
           if (identifierBase === false) {
             prerelease = [identifier]
           }
-          if (compareIdentifiers(this.prerelease[0], identifier) === 0) {
-            if (isNaN(this.prerelease[1])) {
+          if (isPrereleaseIdentifier(this.prerelease, identifier)) {
+            const prereleaseBase = this.prerelease[identifier.split('.').length]
+            if (isNaN(prereleaseBase)) {
               this.prerelease = prerelease
             }
           } else {
@@ -327328,6 +326730,9 @@ module.exports = SemVer
 /***/ 48848:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const parse = __nccwpck_require__(75925)
 const clean = (version, options) => {
   const s = parse(version.trim().replace(/^[=v]+/, ''), options)
@@ -327340,6 +326745,9 @@ module.exports = clean
 
 /***/ 75098:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const eq = __nccwpck_require__(91898)
 const neq = __nccwpck_require__(6017)
@@ -327400,6 +326808,9 @@ module.exports = cmp
 /***/ 13466:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const SemVer = __nccwpck_require__(48088)
 const parse = __nccwpck_require__(75925)
 const { safeRe: re, t } = __nccwpck_require__(9523)
@@ -327421,35 +326832,43 @@ const coerce = (version, options) => {
 
   let match = null
   if (!options.rtl) {
-    match = version.match(re[t.COERCE])
+    match = version.match(options.includePrerelease ? re[t.COERCEFULL] : re[t.COERCE])
   } else {
     // Find the right-most coercible string that does not share
     // a terminus with a more left-ward coercible string.
     // Eg, '1.2.3.4' wants to coerce '2.3.4', not '3.4' or '4'
+    // With includePrerelease option set, '1.2.3.4-rc' wants to coerce '2.3.4-rc', not '2.3.4'
     //
     // Walk through the string checking with a /g regexp
     // Manually set the index so as to pick up overlapping matches.
     // Stop when we get a match that ends at the string end, since no
     // coercible string can be more right-ward without the same terminus.
+    const coerceRtlRegex = options.includePrerelease ? re[t.COERCERTLFULL] : re[t.COERCERTL]
     let next
-    while ((next = re[t.COERCERTL].exec(version)) &&
+    while ((next = coerceRtlRegex.exec(version)) &&
         (!match || match.index + match[0].length !== version.length)
     ) {
       if (!match ||
             next.index + next[0].length !== match.index + match[0].length) {
         match = next
       }
-      re[t.COERCERTL].lastIndex = next.index + next[1].length + next[2].length
+      coerceRtlRegex.lastIndex = next.index + next[1].length + next[2].length
     }
     // leave it in a clean state
-    re[t.COERCERTL].lastIndex = -1
+    coerceRtlRegex.lastIndex = -1
   }
 
   if (match === null) {
     return null
   }
 
-  return parse(`${match[2]}.${match[3] || '0'}.${match[4] || '0'}`, options)
+  const major = match[2]
+  const minor = match[3] || '0'
+  const patch = match[4] || '0'
+  const prerelease = options.includePrerelease && match[5] ? `-${match[5]}` : ''
+  const build = options.includePrerelease && match[6] ? `+${match[6]}` : ''
+
+  return parse(`${major}.${minor}.${patch}${prerelease}${build}`, options)
 }
 module.exports = coerce
 
@@ -327458,6 +326877,9 @@ module.exports = coerce
 
 /***/ 92156:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const SemVer = __nccwpck_require__(48088)
 const compareBuild = (a, b, loose) => {
@@ -327473,6 +326895,9 @@ module.exports = compareBuild
 /***/ 62804:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const compare = __nccwpck_require__(44309)
 const compareLoose = (a, b) => compare(a, b, true)
 module.exports = compareLoose
@@ -327482,6 +326907,9 @@ module.exports = compareLoose
 
 /***/ 44309:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const SemVer = __nccwpck_require__(48088)
 const compare = (a, b, loose) =>
@@ -327494,6 +326922,9 @@ module.exports = compare
 
 /***/ 64297:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const parse = __nccwpck_require__(75925)
 
@@ -327524,20 +326955,13 @@ const diff = (version1, version2) => {
       return 'major'
     }
 
-    // Otherwise it can be determined by checking the high version
-
-    if (highVersion.patch) {
-      // anything higher than a patch bump would result in the wrong version
+    // If the main part has no difference
+    if (lowVersion.compareMain(highVersion) === 0) {
+      if (lowVersion.minor && !lowVersion.patch) {
+        return 'minor'
+      }
       return 'patch'
     }
-
-    if (highVersion.minor) {
-      // anything higher than a minor bump would result in the wrong version
-      return 'minor'
-    }
-
-    // bumping major/minor/patch all have same result
-    return 'major'
   }
 
   // add the `pre` prefix if we are going to a prerelease version
@@ -327555,7 +326979,7 @@ const diff = (version1, version2) => {
     return prefix + 'patch'
   }
 
-  // high and low are preleases
+  // high and low are prereleases
   return 'prerelease'
 }
 
@@ -327567,6 +326991,9 @@ module.exports = diff
 /***/ 91898:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const compare = __nccwpck_require__(44309)
 const eq = (a, b, loose) => compare(a, b, loose) === 0
 module.exports = eq
@@ -327576,6 +327003,9 @@ module.exports = eq
 
 /***/ 84123:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const compare = __nccwpck_require__(44309)
 const gt = (a, b, loose) => compare(a, b, loose) > 0
@@ -327587,6 +327017,9 @@ module.exports = gt
 /***/ 15522:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const compare = __nccwpck_require__(44309)
 const gte = (a, b, loose) => compare(a, b, loose) >= 0
 module.exports = gte
@@ -327596,6 +327029,9 @@ module.exports = gte
 
 /***/ 30900:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const SemVer = __nccwpck_require__(48088)
 
@@ -327623,6 +327059,9 @@ module.exports = inc
 /***/ 80194:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const compare = __nccwpck_require__(44309)
 const lt = (a, b, loose) => compare(a, b, loose) < 0
 module.exports = lt
@@ -327632,6 +327071,9 @@ module.exports = lt
 
 /***/ 77520:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const compare = __nccwpck_require__(44309)
 const lte = (a, b, loose) => compare(a, b, loose) <= 0
@@ -327643,6 +327085,9 @@ module.exports = lte
 /***/ 76688:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const SemVer = __nccwpck_require__(48088)
 const major = (a, loose) => new SemVer(a, loose).major
 module.exports = major
@@ -327652,6 +327097,9 @@ module.exports = major
 
 /***/ 38447:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const SemVer = __nccwpck_require__(48088)
 const minor = (a, loose) => new SemVer(a, loose).minor
@@ -327663,6 +327111,9 @@ module.exports = minor
 /***/ 6017:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const compare = __nccwpck_require__(44309)
 const neq = (a, b, loose) => compare(a, b, loose) !== 0
 module.exports = neq
@@ -327672,6 +327123,9 @@ module.exports = neq
 
 /***/ 75925:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const SemVer = __nccwpck_require__(48088)
 const parse = (version, options, throwErrors = false) => {
@@ -327696,6 +327150,9 @@ module.exports = parse
 /***/ 42866:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const SemVer = __nccwpck_require__(48088)
 const patch = (a, loose) => new SemVer(a, loose).patch
 module.exports = patch
@@ -327705,6 +327162,9 @@ module.exports = patch
 
 /***/ 24016:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const parse = __nccwpck_require__(75925)
 const prerelease = (version, options) => {
@@ -327719,6 +327179,9 @@ module.exports = prerelease
 /***/ 76417:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const compare = __nccwpck_require__(44309)
 const rcompare = (a, b, loose) => compare(b, a, loose)
 module.exports = rcompare
@@ -327729,6 +327192,9 @@ module.exports = rcompare
 /***/ 8701:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const compareBuild = __nccwpck_require__(92156)
 const rsort = (list, loose) => list.sort((a, b) => compareBuild(b, a, loose))
 module.exports = rsort
@@ -327738,6 +327204,9 @@ module.exports = rsort
 
 /***/ 6055:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const Range = __nccwpck_require__(9828)
 const satisfies = (version, range, options) => {
@@ -327756,6 +327225,9 @@ module.exports = satisfies
 /***/ 61426:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const compareBuild = __nccwpck_require__(92156)
 const sort = (list, loose) => list.sort((a, b) => compareBuild(a, b, loose))
 module.exports = sort
@@ -327763,8 +327235,67 @@ module.exports = sort
 
 /***/ }),
 
+/***/ 45937:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+const parse = __nccwpck_require__(75925)
+const constants = __nccwpck_require__(42293)
+const SemVer = __nccwpck_require__(48088)
+
+const truncate = (version, truncation, options) => {
+  if (!constants.RELEASE_TYPES.includes(truncation)) {
+    return null
+  }
+
+  const clonedVersion = cloneInputVersion(version, options)
+  return clonedVersion && doTruncation(clonedVersion, truncation)
+}
+
+const cloneInputVersion = (version, options) => {
+  const versionStringToParse = (
+    version instanceof SemVer ? version.version : version
+  )
+
+  return parse(versionStringToParse, options)
+}
+
+const doTruncation = (version, truncation) => {
+  if (isPrerelease(truncation)) {
+    return version.version
+  }
+
+  version.prerelease = []
+
+  switch (truncation) {
+    case 'major':
+      version.minor = 0
+      version.patch = 0
+      break
+    case 'minor':
+      version.patch = 0
+      break
+  }
+
+  return version.format()
+}
+
+const isPrerelease = (type) => {
+  return type.startsWith('pre')
+}
+
+module.exports = truncate
+
+
+/***/ }),
+
 /***/ 19601:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const parse = __nccwpck_require__(75925)
 const valid = (version, options) => {
@@ -327778,6 +327309,9 @@ module.exports = valid
 
 /***/ 11383:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 // just pre-load all the stuff that index.js lazily exports
 const internalRe = __nccwpck_require__(9523)
@@ -327807,6 +327341,7 @@ const gte = __nccwpck_require__(15522)
 const lte = __nccwpck_require__(77520)
 const cmp = __nccwpck_require__(75098)
 const coerce = __nccwpck_require__(13466)
+const truncate = __nccwpck_require__(45937)
 const Comparator = __nccwpck_require__(91532)
 const Range = __nccwpck_require__(9828)
 const satisfies = __nccwpck_require__(6055)
@@ -327845,6 +327380,7 @@ module.exports = {
   lte,
   cmp,
   coerce,
+  truncate,
   Comparator,
   Range,
   satisfies,
@@ -327874,6 +327410,9 @@ module.exports = {
 
 /***/ 42293:
 /***/ ((module) => {
+
+"use strict";
+
 
 // Note: this is the semver.org version of the spec that it implements
 // Not necessarily the package version of this code.
@@ -327917,6 +327456,9 @@ module.exports = {
 /***/ 50427:
 /***/ ((module) => {
 
+"use strict";
+
+
 const debug = (
   typeof process === 'object' &&
   process.env &&
@@ -327933,8 +327475,15 @@ module.exports = debug
 /***/ 92463:
 /***/ ((module) => {
 
+"use strict";
+
+
 const numeric = /^[0-9]+$/
 const compareIdentifiers = (a, b) => {
+  if (typeof a === 'number' && typeof b === 'number') {
+    return a === b ? 0 : a < b ? -1 : 1
+  }
+
   const anum = numeric.test(a)
   const bnum = numeric.test(b)
 
@@ -327960,8 +327509,61 @@ module.exports = {
 
 /***/ }),
 
+/***/ 15339:
+/***/ ((module) => {
+
+"use strict";
+
+
+class LRUCache {
+  constructor () {
+    this.max = 1000
+    this.map = new Map()
+  }
+
+  get (key) {
+    const value = this.map.get(key)
+    if (value === undefined) {
+      return undefined
+    } else {
+      // Remove the key from the map and add it to the end
+      this.map.delete(key)
+      this.map.set(key, value)
+      return value
+    }
+  }
+
+  delete (key) {
+    return this.map.delete(key)
+  }
+
+  set (key, value) {
+    const deleted = this.delete(key)
+
+    if (!deleted && value !== undefined) {
+      // If cache is full, delete the least recently used item
+      if (this.map.size >= this.max) {
+        const firstKey = this.map.keys().next().value
+        this.delete(firstKey)
+      }
+
+      this.map.set(key, value)
+    }
+
+    return this
+  }
+}
+
+module.exports = LRUCache
+
+
+/***/ }),
+
 /***/ 40785:
 /***/ ((module) => {
+
+"use strict";
+
 
 // parse out just the options we care about
 const looseOption = Object.freeze({ loose: true })
@@ -327985,6 +327587,9 @@ module.exports = parseOptions
 /***/ 9523:
 /***/ ((module, exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const {
   MAX_SAFE_COMPONENT_LENGTH,
   MAX_SAFE_BUILD_LENGTH,
@@ -327997,6 +327602,7 @@ exports = module.exports = {}
 const re = exports.re = []
 const safeRe = exports.safeRe = []
 const src = exports.src = []
+const safeSrc = exports.safeSrc = []
 const t = exports.t = {}
 let R = 0
 
@@ -328029,6 +327635,7 @@ const createToken = (name, value, isGlobal) => {
   debug(name, index, value)
   t[name] = index
   src[index] = value
+  safeSrc[index] = safe
   re[index] = new RegExp(value, isGlobal ? 'g' : undefined)
   safeRe[index] = new RegExp(safe, isGlobal ? 'g' : undefined)
 }
@@ -328061,12 +327668,14 @@ createToken('MAINVERSIONLOOSE', `(${src[t.NUMERICIDENTIFIERLOOSE]})\\.` +
 
 // ## Pre-release Version Identifier
 // A numeric identifier, or a non-numeric identifier.
+// Non-numeric identifiers include numeric identifiers but can be longer.
+// Therefore non-numeric identifiers must go first.
 
-createToken('PRERELEASEIDENTIFIER', `(?:${src[t.NUMERICIDENTIFIER]
-}|${src[t.NONNUMERICIDENTIFIER]})`)
+createToken('PRERELEASEIDENTIFIER', `(?:${src[t.NONNUMERICIDENTIFIER]
+}|${src[t.NUMERICIDENTIFIER]})`)
 
-createToken('PRERELEASEIDENTIFIERLOOSE', `(?:${src[t.NUMERICIDENTIFIERLOOSE]
-}|${src[t.NONNUMERICIDENTIFIER]})`)
+createToken('PRERELEASEIDENTIFIERLOOSE', `(?:${src[t.NONNUMERICIDENTIFIER]
+}|${src[t.NUMERICIDENTIFIERLOOSE]})`)
 
 // ## Pre-release Version
 // Hyphen, followed by one or more dot-separated pre-release version
@@ -328117,7 +327726,7 @@ createToken('LOOSE', `^${src[t.LOOSEPLAIN]}$`)
 createToken('GTLT', '((?:<|>)?=?)')
 
 // Something like "2.*" or "1.2.x".
-// Note that "x.x" is a valid xRange identifer, meaning "any version"
+// Note that "x.x" is a valid xRange identifier, meaning "any version"
 // Only the first item is strictly required.
 createToken('XRANGEIDENTIFIERLOOSE', `${src[t.NUMERICIDENTIFIERLOOSE]}|x|X|\\*`)
 createToken('XRANGEIDENTIFIER', `${src[t.NUMERICIDENTIFIER]}|x|X|\\*`)
@@ -328141,12 +327750,17 @@ createToken('XRANGELOOSE', `^${src[t.GTLT]}\\s*${src[t.XRANGEPLAINLOOSE]}$`)
 
 // Coercion.
 // Extract anything that could conceivably be a part of a valid semver
-createToken('COERCE', `${'(^|[^\\d])' +
+createToken('COERCEPLAIN', `${'(^|[^\\d])' +
               '(\\d{1,'}${MAX_SAFE_COMPONENT_LENGTH}})` +
               `(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?` +
-              `(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?` +
+              `(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?`)
+createToken('COERCE', `${src[t.COERCEPLAIN]}(?:$|[^\\d])`)
+createToken('COERCEFULL', src[t.COERCEPLAIN] +
+              `(?:${src[t.PRERELEASE]})?` +
+              `(?:${src[t.BUILD]})?` +
               `(?:$|[^\\d])`)
 createToken('COERCERTL', src[t.COERCE], true)
+createToken('COERCERTLFULL', src[t.COERCEFULL], true)
 
 // Tilde ranges.
 // Meaning is "reasonably at or greater than"
@@ -328204,6 +327818,9 @@ createToken('GTE0PRE', '^\\s*>=\\s*0\\.0\\.0-0\\s*$')
 /***/ 9380:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 // Determine if version is greater than all the versions possible in the range.
 const outside = __nccwpck_require__(60420)
 const gtr = (version, range, options) => outside(version, range, '>', options)
@@ -328214,6 +327831,9 @@ module.exports = gtr
 
 /***/ 27008:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const Range = __nccwpck_require__(9828)
 const intersects = (r1, r2, options) => {
@@ -328229,6 +327849,9 @@ module.exports = intersects
 /***/ 33323:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const outside = __nccwpck_require__(60420)
 // Determine if version is less than all the versions possible in the range
 const ltr = (version, range, options) => outside(version, range, '<', options)
@@ -328239,6 +327862,9 @@ module.exports = ltr
 
 /***/ 20579:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const SemVer = __nccwpck_require__(48088)
 const Range = __nccwpck_require__(9828)
@@ -328272,6 +327898,9 @@ module.exports = maxSatisfying
 /***/ 10832:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const SemVer = __nccwpck_require__(48088)
 const Range = __nccwpck_require__(9828)
 const minSatisfying = (versions, range, options) => {
@@ -328302,6 +327931,9 @@ module.exports = minSatisfying
 
 /***/ 34179:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const SemVer = __nccwpck_require__(48088)
 const Range = __nccwpck_require__(9828)
@@ -328370,6 +328002,9 @@ module.exports = minVersion
 
 /***/ 60420:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const SemVer = __nccwpck_require__(48088)
 const Comparator = __nccwpck_require__(91532)
@@ -328458,6 +328093,9 @@ module.exports = outside
 /***/ 75297:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 // given a set of versions and a range, create a "simplified" range
 // that includes the same versions that the original range does
 // If the original range is shorter than the simplified one, return that.
@@ -328512,6 +328150,9 @@ module.exports = (versions, range, options) => {
 /***/ 7863:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const Range = __nccwpck_require__(9828)
 const Comparator = __nccwpck_require__(91532)
 const { ANY } = Comparator
@@ -328550,7 +328191,7 @@ const compare = __nccwpck_require__(44309)
 // - If LT
 //   - If LT.semver is greater than any < or <= comp in C, return false
 //   - If LT is <=, and LT.semver does not satisfy every C, return false
-//   - If GT.semver has a prerelease, and not in prerelease mode
+//   - If LT.semver has a prerelease, and not in prerelease mode
 //     - If no C has a prerelease and the LT.semver tuple, return false
 // - Else return true
 
@@ -328686,7 +328327,7 @@ const simpleSubset = (sub, dom, options) => {
         if (higher === c && higher !== gt) {
           return false
         }
-      } else if (gt.operator === '>=' && !satisfies(gt.semver, String(c), options)) {
+      } else if (gt.operator === '>=' && !c.test(gt.semver)) {
         return false
       }
     }
@@ -328704,7 +328345,7 @@ const simpleSubset = (sub, dom, options) => {
         if (lower === c && lower !== lt) {
           return false
         }
-      } else if (lt.operator === '<=' && !satisfies(lt.semver, String(c), options)) {
+      } else if (lt.operator === '<=' && !c.test(lt.semver)) {
         return false
       }
     }
@@ -328766,6 +328407,9 @@ module.exports = subset
 /***/ 52706:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+"use strict";
+
+
 const Range = __nccwpck_require__(9828)
 
 // Mostly just for testing and legacy API reasons
@@ -328780,6 +328424,9 @@ module.exports = toComparators
 
 /***/ 2098:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
 
 const Range = __nccwpck_require__(9828)
 const validRange = (range, options) => {
@@ -352591,1152 +352238,6 @@ nacl.setPRNG = function(fn) {
 })();
 
 })( true && module.exports ? module.exports : (self.nacl = self.nacl || {}));
-
-
-/***/ }),
-
-/***/ 31524:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-
-
-/***/ }),
-
-/***/ 66647:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isValidErrorCode = exports.httpStatusFromErrorCode = exports.TwirpErrorCode = exports.BadRouteError = exports.InternalServerErrorWith = exports.InternalServerError = exports.RequiredArgumentError = exports.InvalidArgumentError = exports.NotFoundError = exports.TwirpError = void 0;
-/**
- * Represents a twirp error
- */
-class TwirpError extends Error {
-    constructor(code, msg) {
-        super(msg);
-        this.code = TwirpErrorCode.Internal;
-        this.meta = {};
-        this.code = code;
-        this.msg = msg;
-        Object.setPrototypeOf(this, TwirpError.prototype);
-    }
-    /**
-     * Adds a metadata kv to the error
-     * @param key
-     * @param value
-     */
-    withMeta(key, value) {
-        this.meta[key] = value;
-        return this;
-    }
-    /**
-     * Returns a single metadata value
-     * return "" if not found
-     * @param key
-     */
-    getMeta(key) {
-        return this.meta[key] || "";
-    }
-    /**
-     * Add the original error cause
-     * @param err
-     * @param addMeta
-     */
-    withCause(err, addMeta = false) {
-        this._originalCause = err;
-        if (addMeta) {
-            this.withMeta("cause", err.message);
-        }
-        return this;
-    }
-    cause() {
-        return this._originalCause;
-    }
-    /**
-     * Returns the error representation to JSON
-     */
-    toJSON() {
-        try {
-            return JSON.stringify({
-                code: this.code,
-                msg: this.msg,
-                meta: this.meta,
-            });
-        }
-        catch (e) {
-            return `{"code": "internal", "msg": "There was an error but it could not be serialized into JSON"}`;
-        }
-    }
-    /**
-     * Create a twirp error from an object
-     * @param obj
-     */
-    static fromObject(obj) {
-        const code = obj["code"] || TwirpErrorCode.Unknown;
-        const msg = obj["msg"] || "unknown";
-        const error = new TwirpError(code, msg);
-        if (obj["meta"]) {
-            Object.keys(obj["meta"]).forEach((key) => {
-                error.withMeta(key, obj["meta"][key]);
-            });
-        }
-        return error;
-    }
-}
-exports.TwirpError = TwirpError;
-/**
- * NotFoundError constructor for the common NotFound error.
- */
-class NotFoundError extends TwirpError {
-    constructor(msg) {
-        super(TwirpErrorCode.NotFound, msg);
-    }
-}
-exports.NotFoundError = NotFoundError;
-/**
- * InvalidArgumentError constructor for the common InvalidArgument error. Can be
- * used when an argument has invalid format, is a number out of range, is a bad
- * option, etc).
- */
-class InvalidArgumentError extends TwirpError {
-    constructor(argument, validationMsg) {
-        super(TwirpErrorCode.InvalidArgument, argument + " " + validationMsg);
-        this.withMeta("argument", argument);
-    }
-}
-exports.InvalidArgumentError = InvalidArgumentError;
-/**
- * RequiredArgumentError is a more specific constructor for InvalidArgument
- * error. Should be used when the argument is required (expected to have a
- * non-zero value).
- */
-class RequiredArgumentError extends InvalidArgumentError {
-    constructor(argument) {
-        super(argument, "is required");
-    }
-}
-exports.RequiredArgumentError = RequiredArgumentError;
-/**
- * InternalError constructor for the common Internal error. Should be used to
- * specify that something bad or unexpected happened.
- */
-class InternalServerError extends TwirpError {
-    constructor(msg) {
-        super(TwirpErrorCode.Internal, msg);
-    }
-}
-exports.InternalServerError = InternalServerError;
-/**
- * InternalErrorWith makes an internal error, wrapping the original error and using it
- * for the error message, and with metadata "cause" with the original error type.
- * This function is used by Twirp services to wrap non-Twirp errors as internal errors.
- * The wrapped error can be extracted later with err.cause()
- */
-class InternalServerErrorWith extends InternalServerError {
-    constructor(err) {
-        super(err.message);
-        this.withMeta("cause", err.name);
-        this.withCause(err);
-    }
-}
-exports.InternalServerErrorWith = InternalServerErrorWith;
-/**
- * A standard BadRoute Error
- */
-class BadRouteError extends TwirpError {
-    constructor(msg, method, url) {
-        super(TwirpErrorCode.BadRoute, msg);
-        this.withMeta("twirp_invalid_route", method + " " + url);
-    }
-}
-exports.BadRouteError = BadRouteError;
-var TwirpErrorCode;
-(function (TwirpErrorCode) {
-    // Canceled indicates the operation was cancelled (typically by the caller).
-    TwirpErrorCode["Canceled"] = "canceled";
-    // Unknown error. For example when handling errors raised by APIs that do not
-    // return enough error information.
-    TwirpErrorCode["Unknown"] = "unknown";
-    // InvalidArgument indicates client specified an invalid argument. It
-    // indicates arguments that are problematic regardless of the state of the
-    // system (i.e. a malformed file name, required argument, number out of range,
-    // etc.).
-    TwirpErrorCode["InvalidArgument"] = "invalid_argument";
-    // Malformed indicates an error occurred while decoding the client's request.
-    // This may mean that the message was encoded improperly, or that there is a
-    // disagreement in message format between the client and server.
-    TwirpErrorCode["Malformed"] = "malformed";
-    // DeadlineExceeded means operation expired before completion. For operations
-    // that change the state of the system, this error may be returned even if the
-    // operation has completed successfully (timeout).
-    TwirpErrorCode["DeadlineExceeded"] = "deadline_exceeded";
-    // NotFound means some requested entity was not found.
-    TwirpErrorCode["NotFound"] = "not_found";
-    // BadRoute means that the requested URL path wasn't routable to a Twirp
-    // service and method. This is returned by the generated server, and usually
-    // shouldn't be returned by applications. Instead, applications should use
-    // NotFound or Unimplemented.
-    TwirpErrorCode["BadRoute"] = "bad_route";
-    // AlreadyExists means an attempt to create an entity failed because one
-    // already exists.
-    TwirpErrorCode["AlreadyExists"] = "already_exists";
-    // PermissionDenied indicates the caller does not have permission to execute
-    // the specified operation. It must not be used if the caller cannot be
-    // identified (Unauthenticated).
-    TwirpErrorCode["PermissionDenied"] = "permission_denied";
-    // Unauthenticated indicates the request does not have valid authentication
-    // credentials for the operation.
-    TwirpErrorCode["Unauthenticated"] = "unauthenticated";
-    // ResourceExhausted indicates some resource has been exhausted, perhaps a
-    // per-user quota, or perhaps the entire file system is out of space.
-    TwirpErrorCode["ResourceExhausted"] = "resource_exhausted";
-    // FailedPrecondition indicates operation was rejected because the system is
-    // not in a state required for the operation's execution. For example, doing
-    // an rmdir operation on a directory that is non-empty, or on a non-directory
-    // object, or when having conflicting read-modify-write on the same resource.
-    TwirpErrorCode["FailedPrecondition"] = "failed_precondition";
-    // Aborted indicates the operation was aborted, typically due to a concurrency
-    // issue like sequencer check failures, transaction aborts, etc.
-    TwirpErrorCode["Aborted"] = "aborted";
-    // OutOfRange means operation was attempted past the valid range. For example,
-    // seeking or reading past end of a paginated collection.
-    //
-    // Unlike InvalidArgument, this error indicates a problem that may be fixed if
-    // the system state changes (i.e. adding more items to the collection).
-    //
-    // There is a fair bit of overlap between FailedPrecondition and OutOfRange.
-    // We recommend using OutOfRange (the more specific error) when it applies so
-    // that callers who are iterating through a space can easily look for an
-    // OutOfRange error to detect when they are done.
-    TwirpErrorCode["OutOfRange"] = "out_of_range";
-    // Unimplemented indicates operation is not implemented or not
-    // supported/enabled in this service.
-    TwirpErrorCode["Unimplemented"] = "unimplemented";
-    // Internal errors. When some invariants expected by the underlying system
-    // have been broken. In other words, something bad happened in the library or
-    // backend service. Do not confuse with HTTP Internal Server Error; an
-    // Internal error could also happen on the client code, i.e. when parsing a
-    // server response.
-    TwirpErrorCode["Internal"] = "internal";
-    // Unavailable indicates the service is currently unavailable. This is a most
-    // likely a transient condition and may be corrected by retrying with a
-    // backoff.
-    TwirpErrorCode["Unavailable"] = "unavailable";
-    // DataLoss indicates unrecoverable data loss or corruption.
-    TwirpErrorCode["DataLoss"] = "data_loss";
-})(TwirpErrorCode = exports.TwirpErrorCode || (exports.TwirpErrorCode = {}));
-// ServerHTTPStatusFromErrorCode maps a Twirp error type into a similar HTTP
-// response status. It is used by the Twirp server handler to set the HTTP
-// response status code. Returns 0 if the ErrorCode is invalid.
-function httpStatusFromErrorCode(code) {
-    switch (code) {
-        case TwirpErrorCode.Canceled:
-            return 408; // RequestTimeout
-        case TwirpErrorCode.Unknown:
-            return 500; // Internal Server Error
-        case TwirpErrorCode.InvalidArgument:
-            return 400; // BadRequest
-        case TwirpErrorCode.Malformed:
-            return 400; // BadRequest
-        case TwirpErrorCode.DeadlineExceeded:
-            return 408; // RequestTimeout
-        case TwirpErrorCode.NotFound:
-            return 404; // Not Found
-        case TwirpErrorCode.BadRoute:
-            return 404; // Not Found
-        case TwirpErrorCode.AlreadyExists:
-            return 409; // Conflict
-        case TwirpErrorCode.PermissionDenied:
-            return 403; // Forbidden
-        case TwirpErrorCode.Unauthenticated:
-            return 401; // Unauthorized
-        case TwirpErrorCode.ResourceExhausted:
-            return 429; // Too Many Requests
-        case TwirpErrorCode.FailedPrecondition:
-            return 412; // Precondition Failed
-        case TwirpErrorCode.Aborted:
-            return 409; // Conflict
-        case TwirpErrorCode.OutOfRange:
-            return 400; // Bad Request
-        case TwirpErrorCode.Unimplemented:
-            return 501; // Not Implemented
-        case TwirpErrorCode.Internal:
-            return 500; // Internal Server Error
-        case TwirpErrorCode.Unavailable:
-            return 503; // Service Unavailable
-        case TwirpErrorCode.DataLoss:
-            return 500; // Internal Server Error
-        default:
-            return 0; // Invalid!
-    }
-}
-exports.httpStatusFromErrorCode = httpStatusFromErrorCode;
-// IsValidErrorCode returns true if is one of the valid predefined constants.
-function isValidErrorCode(code) {
-    return httpStatusFromErrorCode(code) != 0;
-}
-exports.isValidErrorCode = isValidErrorCode;
-
-
-/***/ }),
-
-/***/ 56748:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Gateway = exports.Pattern = void 0;
-const querystring_1 = __nccwpck_require__(63477);
-const dotObject = __importStar(__nccwpck_require__(13598));
-const request_1 = __nccwpck_require__(8347);
-const errors_1 = __nccwpck_require__(66647);
-const http_client_1 = __nccwpck_require__(94091);
-const server_1 = __nccwpck_require__(26604);
-var Pattern;
-(function (Pattern) {
-    Pattern["POST"] = "post";
-    Pattern["GET"] = "get";
-    Pattern["PATCH"] = "patch";
-    Pattern["PUT"] = "put";
-    Pattern["DELETE"] = "delete";
-})(Pattern = exports.Pattern || (exports.Pattern = {}));
-/**
- * The Gateway proxies http requests to Twirp Compliant
- * handlers
- */
-class Gateway {
-    constructor(routes) {
-        this.routes = routes;
-    }
-    /**
-     * Middleware that rewrite the current request
-     * to a Twirp compliant request
-     */
-    twirpRewrite(prefix = "/twirp") {
-        return (req, resp, next) => {
-            this.rewrite(req, resp, prefix)
-                .then(() => next())
-                .catch((e) => {
-                if (e instanceof errors_1.TwirpError) {
-                    if (e.code !== errors_1.TwirpErrorCode.NotFound) {
-                        server_1.writeError(resp, e);
-                    }
-                    else {
-                        next();
-                    }
-                }
-            });
-        };
-    }
-    /**
-     * Rewrite an incoming request to a Twirp compliant request
-     * @param req
-     * @param resp
-     * @param prefix
-     */
-    rewrite(req, resp, prefix = "/twirp") {
-        return __awaiter(this, void 0, void 0, function* () {
-            const [match, route] = this.matchRoute(req);
-            const body = yield this.prepareTwirpBody(req, match, route);
-            const twirpUrl = `${prefix}/${route.packageName}.${route.serviceName}/${route.methodName}`;
-            req.url = twirpUrl;
-            req.originalUrl = twirpUrl;
-            req.method = "POST";
-            req.headers["content-type"] = "application/json";
-            req.rawBody = Buffer.from(JSON.stringify(body));
-            if (route.responseBodyKey) {
-                const endFn = resp.end.bind(resp);
-                resp.end = function (chunk) {
-                    if (resp.statusCode === 200) {
-                        endFn(`{ "${route.responseBodyKey}": ${chunk} }`);
-                    }
-                    else {
-                        endFn(chunk);
-                    }
-                };
-            }
-        });
-    }
-    /**
-     * Create a reverse proxy handler to
-     * proxy http requests to Twirp Compliant handlers
-     * @param httpClientOption
-     */
-    reverseProxy(httpClientOption) {
-        const client = http_client_1.NodeHttpRPC(httpClientOption);
-        return (req, res) => __awaiter(this, void 0, void 0, function* () {
-            try {
-                const [match, route] = this.matchRoute(req);
-                const body = yield this.prepareTwirpBody(req, match, route);
-                const response = yield client.request(`${route.packageName}.${route.serviceName}`, route.methodName, "application/json", body);
-                res.statusCode = 200;
-                res.setHeader("content-type", "application/json");
-                let jsonResponse;
-                if (route.responseBodyKey) {
-                    jsonResponse = JSON.stringify({ [route.responseBodyKey]: response });
-                }
-                else {
-                    jsonResponse = JSON.stringify(response);
-                }
-                res.end(jsonResponse);
-            }
-            catch (e) {
-                server_1.writeError(res, e);
-            }
-        });
-    }
-    /**
-     * Prepares twirp body requests using http.google.annotions
-     * compliant spec
-     *
-     * @param req
-     * @param match
-     * @param route
-     * @protected
-     */
-    prepareTwirpBody(req, match, route) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const _a = match.params, { query_string } = _a, params = __rest(_a, ["query_string"]);
-            let requestBody = Object.assign({}, params);
-            if (query_string && route.bodyKey !== "*") {
-                const queryParams = this.parseQueryString(query_string);
-                requestBody = Object.assign(Object.assign({}, queryParams), requestBody);
-            }
-            let body = {};
-            if (route.bodyKey) {
-                const data = yield request_1.getRequestData(req);
-                try {
-                    const jsonBody = JSON.parse(data.toString() || "{}");
-                    if (route.bodyKey === "*") {
-                        body = jsonBody;
-                    }
-                    else {
-                        body[route.bodyKey] = jsonBody;
-                    }
-                }
-                catch (e) {
-                    const msg = "the json request could not be decoded";
-                    throw new errors_1.TwirpError(errors_1.TwirpErrorCode.Malformed, msg).withCause(e, true);
-                }
-            }
-            return Object.assign(Object.assign({}, body), requestBody);
-        });
-    }
-    /**
-     * Matches a route
-     * @param req
-     */
-    matchRoute(req) {
-        var _a;
-        const httpMethod = (_a = req.method) === null || _a === void 0 ? void 0 : _a.toLowerCase();
-        if (!httpMethod) {
-            throw new errors_1.BadRouteError(`method not allowed`, req.method || "", req.url || "");
-        }
-        const routes = this.routes[httpMethod];
-        for (const route of routes) {
-            const match = route.matcher(req.url || "/");
-            if (match) {
-                return [match, route];
-            }
-        }
-        throw new errors_1.NotFoundError(`url ${req.url} not found`);
-    }
-    /**
-     * Parse query string
-     * @param queryString
-     */
-    parseQueryString(queryString) {
-        const queryParams = querystring_1.parse(queryString.replace("?", ""));
-        return dotObject.object(queryParams);
-    }
-}
-exports.Gateway = Gateway;
-
-
-/***/ }),
-
-/***/ 4263:
-/***/ (function(__unused_webpack_module, exports) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isHook = exports.chainHooks = void 0;
-// ChainHooks creates a new ServerHook which chains the callbacks in
-// each of the constituent hooks passed in. Each hook function will be
-// called in the order of the ServerHooks values passed in.
-//
-// For the erroring hooks, RequestReceived and RequestRouted, any returned
-// errors prevent processing by later hooks.
-function chainHooks(...hooks) {
-    if (hooks.length === 0) {
-        return null;
-    }
-    if (hooks.length === 1) {
-        return hooks[0];
-    }
-    const serverHook = {
-        requestReceived(ctx) {
-            return __awaiter(this, void 0, void 0, function* () {
-                for (const hook of hooks) {
-                    if (!hook.requestReceived) {
-                        continue;
-                    }
-                    yield hook.requestReceived(ctx);
-                }
-            });
-        },
-        requestPrepared(ctx) {
-            return __awaiter(this, void 0, void 0, function* () {
-                for (const hook of hooks) {
-                    if (!hook.requestPrepared) {
-                        continue;
-                    }
-                    console.warn("hook requestPrepared is deprecated and will be removed in the next release. " +
-                        "Please use responsePrepared instead.");
-                    yield hook.requestPrepared(ctx);
-                }
-            });
-        },
-        responsePrepared(ctx) {
-            return __awaiter(this, void 0, void 0, function* () {
-                for (const hook of hooks) {
-                    if (!hook.responsePrepared) {
-                        continue;
-                    }
-                    yield hook.responsePrepared(ctx);
-                }
-            });
-        },
-        requestSent(ctx) {
-            return __awaiter(this, void 0, void 0, function* () {
-                for (const hook of hooks) {
-                    if (!hook.requestSent) {
-                        continue;
-                    }
-                    console.warn("hook requestSent is deprecated and will be removed in the next release. " +
-                        "Please use responseSent instead.");
-                    yield hook.requestSent(ctx);
-                }
-            });
-        },
-        responseSent(ctx) {
-            return __awaiter(this, void 0, void 0, function* () {
-                for (const hook of hooks) {
-                    if (!hook.responseSent) {
-                        continue;
-                    }
-                    yield hook.responseSent(ctx);
-                }
-            });
-        },
-        requestRouted(ctx) {
-            return __awaiter(this, void 0, void 0, function* () {
-                for (const hook of hooks) {
-                    if (!hook.requestRouted) {
-                        continue;
-                    }
-                    yield hook.requestRouted(ctx);
-                }
-            });
-        },
-        error(ctx, err) {
-            return __awaiter(this, void 0, void 0, function* () {
-                for (const hook of hooks) {
-                    if (!hook.error) {
-                        continue;
-                    }
-                    yield hook.error(ctx, err);
-                }
-            });
-        },
-    };
-    return serverHook;
-}
-exports.chainHooks = chainHooks;
-function isHook(object) {
-    return ("requestReceived" in object ||
-        "requestPrepared" in object ||
-        "requestSent" in object ||
-        "requestRouted" in object ||
-        "responsePrepared" in object ||
-        "responseSent" in object ||
-        "error" in object);
-}
-exports.isHook = isHook;
-
-
-/***/ }),
-
-/***/ 94091:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.FetchRPC = exports.wrapErrorResponseToTwirpError = exports.NodeHttpRPC = void 0;
-const http = __importStar(__nccwpck_require__(13685));
-const https = __importStar(__nccwpck_require__(95687));
-const url_1 = __nccwpck_require__(57310);
-const errors_1 = __nccwpck_require__(66647);
-/**
- * a node HTTP RPC implementation
- * @param options
- * @constructor
- */
-const NodeHttpRPC = (options) => ({
-    request(service, method, contentType, data) {
-        let client;
-        return new Promise((resolve, rejected) => {
-            const responseChunks = [];
-            const requestData = contentType === "application/protobuf"
-                ? Buffer.from(data)
-                : JSON.stringify(data);
-            const url = new url_1.URL(options.baseUrl);
-            const isHttps = url.protocol === "https:";
-            if (isHttps) {
-                client = https;
-            }
-            else {
-                client = http;
-            }
-            const prefix = url.pathname !== "/" ? url.pathname : "";
-            const req = client
-                .request(Object.assign(Object.assign({}, (options ? options : {})), { method: "POST", protocol: url.protocol, host: url.hostname, port: url.port ? url.port : isHttps ? 443 : 80, path: `${prefix}/${service}/${method}`, headers: Object.assign(Object.assign({}, (options.headers ? options.headers : {})), { "Content-Type": contentType, "Content-Length": contentType === "application/protobuf"
-                        ? Buffer.byteLength(requestData)
-                        : Buffer.from(requestData).byteLength }) }), (res) => {
-                res.on("data", (chunk) => responseChunks.push(chunk));
-                res.on("end", () => {
-                    const data = Buffer.concat(responseChunks);
-                    if (res.statusCode != 200) {
-                        rejected(wrapErrorResponseToTwirpError(data.toString()));
-                    }
-                    else {
-                        if (contentType === "application/json") {
-                            resolve(JSON.parse(data.toString()));
-                        }
-                        else {
-                            resolve(data);
-                        }
-                    }
-                });
-                res.on("error", (err) => {
-                    rejected(err);
-                });
-            })
-                .on("error", (err) => {
-                rejected(err);
-            });
-            req.end(requestData);
-        });
-    },
-});
-exports.NodeHttpRPC = NodeHttpRPC;
-function wrapErrorResponseToTwirpError(errorResponse) {
-    return errors_1.TwirpError.fromObject(JSON.parse(errorResponse));
-}
-exports.wrapErrorResponseToTwirpError = wrapErrorResponseToTwirpError;
-/**
- * a browser fetch RPC implementation
- */
-const FetchRPC = (options) => ({
-    request(service, method, contentType, data) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const headers = new Headers(options.headers);
-            headers.set("content-type", contentType);
-            const response = yield fetch(`${options.baseUrl}/${service}/${method}`, Object.assign(Object.assign({}, options), { method: "POST", headers, body: data instanceof Uint8Array ? data : JSON.stringify(data) }));
-            if (response.status === 200) {
-                if (contentType === "application/json") {
-                    return yield response.json();
-                }
-                return new Uint8Array(yield response.arrayBuffer());
-            }
-            throw errors_1.TwirpError.fromObject(yield response.json());
-        });
-    },
-});
-exports.FetchRPC = FetchRPC;
-
-
-/***/ }),
-
-/***/ 66465:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __exportStar = (this && this.__exportStar) || function(m, exports) {
-    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TwirpContentType = void 0;
-__exportStar(__nccwpck_require__(31524), exports);
-__exportStar(__nccwpck_require__(26604), exports);
-__exportStar(__nccwpck_require__(48913), exports);
-__exportStar(__nccwpck_require__(4263), exports);
-__exportStar(__nccwpck_require__(66647), exports);
-__exportStar(__nccwpck_require__(56748), exports);
-__exportStar(__nccwpck_require__(94091), exports);
-var request_1 = __nccwpck_require__(8347);
-Object.defineProperty(exports, "TwirpContentType", ({ enumerable: true, get: function () { return request_1.TwirpContentType; } }));
-
-
-/***/ }),
-
-/***/ 48913:
-/***/ (function(__unused_webpack_module, exports) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.chainInterceptors = void 0;
-// chains multiple Interceptors into a single Interceptor.
-// The first interceptor wraps the second one, and so on.
-// Returns null if interceptors is empty.
-function chainInterceptors(...interceptors) {
-    if (interceptors.length === 0) {
-        return;
-    }
-    if (interceptors.length === 1) {
-        return interceptors[0];
-    }
-    const first = interceptors[0];
-    return (ctx, request, handler) => __awaiter(this, void 0, void 0, function* () {
-        let next = handler;
-        for (let i = interceptors.length - 1; i > 0; i--) {
-            next = ((next) => (ctx, typedRequest) => {
-                return interceptors[i](ctx, typedRequest, next);
-            })(next);
-        }
-        return first(ctx, request, next);
-    });
-}
-exports.chainInterceptors = chainInterceptors;
-
-
-/***/ }),
-
-/***/ 8347:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.parseTwirpPath = exports.getRequestData = exports.validateRequest = exports.getContentType = exports.TwirpContentType = void 0;
-const errors_1 = __nccwpck_require__(66647);
-/**
- * Supported Twirp Content-Type
- */
-var TwirpContentType;
-(function (TwirpContentType) {
-    TwirpContentType[TwirpContentType["Protobuf"] = 0] = "Protobuf";
-    TwirpContentType[TwirpContentType["JSON"] = 1] = "JSON";
-    TwirpContentType[TwirpContentType["Unknown"] = 2] = "Unknown";
-})(TwirpContentType = exports.TwirpContentType || (exports.TwirpContentType = {}));
-/**
- * Get supported content-type
- * @param mimeType
- */
-function getContentType(mimeType) {
-    switch (mimeType) {
-        case "application/protobuf":
-            return TwirpContentType.Protobuf;
-        case "application/json":
-            return TwirpContentType.JSON;
-        default:
-            return TwirpContentType.Unknown;
-    }
-}
-exports.getContentType = getContentType;
-/**
- * Validate a twirp request
- * @param ctx
- * @param request
- * @param pathPrefix
- */
-function validateRequest(ctx, request, pathPrefix) {
-    if (request.method !== "POST") {
-        const msg = `unsupported method ${request.method} (only POST is allowed)`;
-        throw new errors_1.BadRouteError(msg, request.method || "", request.url || "");
-    }
-    const path = parseTwirpPath(request.url || "");
-    if (path.pkgService !==
-        (ctx.packageName ? ctx.packageName + "." : "") + ctx.serviceName) {
-        const msg = `no handler for path ${request.url}`;
-        throw new errors_1.BadRouteError(msg, request.method || "", request.url || "");
-    }
-    if (path.prefix !== pathPrefix) {
-        const msg = `invalid path prefix ${path.prefix}, expected ${pathPrefix}, on path ${request.url}`;
-        throw new errors_1.BadRouteError(msg, request.method || "", request.url || "");
-    }
-    const mimeContentType = request.headers["content-type"] || "";
-    if (ctx.contentType === TwirpContentType.Unknown) {
-        const msg = `unexpected Content-Type: ${request.headers["content-type"]}`;
-        throw new errors_1.BadRouteError(msg, request.method || "", request.url || "");
-    }
-    return Object.assign(Object.assign({}, path), { mimeContentType, contentType: ctx.contentType });
-}
-exports.validateRequest = validateRequest;
-/**
- * Get request data from the body
- * @param req
- */
-function getRequestData(req) {
-    return new Promise((resolve, reject) => {
-        const reqWithRawBody = req;
-        if (reqWithRawBody.rawBody instanceof Buffer) {
-            resolve(reqWithRawBody.rawBody);
-            return;
-        }
-        const chunks = [];
-        req.on("data", (chunk) => chunks.push(chunk));
-        req.on("end", () => __awaiter(this, void 0, void 0, function* () {
-            const data = Buffer.concat(chunks);
-            resolve(data);
-        }));
-        req.on("error", (err) => {
-            if (req.aborted) {
-                reject(new errors_1.TwirpError(errors_1.TwirpErrorCode.DeadlineExceeded, "failed to read request: deadline exceeded"));
-            }
-            else {
-                reject(new errors_1.TwirpError(errors_1.TwirpErrorCode.Malformed, err.message).withCause(err));
-            }
-        });
-        req.on("close", () => {
-            reject(new errors_1.TwirpError(errors_1.TwirpErrorCode.Canceled, "failed to read request: context canceled"));
-        });
-    });
-}
-exports.getRequestData = getRequestData;
-/**
- * Parses twirp url path
- * @param path
- */
-function parseTwirpPath(path) {
-    const parts = path.split("/");
-    if (parts.length < 2) {
-        return {
-            pkgService: "",
-            method: "",
-            prefix: "",
-        };
-    }
-    return {
-        method: parts[parts.length - 1],
-        pkgService: parts[parts.length - 2],
-        prefix: parts.slice(0, parts.length - 2).join("/"),
-    };
-}
-exports.parseTwirpPath = parseTwirpPath;
-
-
-/***/ }),
-
-/***/ 26604:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.writeError = exports.TwirpServer = void 0;
-const hooks_1 = __nccwpck_require__(4263);
-const request_1 = __nccwpck_require__(8347);
-const errors_1 = __nccwpck_require__(66647);
-/**
- * Runtime server implementation of a TwirpServer
- */
-class TwirpServer {
-    constructor(options) {
-        this.pathPrefix = "/twirp";
-        this.hooks = [];
-        this.interceptors = [];
-        this.packageName = options.packageName;
-        this.serviceName = options.serviceName;
-        this.methodList = options.methodList;
-        this.matchRoute = options.matchRoute;
-        this.service = options.service;
-    }
-    /**
-     * Returns the prefix for this server
-     */
-    get prefix() {
-        return this.pathPrefix;
-    }
-    /**
-     * The http handler for twirp complaint endpoints
-     * @param options
-     */
-    httpHandler(options) {
-        return (req, resp) => {
-            // setup prefix
-            if ((options === null || options === void 0 ? void 0 : options.prefix) !== undefined) {
-                this.withPrefix(options.prefix);
-            }
-            return this._httpHandler(req, resp);
-        };
-    }
-    /**
-     * Adds interceptors or hooks to the request stack
-     * @param middlewares
-     */
-    use(...middlewares) {
-        middlewares.forEach((middleware) => {
-            if (hooks_1.isHook(middleware)) {
-                this.hooks.push(middleware);
-                return this;
-            }
-            this.interceptors.push(middleware);
-        });
-        return this;
-    }
-    /**
-     * Adds a prefix to the service url path
-     * @param prefix
-     */
-    withPrefix(prefix) {
-        if (prefix === false) {
-            this.pathPrefix = "";
-        }
-        else {
-            this.pathPrefix = prefix;
-        }
-        return this;
-    }
-    /**
-     * Returns the regex matching path for this twirp server
-     */
-    matchingPath() {
-        const baseRegex = this.baseURI().replace(/\./g, "\\.");
-        return new RegExp(`${baseRegex}\/(${this.methodList.join("|")})`);
-    }
-    /**
-     * Returns the base URI for this twirp server
-     */
-    baseURI() {
-        return `${this.pathPrefix}/${this.packageName ? this.packageName + "." : ""}${this.serviceName}`;
-    }
-    /**
-     * Create a twirp context
-     * @param req
-     * @param res
-     * @private
-     */
-    createContext(req, res) {
-        return {
-            packageName: this.packageName,
-            serviceName: this.serviceName,
-            methodName: "",
-            contentType: request_1.getContentType(req.headers["content-type"]),
-            req: req,
-            res: res,
-        };
-    }
-    /**
-     * Twrip server http handler implementation
-     * @param req
-     * @param resp
-     * @private
-     */
-    _httpHandler(req, resp) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const ctx = this.createContext(req, resp);
-            try {
-                yield this.invokeHook("requestReceived", ctx);
-                const { method, mimeContentType } = request_1.validateRequest(ctx, req, this.pathPrefix || "");
-                const handler = this.matchRoute(method, {
-                    onMatch: (ctx) => {
-                        return this.invokeHook("requestRouted", ctx);
-                    },
-                    onNotFound: () => {
-                        const msg = `no handler for path ${req.url}`;
-                        throw new errors_1.BadRouteError(msg, req.method || "", req.url || "");
-                    },
-                });
-                const body = yield request_1.getRequestData(req);
-                const response = yield handler(ctx, this.service, body, this.interceptors);
-                yield Promise.all([
-                    this.invokeHook("responsePrepared", ctx),
-                    // keep backwards compatibility till next release
-                    this.invokeHook("requestPrepared", ctx),
-                ]);
-                resp.statusCode = 200;
-                resp.setHeader("Content-Type", mimeContentType);
-                resp.end(response);
-            }
-            catch (e) {
-                yield this.invokeHook("error", ctx, mustBeTwirpError(e));
-                if (!resp.headersSent) {
-                    writeError(resp, e);
-                }
-            }
-            finally {
-                yield Promise.all([
-                    this.invokeHook("responseSent", ctx),
-                    // keep backwards compatibility till next release
-                    this.invokeHook("requestSent", ctx),
-                ]);
-            }
-        });
-    }
-    /**
-     * Invoke a hook
-     * @param hookName
-     * @param ctx
-     * @param err
-     * @protected
-     */
-    invokeHook(hookName, ctx, err) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (this.hooks.length === 0) {
-                return;
-            }
-            const chainedHooks = hooks_1.chainHooks(...this.hooks);
-            const hook = chainedHooks === null || chainedHooks === void 0 ? void 0 : chainedHooks[hookName];
-            if (hook) {
-                yield hook(ctx, err || new errors_1.InternalServerError("internal server error"));
-            }
-        });
-    }
-}
-exports.TwirpServer = TwirpServer;
-/**
- * Write http error response
- * @param res
- * @param error
- */
-function writeError(res, error) {
-    const twirpError = mustBeTwirpError(error);
-    res.setHeader("Content-Type", "application/json");
-    res.statusCode = errors_1.httpStatusFromErrorCode(twirpError.code);
-    res.end(twirpError.toJSON());
-}
-exports.writeError = writeError;
-/**
- * Make sure that the error passed is a TwirpError
- * otherwise it will wrap it into an InternalError
- * @param err
- */
-function mustBeTwirpError(err) {
-    if (err instanceof errors_1.TwirpError) {
-        return err;
-    }
-    return new errors_1.InternalServerErrorWith(err);
-}
 
 
 /***/ }),
@@ -378074,6 +376575,203 @@ function dumpException(ex)
 
 /***/ }),
 
+/***/ 54886:
+/***/ ((module) => {
+
+"use strict";
+
+
+var conversions = {};
+module.exports = conversions;
+
+function sign(x) {
+    return x < 0 ? -1 : 1;
+}
+
+function evenRound(x) {
+    // Round x to the nearest integer, choosing the even integer if it lies halfway between two.
+    if ((x % 1) === 0.5 && (x & 1) === 0) { // [even number].5; round down (i.e. floor)
+        return Math.floor(x);
+    } else {
+        return Math.round(x);
+    }
+}
+
+function createNumberConversion(bitLength, typeOpts) {
+    if (!typeOpts.unsigned) {
+        --bitLength;
+    }
+    const lowerBound = typeOpts.unsigned ? 0 : -Math.pow(2, bitLength);
+    const upperBound = Math.pow(2, bitLength) - 1;
+
+    const moduloVal = typeOpts.moduloBitLength ? Math.pow(2, typeOpts.moduloBitLength) : Math.pow(2, bitLength);
+    const moduloBound = typeOpts.moduloBitLength ? Math.pow(2, typeOpts.moduloBitLength - 1) : Math.pow(2, bitLength - 1);
+
+    return function(V, opts) {
+        if (!opts) opts = {};
+
+        let x = +V;
+
+        if (opts.enforceRange) {
+            if (!Number.isFinite(x)) {
+                throw new TypeError("Argument is not a finite number");
+            }
+
+            x = sign(x) * Math.floor(Math.abs(x));
+            if (x < lowerBound || x > upperBound) {
+                throw new TypeError("Argument is not in byte range");
+            }
+
+            return x;
+        }
+
+        if (!isNaN(x) && opts.clamp) {
+            x = evenRound(x);
+
+            if (x < lowerBound) x = lowerBound;
+            if (x > upperBound) x = upperBound;
+            return x;
+        }
+
+        if (!Number.isFinite(x) || x === 0) {
+            return 0;
+        }
+
+        x = sign(x) * Math.floor(Math.abs(x));
+        x = x % moduloVal;
+
+        if (!typeOpts.unsigned && x >= moduloBound) {
+            return x - moduloVal;
+        } else if (typeOpts.unsigned) {
+            if (x < 0) {
+              x += moduloVal;
+            } else if (x === -0) { // don't return negative zero
+              return 0;
+            }
+        }
+
+        return x;
+    }
+}
+
+conversions["void"] = function () {
+    return undefined;
+};
+
+conversions["boolean"] = function (val) {
+    return !!val;
+};
+
+conversions["byte"] = createNumberConversion(8, { unsigned: false });
+conversions["octet"] = createNumberConversion(8, { unsigned: true });
+
+conversions["short"] = createNumberConversion(16, { unsigned: false });
+conversions["unsigned short"] = createNumberConversion(16, { unsigned: true });
+
+conversions["long"] = createNumberConversion(32, { unsigned: false });
+conversions["unsigned long"] = createNumberConversion(32, { unsigned: true });
+
+conversions["long long"] = createNumberConversion(32, { unsigned: false, moduloBitLength: 64 });
+conversions["unsigned long long"] = createNumberConversion(32, { unsigned: true, moduloBitLength: 64 });
+
+conversions["double"] = function (V) {
+    const x = +V;
+
+    if (!Number.isFinite(x)) {
+        throw new TypeError("Argument is not a finite floating-point value");
+    }
+
+    return x;
+};
+
+conversions["unrestricted double"] = function (V) {
+    const x = +V;
+
+    if (isNaN(x)) {
+        throw new TypeError("Argument is NaN");
+    }
+
+    return x;
+};
+
+// not quite valid, but good enough for JS
+conversions["float"] = conversions["double"];
+conversions["unrestricted float"] = conversions["unrestricted double"];
+
+conversions["DOMString"] = function (V, opts) {
+    if (!opts) opts = {};
+
+    if (opts.treatNullAsEmptyString && V === null) {
+        return "";
+    }
+
+    return String(V);
+};
+
+conversions["ByteString"] = function (V, opts) {
+    const x = String(V);
+    let c = undefined;
+    for (let i = 0; (c = x.codePointAt(i)) !== undefined; ++i) {
+        if (c > 255) {
+            throw new TypeError("Argument is not a valid bytestring");
+        }
+    }
+
+    return x;
+};
+
+conversions["USVString"] = function (V) {
+    const S = String(V);
+    const n = S.length;
+    const U = [];
+    for (let i = 0; i < n; ++i) {
+        const c = S.charCodeAt(i);
+        if (c < 0xD800 || c > 0xDFFF) {
+            U.push(String.fromCodePoint(c));
+        } else if (0xDC00 <= c && c <= 0xDFFF) {
+            U.push(String.fromCodePoint(0xFFFD));
+        } else {
+            if (i === n - 1) {
+                U.push(String.fromCodePoint(0xFFFD));
+            } else {
+                const d = S.charCodeAt(i + 1);
+                if (0xDC00 <= d && d <= 0xDFFF) {
+                    const a = c & 0x3FF;
+                    const b = d & 0x3FF;
+                    U.push(String.fromCodePoint((2 << 15) + (2 << 9) * a + b));
+                    ++i;
+                } else {
+                    U.push(String.fromCodePoint(0xFFFD));
+                }
+            }
+        }
+    }
+
+    return U.join('');
+};
+
+conversions["Date"] = function (V, opts) {
+    if (!(V instanceof Date)) {
+        throw new TypeError("Argument is not a Date object");
+    }
+    if (isNaN(V)) {
+        return undefined;
+    }
+
+    return V;
+};
+
+conversions["RegExp"] = function (V, opts) {
+    if (!(V instanceof RegExp)) {
+        V = new RegExp(V);
+    }
+
+    return V;
+};
+
+
+/***/ }),
+
 /***/ 97537:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
@@ -378288,7 +376986,7 @@ exports.implementation = class URLImpl {
 "use strict";
 
 
-const conversions = __nccwpck_require__(56059);
+const conversions = __nccwpck_require__(54886);
 const utils = __nccwpck_require__(83185);
 const Impl = __nccwpck_require__(97537);
 
@@ -379834,203 +378532,6 @@ module.exports.implForWrapper = function (wrapper) {
   return wrapper[module.exports.implSymbol];
 };
 
-
-
-/***/ }),
-
-/***/ 56059:
-/***/ ((module) => {
-
-"use strict";
-
-
-var conversions = {};
-module.exports = conversions;
-
-function sign(x) {
-    return x < 0 ? -1 : 1;
-}
-
-function evenRound(x) {
-    // Round x to the nearest integer, choosing the even integer if it lies halfway between two.
-    if ((x % 1) === 0.5 && (x & 1) === 0) { // [even number].5; round down (i.e. floor)
-        return Math.floor(x);
-    } else {
-        return Math.round(x);
-    }
-}
-
-function createNumberConversion(bitLength, typeOpts) {
-    if (!typeOpts.unsigned) {
-        --bitLength;
-    }
-    const lowerBound = typeOpts.unsigned ? 0 : -Math.pow(2, bitLength);
-    const upperBound = Math.pow(2, bitLength) - 1;
-
-    const moduloVal = typeOpts.moduloBitLength ? Math.pow(2, typeOpts.moduloBitLength) : Math.pow(2, bitLength);
-    const moduloBound = typeOpts.moduloBitLength ? Math.pow(2, typeOpts.moduloBitLength - 1) : Math.pow(2, bitLength - 1);
-
-    return function(V, opts) {
-        if (!opts) opts = {};
-
-        let x = +V;
-
-        if (opts.enforceRange) {
-            if (!Number.isFinite(x)) {
-                throw new TypeError("Argument is not a finite number");
-            }
-
-            x = sign(x) * Math.floor(Math.abs(x));
-            if (x < lowerBound || x > upperBound) {
-                throw new TypeError("Argument is not in byte range");
-            }
-
-            return x;
-        }
-
-        if (!isNaN(x) && opts.clamp) {
-            x = evenRound(x);
-
-            if (x < lowerBound) x = lowerBound;
-            if (x > upperBound) x = upperBound;
-            return x;
-        }
-
-        if (!Number.isFinite(x) || x === 0) {
-            return 0;
-        }
-
-        x = sign(x) * Math.floor(Math.abs(x));
-        x = x % moduloVal;
-
-        if (!typeOpts.unsigned && x >= moduloBound) {
-            return x - moduloVal;
-        } else if (typeOpts.unsigned) {
-            if (x < 0) {
-              x += moduloVal;
-            } else if (x === -0) { // don't return negative zero
-              return 0;
-            }
-        }
-
-        return x;
-    }
-}
-
-conversions["void"] = function () {
-    return undefined;
-};
-
-conversions["boolean"] = function (val) {
-    return !!val;
-};
-
-conversions["byte"] = createNumberConversion(8, { unsigned: false });
-conversions["octet"] = createNumberConversion(8, { unsigned: true });
-
-conversions["short"] = createNumberConversion(16, { unsigned: false });
-conversions["unsigned short"] = createNumberConversion(16, { unsigned: true });
-
-conversions["long"] = createNumberConversion(32, { unsigned: false });
-conversions["unsigned long"] = createNumberConversion(32, { unsigned: true });
-
-conversions["long long"] = createNumberConversion(32, { unsigned: false, moduloBitLength: 64 });
-conversions["unsigned long long"] = createNumberConversion(32, { unsigned: true, moduloBitLength: 64 });
-
-conversions["double"] = function (V) {
-    const x = +V;
-
-    if (!Number.isFinite(x)) {
-        throw new TypeError("Argument is not a finite floating-point value");
-    }
-
-    return x;
-};
-
-conversions["unrestricted double"] = function (V) {
-    const x = +V;
-
-    if (isNaN(x)) {
-        throw new TypeError("Argument is NaN");
-    }
-
-    return x;
-};
-
-// not quite valid, but good enough for JS
-conversions["float"] = conversions["double"];
-conversions["unrestricted float"] = conversions["unrestricted double"];
-
-conversions["DOMString"] = function (V, opts) {
-    if (!opts) opts = {};
-
-    if (opts.treatNullAsEmptyString && V === null) {
-        return "";
-    }
-
-    return String(V);
-};
-
-conversions["ByteString"] = function (V, opts) {
-    const x = String(V);
-    let c = undefined;
-    for (let i = 0; (c = x.codePointAt(i)) !== undefined; ++i) {
-        if (c > 255) {
-            throw new TypeError("Argument is not a valid bytestring");
-        }
-    }
-
-    return x;
-};
-
-conversions["USVString"] = function (V) {
-    const S = String(V);
-    const n = S.length;
-    const U = [];
-    for (let i = 0; i < n; ++i) {
-        const c = S.charCodeAt(i);
-        if (c < 0xD800 || c > 0xDFFF) {
-            U.push(String.fromCodePoint(c));
-        } else if (0xDC00 <= c && c <= 0xDFFF) {
-            U.push(String.fromCodePoint(0xFFFD));
-        } else {
-            if (i === n - 1) {
-                U.push(String.fromCodePoint(0xFFFD));
-            } else {
-                const d = S.charCodeAt(i + 1);
-                if (0xDC00 <= d && d <= 0xDFFF) {
-                    const a = c & 0x3FF;
-                    const b = d & 0x3FF;
-                    U.push(String.fromCodePoint((2 << 15) + (2 << 9) * a + b));
-                    ++i;
-                } else {
-                    U.push(String.fromCodePoint(0xFFFD));
-                }
-            }
-        }
-    }
-
-    return U.join('');
-};
-
-conversions["Date"] = function (V, opts) {
-    if (!(V instanceof Date)) {
-        throw new TypeError("Argument is not a Date object");
-    }
-    if (isNaN(V)) {
-        return undefined;
-    }
-
-    return V;
-};
-
-conversions["RegExp"] = function (V, opts) {
-    if (!(V instanceof RegExp)) {
-        V = new RegExp(V);
-    }
-
-    return V;
-};
 
 
 /***/ }),
@@ -394472,8 +392973,10 @@ class Composer {
             }
         }
         if (afterDoc) {
-            Array.prototype.push.apply(doc.errors, this.errors);
-            Array.prototype.push.apply(doc.warnings, this.warnings);
+            for (let i = 0; i < this.errors.length; ++i)
+                doc.errors.push(this.errors[i]);
+            for (let i = 0; i < this.warnings.length; ++i)
+                doc.warnings.push(this.warnings[i]);
         }
         else {
             doc.errors = this.errors;
@@ -395405,7 +393908,7 @@ function doubleQuotedValue(source, onError) {
                     next = source[++i + 1];
             }
             else if (next === 'x' || next === 'u' || next === 'U') {
-                const length = { x: 2, u: 4, U: 8 }[next];
+                const length = next === 'x' ? 2 : next === 'u' ? 4 : 8;
                 res += parseCharCode(source, i + 1, length, onError);
                 i += length;
             }
@@ -395475,12 +393978,14 @@ function parseCharCode(source, offset, length, onError) {
     const cc = source.substr(offset, length);
     const ok = cc.length === length && /^[0-9a-fA-F]+$/.test(cc);
     const code = ok ? parseInt(cc, 16) : NaN;
-    if (isNaN(code)) {
+    try {
+        return String.fromCodePoint(code);
+    }
+    catch {
         const raw = source.substr(offset - 2, length + 2);
         onError(offset - 2, 'BAD_DQ_ESCAPE', `Invalid escape sequence ${raw}`);
         return raw;
     }
-    return String.fromCodePoint(code);
 }
 
 exports.resolveFlowScalar = resolveFlowScalar;
@@ -396732,6 +395237,8 @@ class Alias extends Node.NodeBase {
      * instance of the `source` anchor before this node.
      */
     resolve(doc, ctx) {
+        if (ctx?.maxAliasCount === 0)
+            throw new ReferenceError('Alias resolution is disabled');
         let nodes;
         if (ctx?.aliasResolveCache) {
             nodes = ctx.aliasResolveCache;
@@ -398419,7 +396926,7 @@ class Lexer {
             const n = (yield* this.pushCount(1)) + (yield* this.pushSpaces(true));
             this.indentNext = this.indentValue + 1;
             this.indentValue += n;
-            return yield* this.parseBlockStart();
+            return 'block-start';
         }
         return 'doc';
     }
@@ -398740,32 +397247,36 @@ class Lexer {
         return 0;
     }
     *pushIndicators() {
-        switch (this.charAt(0)) {
-            case '!':
-                return ((yield* this.pushTag()) +
-                    (yield* this.pushSpaces(true)) +
-                    (yield* this.pushIndicators()));
-            case '&':
-                return ((yield* this.pushUntil(isNotAnchorChar)) +
-                    (yield* this.pushSpaces(true)) +
-                    (yield* this.pushIndicators()));
-            case '-': // this is an error
-            case '?': // this is an error outside flow collections
-            case ':': {
-                const inFlow = this.flowLevel > 0;
-                const ch1 = this.charAt(1);
-                if (isEmpty(ch1) || (inFlow && flowIndicatorChars.has(ch1))) {
-                    if (!inFlow)
-                        this.indentNext = this.indentValue + 1;
-                    else if (this.flowKey)
-                        this.flowKey = false;
-                    return ((yield* this.pushCount(1)) +
-                        (yield* this.pushSpaces(true)) +
-                        (yield* this.pushIndicators()));
+        let n = 0;
+        loop: while (true) {
+            switch (this.charAt(0)) {
+                case '!':
+                    n += yield* this.pushTag();
+                    n += yield* this.pushSpaces(true);
+                    continue loop;
+                case '&':
+                    n += yield* this.pushUntil(isNotAnchorChar);
+                    n += yield* this.pushSpaces(true);
+                    continue loop;
+                case '-': // this is an error
+                case '?': // this is an error outside flow collections
+                case ':': {
+                    const inFlow = this.flowLevel > 0;
+                    const ch1 = this.charAt(1);
+                    if (isEmpty(ch1) || (inFlow && flowIndicatorChars.has(ch1))) {
+                        if (!inFlow)
+                            this.indentNext = this.indentValue + 1;
+                        else if (this.flowKey)
+                            this.flowKey = false;
+                        n += yield* this.pushCount(1);
+                        n += yield* this.pushSpaces(true);
+                        continue loop;
+                    }
                 }
             }
+            break loop;
         }
-        return 0;
+        return n;
     }
     *pushTag() {
         if (this.charAt(1) === '<') {
@@ -398953,6 +397464,14 @@ function getFirstKeyStartProps(prev) {
     }
     return prev.splice(i, prev.length);
 }
+function arrayPushArray(target, source) {
+    // May exhaust call stack with large `source` array
+    if (source.length < 1e5)
+        Array.prototype.push.apply(target, source);
+    else
+        for (let i = 0; i < source.length; ++i)
+            target.push(source[i]);
+}
 function fixFlowSeqItems(fc) {
     if (fc.start.type === 'flow-seq-start') {
         for (const it of fc.items) {
@@ -398965,12 +397484,12 @@ function fixFlowSeqItems(fc) {
                 delete it.key;
                 if (isFlowToken(it.value)) {
                     if (it.value.end)
-                        Array.prototype.push.apply(it.value.end, it.sep);
+                        arrayPushArray(it.value.end, it.sep);
                     else
                         it.value.end = it.sep;
                 }
                 else
-                    Array.prototype.push.apply(it.start, it.sep);
+                    arrayPushArray(it.start, it.sep);
                 delete it.sep;
             }
         }
@@ -399390,7 +397909,7 @@ class Parser {
                         const prev = map.items[map.items.length - 2];
                         const end = prev?.value?.end;
                         if (Array.isArray(end)) {
-                            Array.prototype.push.apply(end, it.start);
+                            arrayPushArray(end, it.start);
                             end.push(this.sourceToken);
                             map.items.pop();
                             return;
@@ -399605,7 +398124,7 @@ class Parser {
                         const prev = seq.items[seq.items.length - 2];
                         const end = prev?.value?.end;
                         if (Array.isArray(end)) {
-                            Array.prototype.push.apply(end, it.start);
+                            arrayPushArray(end, it.start);
                             end.push(this.sourceToken);
                             seq.items.pop();
                             return;
@@ -400759,18 +399278,18 @@ const isMergeKey = (ctx, key) => (merge.identify(key) ||
         merge.identify(key.value))) &&
     ctx?.doc.schema.tags.some(tag => tag.tag === merge.tag && tag.default);
 function addMergeToJSMap(ctx, map, value) {
-    value = ctx && identity.isAlias(value) ? value.resolve(ctx.doc) : value;
-    if (identity.isSeq(value))
-        for (const it of value.items)
+    const source = resolveAliasValue(ctx, value);
+    if (identity.isSeq(source))
+        for (const it of source.items)
             mergeValue(ctx, map, it);
-    else if (Array.isArray(value))
-        for (const it of value)
+    else if (Array.isArray(source))
+        for (const it of source)
             mergeValue(ctx, map, it);
     else
-        mergeValue(ctx, map, value);
+        mergeValue(ctx, map, source);
 }
 function mergeValue(ctx, map, value) {
-    const source = ctx && identity.isAlias(value) ? value.resolve(ctx.doc) : value;
+    const source = resolveAliasValue(ctx, value);
     if (!identity.isMap(source))
         throw new Error('Merge sources must be maps or map aliases');
     const srcMap = source.toJSON(null, ctx, Map);
@@ -400792,6 +399311,9 @@ function mergeValue(ctx, map, value) {
         }
     }
     return map;
+}
+function resolveAliasValue(ctx, value) {
+    return ctx && identity.isAlias(value) ? value.resolve(ctx.doc, ctx) : value;
 }
 
 exports.addMergeToJSMap = addMergeToJSMap;
@@ -401847,7 +400369,8 @@ function stringifyNumber({ format, minFractionDigits, tag, value }) {
     if (!format &&
         minFractionDigits &&
         (!tag || tag === 'tag:yaml.org,2002:float') &&
-        /^\d/.test(n)) {
+        /^-?\d/.test(n) &&
+        !n.includes('e')) {
         let i = n.indexOf('.');
         if (i < 0) {
             i = n.length;
@@ -407978,15 +406501,11 @@ let crypto = __nccwpck_require__(6113)
 
 let { urlAlphabet } = __nccwpck_require__(97651)
 
-// It is best to make fewer, larger requests to the crypto module to
-// avoid system call overhead. So, random numbers are generated in a
-// pool. The pool is a Buffer that is larger than the initial random
-// request size by this multiplier. The pool is enlarged if subsequent
-// requests exceed the maximum buffer size.
 const POOL_SIZE_MULTIPLIER = 128
 let pool, poolOffset
 
 let fillPool = bytes => {
+  if (bytes < 0 || bytes > 1024) throw new RangeError('Wrong ID size')
   if (!pool || pool.length < bytes) {
     pool = Buffer.allocUnsafe(bytes * POOL_SIZE_MULTIPLIER)
     crypto.randomFillSync(pool)
@@ -407999,39 +406518,22 @@ let fillPool = bytes => {
 }
 
 let random = bytes => {
-  // `|=` convert `bytes` to number to prevent `valueOf` abusing and pool pollution
   fillPool((bytes |= 0))
   return pool.subarray(poolOffset - bytes, poolOffset)
 }
 
 let customRandom = (alphabet, defaultSize, getRandom) => {
-  // First, a bitmask is necessary to generate the ID. The bitmask makes bytes
-  // values closer to the alphabet size. The bitmask calculates the closest
-  // `2^31 - 1` number, which exceeds the alphabet size.
-  // For example, the bitmask for the alphabet size 30 is 31 (00011111).
   let mask = (2 << (31 - Math.clz32((alphabet.length - 1) | 1))) - 1
-  // Though, the bitmask solution is not perfect since the bytes exceeding
-  // the alphabet size are refused. Therefore, to reliably generate the ID,
-  // the random bytes redundancy has to be satisfied.
 
-  // Note: every hardware random generator call is performance expensive,
-  // because the system call for entropy collection takes a lot of time.
-  // So, to avoid additional system calls, extra bytes are requested in advance.
 
-  // Next, a step determines how many random bytes to generate.
-  // The number of random bytes gets decided upon the ID size, mask,
-  // alphabet size, and magic number 1.6 (using 1.6 peaks at performance
-  // according to benchmarks).
   let step = Math.ceil((1.6 * mask * defaultSize) / alphabet.length)
 
   return (size = defaultSize) => {
     let id = ''
     while (true) {
       let bytes = getRandom(step)
-      // A compact alternative for `for (let i = 0; i < step; i++)`.
       let i = step
       while (i--) {
-        // Adding `|| ''` refuses a random byte that exceeds the alphabet size.
         id += alphabet[bytes[i] & mask] || ''
         if (id.length === size) return id
       }
@@ -408043,16 +406545,9 @@ let customAlphabet = (alphabet, size = 21) =>
   customRandom(alphabet, size, random)
 
 let nanoid = (size = 21) => {
-  // `|=` convert `size` to number to prevent `valueOf` abusing and pool pollution
   fillPool((size |= 0))
   let id = ''
-  // We are reading directly from the random pool to avoid creating new array
   for (let i = poolOffset - size; i < poolOffset; i++) {
-    // It is incorrect to use bytes exceeding the alphabet size.
-    // The following mask reduces the random byte in the 0-255 value
-    // range to the 0-63 value range. Therefore, adding hacks, such
-    // as empty string fallback or magic numbers, is unneccessary because
-    // the bitmask trims bytes down to the alphabet size.
     id += urlAlphabet[pool[i] & 63]
   }
   return id
@@ -408066,9 +406561,6 @@ module.exports = { nanoid, customAlphabet, customRandom, urlAlphabet, random }
 /***/ 97651:
 /***/ ((module) => {
 
-// This alphabet uses `A-Za-z0-9_-` symbols.
-// The order of characters is optimized for better gzip and brotli compression.
-// Same as in non-secure/index.js
 let urlAlphabet =
   'useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict'
 
@@ -410286,7 +408778,7 @@ module.exports = underscoreNodeF._;
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"name":"@actions/cache","version":"4.0.0","preview":true,"description":"Actions cache lib","keywords":["github","actions","cache"],"homepage":"https://github.com/actions/toolkit/tree/main/packages/cache","license":"MIT","main":"lib/cache.js","types":"lib/cache.d.ts","directories":{"lib":"lib","test":"__tests__"},"files":["lib","!.DS_Store"],"publishConfig":{"access":"public"},"repository":{"type":"git","url":"git+https://github.com/actions/toolkit.git","directory":"packages/cache"},"scripts":{"audit-moderate":"npm install && npm audit --json --audit-level=moderate > audit.json","test":"echo \\"Error: run tests from root\\" && exit 1","tsc":"tsc"},"bugs":{"url":"https://github.com/actions/toolkit/issues"},"dependencies":{"@actions/core":"^1.11.1","@actions/exec":"^1.0.1","@actions/glob":"^0.1.0","@actions/http-client":"^2.1.1","@actions/io":"^1.0.1","@azure/abort-controller":"^1.1.0","@azure/ms-rest-js":"^2.6.0","@azure/storage-blob":"^12.13.0","@protobuf-ts/plugin":"^2.9.4","semver":"^6.3.1","twirp-ts":"^2.5.0"},"devDependencies":{"@types/semver":"^6.0.0","typescript":"^5.2.2"}}');
+module.exports = JSON.parse('{"name":"@actions/cache","version":"4.1.0","preview":true,"description":"Actions cache lib","keywords":["github","actions","cache"],"homepage":"https://github.com/actions/toolkit/tree/main/packages/cache","license":"MIT","main":"lib/cache.js","types":"lib/cache.d.ts","directories":{"lib":"lib","test":"__tests__"},"files":["lib","!.DS_Store"],"publishConfig":{"access":"public"},"repository":{"type":"git","url":"git+https://github.com/actions/toolkit.git","directory":"packages/cache"},"scripts":{"audit-moderate":"npm install && npm audit --json --audit-level=moderate > audit.json","test":"echo \\"Error: run tests from root\\" && exit 1","tsc":"tsc"},"bugs":{"url":"https://github.com/actions/toolkit/issues"},"dependencies":{"@actions/core":"^1.11.1","@actions/exec":"^1.0.1","@actions/glob":"^0.1.0","@protobuf-ts/runtime-rpc":"^2.11.1","@actions/http-client":"^2.1.1","@actions/io":"^1.0.1","@azure/abort-controller":"^1.1.0","@azure/ms-rest-js":"^2.6.0","@azure/storage-blob":"^12.13.0","semver":"^6.3.1"},"devDependencies":{"@types/node":"^22.13.9","@types/semver":"^6.0.0","@protobuf-ts/plugin":"^2.9.4","typescript":"^5.2.2"}}');
 
 /***/ }),
 

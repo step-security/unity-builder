@@ -2,12 +2,16 @@ name: Integrity
 
 on:
   push: { branches: [main] }
-  pull_request: {}
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
 
 permissions:
   contents: read
   checks: write
   statuses: write
+
+env:
+  CODECOV_TOKEN: '2f2eb890-30e2-4724-83eb-7633832cf0de'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -27,8 +31,12 @@ jobs:
       - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
           node-version: '24'
-      - run: yarn
+      - name: Install package manager (from package.json)
+        run: |
+          corepack enable
+          corepack install
+      - run: yarn install --immutable
       - run: yarn lint
-      - run: yarn test:ci
+      - run: yarn test:ci --coverage
       - run: yarn build || { echo "build command should always succeed" ; exit 61; }
   #      - run: yarn build --quiet && git diff --quiet dist || { echo "dist should be auto generated" ; git diff dist ; exit 62; }
