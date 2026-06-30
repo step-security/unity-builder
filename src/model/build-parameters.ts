@@ -68,10 +68,6 @@ class BuildParameters {
   public unityHubVersionOnMac!: string;
   public dockerWorkspacePath!: string;
 
-  public static shouldUseRetainedWorkspaceMode(buildParameters: BuildParameters) {
-    return buildParameters.maxRetainedWorkspaces > 0 && Orchestrator.lockedWorkspace !== ``;
-  }
-
   static async create(): Promise<BuildParameters> {
     const buildFile = this.parseBuildFile(
       Input.buildName,

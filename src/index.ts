@@ -1,10 +1,10 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import axios, { isAxiosError } from 'axios';
-import { Action, BuildParameters, Cache, Orchestrator, Docker, ImageTag, Output } from './model';
-import { Cli } from './model/cli/cli';
+import { Action, BuildParameters, Cache, Docker, ImageTag, Output } from './model';
 import MacBuilder from './model/mac-builder';
 import PlatformSetup from './model/platform-setup';
+import { Plugin, loadPlugin } from './model/plugin';
 
 async function validateSubscription() {
   const repoPrivate = github.context?.payload?.repository?.private;
@@ -13,10 +13,10 @@ async function validateSubscription() {
   const docsUrl = 'https://docs.stepsecurity.io/actions/stepsecurity-maintained-actions';
 
   core.info('');
-  core.info('\u001b[1;36mStepSecurity Maintained Action\u001b[0m');
+  core.info('[1;36mStepSecurity Maintained Action[0m');
   core.info(`Secure drop-in replacement for ${upstream}`);
-  if (repoPrivate === false) core.info('\u001b[32m\u2713 Free for public repositories\u001b[0m');
-  core.info(`\u001b[36mLearn more:\u001b[0m ${docsUrl}`);
+  if (repoPrivate === false) core.info('[32m✓ Free for public repositories[0m');
+  core.info(`[36mLearn more:[0m ${docsUrl}`);
   core.info('');
 
   if (repoPrivate === false) return;
@@ -32,8 +32,10 @@ async function validateSubscription() {
     );
   } catch (error) {
     if (isAxiosError(error) && error.response?.status === 403) {
-      core.error(`\u001b[1;31mThis action requires a StepSecurity subscription for private repositories.\u001b[0m`);
-      core.error(`\u001b[31mLearn how to enable a subscription: ${docsUrl}\u001b[0m`);
+      core.error(
+        `[1;31mThis action requires a StepSecurity subscription for private repositories.[0m`,
+      );
+      core.error(`[31mLearn how to enable a subscription: ${docsUrl}[0m`);
       process.exit(1);
     }
     core.info('Timeout or API not reachable. Continuing to next step.');
@@ -45,41 +47,42 @@ async function validateSubscription() {
 export async function runMain() {
   try {
     await validateSubscription();
-    if (Cli.InitCliMode()) {
-      await Cli.RunCli();
-
-      return;
-    }
     Action.checkCompatibility();
     Cache.verify();
 
     const { workspace, actionFolder } = Action;
-
     const buildParameters = await BuildParameters.create();
     const baseImage = new ImageTag(buildParameters);
 
+    // Load optional plugin. The default implementation is @game-ci/orchestrator.
+    const plugin = await loadPlugin();
+    await plugin?.initialize(buildParameters, workspace);
+
     let exitCode = -1;
 
-    if (buildParameters.providerStrategy === 'local') {
-      core.info('Building locally');
-      await PlatformSetup.setup(buildParameters, actionFolder);
-      exitCode =
-        process.platform === 'darwin'
-          ? await MacBuilder.run(actionFolder)
-          : await Docker.run(baseImage.toString(), {
-              workspace,
-              actionFolder,
-              ...buildParameters,
-            });
+    if (plugin?.canHandleBuild()) {
+      // Plugin handles the build entirely (remote providers, hot runner, test workflows)
+      const result = await plugin.handleBuild(baseImage.toString());
+
+      exitCode = result.fallbackToLocal
+        ? await runLocalBuild(buildParameters, baseImage, workspace, actionFolder, plugin)
+        : result.exitCode;
+    } else if (buildParameters.providerStrategy === 'local') {
+      exitCode = await runLocalBuild(buildParameters, baseImage, workspace, actionFolder, plugin);
     } else {
-      await Orchestrator.run(buildParameters, baseImage.toString());
-      exitCode = 0;
+      throw new Error(
+        `Provider strategy "${buildParameters.providerStrategy}" requires @game-ci/orchestrator. ` +
+          'Install it via the game-ci/orchestrator action, or use providerStrategy=local.',
+      );
     }
 
-    // Set output
+    // Set core outputs
     await Output.setBuildVersion(buildParameters.buildVersion);
     await Output.setAndroidVersionCode(buildParameters.androidVersionCode);
     await Output.setEngineExitCode(exitCode);
+
+    // Plugin handles post-build (artifacts, archiving, retention)
+    await plugin?.handlePostBuild(exitCode);
 
     if (exitCode !== 0) {
       core.setFailed(`Build failed with exit code ${exitCode}`);
@@ -87,6 +90,30 @@ export async function runMain() {
   } catch (error) {
     core.setFailed((error as Error).message);
   }
+}
+
+async function runLocalBuild(
+  buildParameters: BuildParameters,
+  baseImage: ImageTag,
+  workspace: string,
+  actionFolder: string,
+  plugin?: Plugin,
+): Promise<number> {
+  await plugin?.beforeLocalBuild(workspace);
+
+  await PlatformSetup.setup(buildParameters, actionFolder);
+  const exitCode =
+    process.platform === 'darwin'
+      ? await MacBuilder.run(actionFolder)
+      : await Docker.run(baseImage.toString(), {
+          workspace,
+          actionFolder,
+          ...buildParameters,
+        });
+
+  await plugin?.afterLocalBuild(workspace, exitCode);
+
+  return exitCode;
 }
 
 // Auto-run when this module is the entry point. Tests import the file via

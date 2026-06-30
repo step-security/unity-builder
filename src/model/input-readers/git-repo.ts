@@ -10,7 +10,6 @@ export class GitRepoReader {
       exec(command, { maxBuffer: 1024 * 10000 }, (error, stdout) => {
         if (error) {
           reject(error);
-
           return;
         }
         resolve(stdout.toString());
