@@ -58,7 +58,7 @@ class AWSBuildEnvironment implements ProviderInterface {
     filter: string,
     previewOnly: boolean,
     // eslint-disable-next-line no-unused-vars
-    olderThan: Number,
+    olderThan: number,
     // eslint-disable-next-line no-unused-vars
     fullCache: boolean,
     // eslint-disable-next-line no-unused-vars

@@ -43,7 +43,7 @@ describe('Orchestrator Locking', () => {
       const result = await SharedWorkspaceLocking.LockWorkspace(newWorkspaceName, runId, buildParameters);
       expect(result).toBeTruthy();
       const lines = await SharedWorkspaceLocking.ReadLines(`aws s3 ls ${SharedWorkspaceLocking.workspaceRoot}`);
-      expect(lines.map((x) => x.replace(`/`, ``)).includes(buildParameters.cacheKey));
+      expect(lines.map((x) => x.replace(`/`, ``)).includes(buildParameters.cacheKey)).toBeTruthy();
       expect(await SharedWorkspaceLocking.DoesCacheKeyTopLevelExist(buildParameters)).toBeTruthy();
       expect(await SharedWorkspaceLocking.DoesWorkspaceExist(newWorkspaceName, buildParameters)).toBeTruthy();
       const allLocks = await SharedWorkspaceLocking.GetAllLocksForWorkspace(newWorkspaceName, buildParameters);

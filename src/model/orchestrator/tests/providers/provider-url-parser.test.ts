@@ -115,10 +115,10 @@ describe('provider-url-parser', () => {
     });
 
     it('parses Windows paths', () => {
-      const result = parseProviderSource('C:\path\to\provider');
+      const result = parseProviderSource('C:path to provider');
       expect(result).toEqual({
         type: 'local',
-        path: 'C:\path\to\provider',
+        path: 'C:path to provider',
       });
     });
 

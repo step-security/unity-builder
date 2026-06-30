@@ -29,11 +29,7 @@ echo "---${buildParameters.logId}"`;
     const experimentHooks = customCommandHooks;
     let output = new Array<CommandHook>();
     if (experimentHooks && experimentHooks !== '') {
-      try {
-        output = YAML.parse(experimentHooks);
-      } catch (error) {
-        throw error;
-      }
+      output = YAML.parse(experimentHooks);
     }
 
     return [
@@ -113,6 +109,6 @@ echo "---${buildParameters.logId}"`;
     const secrets = hooks.map((x: any) => x.secrets).filter((x: any) => x !== undefined && x.length > 0);
 
     // eslint-disable-next-line unicorn/no-array-reduce
-    return secrets.length > 0 ? secrets.reduce((x: any, y: any) => [...x, ...y]) : [];
+    return secrets.length > 0 ? secrets.reduce((x: any, y: any) => x.concat(y)) : [];
   }
 }

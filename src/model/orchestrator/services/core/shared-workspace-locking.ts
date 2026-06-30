@@ -259,7 +259,7 @@ export class SharedWorkspaceLocking {
   public static async GetWorkspaceTimestamp(
     workspace: string,
     buildParametersContext: BuildParameters,
-  ): Promise<Number> {
+  ): Promise<number> {
     if (workspace.split(`_`).length > 0) {
       return Number(workspace.split(`_`)[1]);
     }

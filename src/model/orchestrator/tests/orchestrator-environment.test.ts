@@ -103,7 +103,7 @@ describe('Orchestrator Sync Environments', () => {
         });
       const newLinePurgedFile = file
         .replace(/\s+/g, '')
-        .replace(new RegExp(`\[${OrchestratorStatics.logPrefix}\]`, 'g'), '');
+        .replace(new RegExp(`[${OrchestratorStatics.logPrefix}]`, 'g'), '');
       for (const element of combined) {
         expect(newLinePurgedFile).toContain(`${element.name}`);
         OrchestratorLogger.log(`Contains ${element.name}`);

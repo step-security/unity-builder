@@ -37,7 +37,7 @@ class OrchestratorQueryOverride {
           OrchestratorOptions.pullInputList.includes(query) ||
           OrchestratorOptions.pullInputList.includes(Input.ToEnvVarFormat(query));
 
-        return doesInclude ? true : false;
+        return doesInclude;
       } else {
         return true;
       }

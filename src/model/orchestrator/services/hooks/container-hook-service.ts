@@ -6,7 +6,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import Input from '../../../input';
 import OrchestratorOptions from '../../options/orchestrator-options';
-import { ContainerHook as ContainerHook } from './container-hook';
+import { ContainerHook } from './container-hook';
 import { OrchestratorStepParameters } from '../../options/orchestrator-step-parameters';
 
 export class ContainerHookService {

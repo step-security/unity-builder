@@ -305,16 +305,12 @@ export class RemoteClient {
     RemoteClientLogger.log(`Cloning the repository being built:`);
     await OrchestratorSystem.Run(`git config --global filter.lfs.smudge "git-lfs smudge --skip -- %f"`);
     await OrchestratorSystem.Run(`git config --global filter.lfs.process "git-lfs filter-process --skip"`);
-    try {
-      const depthArgument = OrchestratorOptions.cloneDepth !== '0' ? `--depth ${OrchestratorOptions.cloneDepth}` : '';
-      await OrchestratorSystem.Run(
-        `git clone ${depthArgument} ${OrchestratorFolders.targetBuildRepoUrl} ${path.basename(
-          OrchestratorFolders.repoPathAbsolute,
-        )}`.trim(),
-      );
-    } catch (error: any) {
-      throw error;
-    }
+    const depthArgument = OrchestratorOptions.cloneDepth !== '0' ? `--depth ${OrchestratorOptions.cloneDepth}` : '';
+    await OrchestratorSystem.Run(
+      `git clone ${depthArgument} ${OrchestratorFolders.targetBuildRepoUrl} ${path.basename(
+        OrchestratorFolders.repoPathAbsolute,
+      )}`.trim(),
+    );
     process.chdir(OrchestratorFolders.repoPathAbsolute);
     await OrchestratorSystem.Run(`git lfs install`);
     assert(fs.existsSync(`.git`), 'git folder exists');

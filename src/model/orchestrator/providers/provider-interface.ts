@@ -45,7 +45,7 @@ export interface ProviderInterface {
     // eslint-disable-next-line no-unused-vars
     previewOnly: boolean,
     // eslint-disable-next-line no-unused-vars
-    olderThan: Number,
+    olderThan: number,
     // eslint-disable-next-line no-unused-vars
     fullCache: boolean,
     // eslint-disable-next-line no-unused-vars

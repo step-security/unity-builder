@@ -100,7 +100,7 @@ class Kubernetes implements ProviderInterface {
     // eslint-disable-next-line no-unused-vars
     previewOnly: boolean,
     // eslint-disable-next-line no-unused-vars
-    olderThan: Number,
+    olderThan: number,
     // eslint-disable-next-line no-unused-vars
     fullCache: boolean,
     // eslint-disable-next-line no-unused-vars
@@ -116,15 +116,11 @@ class Kubernetes implements ProviderInterface {
     // eslint-disable-next-line no-unused-vars
     defaultSecretsArray: { ParameterKey: string; EnvironmentVariable: string; ParameterValue: string }[],
   ) {
-    try {
-      this.buildParameters = buildParameters;
-      this.cleanupCronJobName = `unity-builder-cronjob-${buildParameters.buildGuid}`;
-      this.serviceAccountName = `service-account-${buildParameters.buildGuid}`;
+    this.buildParameters = buildParameters;
+    this.cleanupCronJobName = `unity-builder-cronjob-${buildParameters.buildGuid}`;
+    this.serviceAccountName = `service-account-${buildParameters.buildGuid}`;
 
-      await KubernetesServiceAccount.createServiceAccount(this.serviceAccountName, this.namespace, this.kubeClient);
-    } catch (error) {
-      throw error;
-    }
+    await KubernetesServiceAccount.createServiceAccount(this.serviceAccountName, this.namespace, this.kubeClient);
   }
 
   async runTaskInWorkflow(

@@ -24,49 +24,45 @@ export class CustomWorkflow {
     environmentVariables: OrchestratorEnvironmentVariable[],
     secrets: OrchestratorSecret[],
   ) {
-    try {
-      let output = '';
+    let output = '';
 
-      // if (Orchestrator.buildParameters?.orchestratorDebug) {
-      //   OrchestratorLogger.log(`Custom Job Description \n${JSON.stringify(buildSteps, undefined, 4)}`);
-      // }
-      for (const step of steps) {
-        OrchestratorLogger.log(`Orchestrator is running in custom job mode`);
-        try {
-          const stepOutput = await Orchestrator.Provider.runTaskInWorkflow(
-            Orchestrator.buildParameters.buildGuid,
-            step.image,
-            step.commands,
-            `/${OrchestratorFolders.buildVolumeFolder}`,
-            `/${OrchestratorFolders.projectPathAbsolute}/`,
-            environmentVariables,
-            [...secrets, ...step.secrets],
+    // if (Orchestrator.buildParameters?.orchestratorDebug) {
+    //   OrchestratorLogger.log(`Custom Job Description \n${JSON.stringify(buildSteps, undefined, 4)}`);
+    // }
+    for (const step of steps) {
+      OrchestratorLogger.log(`Orchestrator is running in custom job mode`);
+      try {
+        const stepOutput = await Orchestrator.Provider.runTaskInWorkflow(
+          Orchestrator.buildParameters.buildGuid,
+          step.image,
+          step.commands,
+          `/${OrchestratorFolders.buildVolumeFolder}`,
+          `/${OrchestratorFolders.projectPathAbsolute}/`,
+          environmentVariables,
+          [...secrets, ...step.secrets],
+        );
+        output += stepOutput;
+      } catch (error: any) {
+        const allowFailure = step.allowFailure === true;
+        const stepName = step.name || step.image || 'unknown';
+
+        if (allowFailure) {
+          OrchestratorLogger.logWarning(
+            `Hook container "${stepName}" failed but allowFailure is true. Continuing build. Error: ${
+              error?.message || error
+            }`,
           );
-          output += stepOutput;
-        } catch (error: any) {
-          const allowFailure = step.allowFailure === true;
-          const stepName = step.name || step.image || 'unknown';
 
-          if (allowFailure) {
-            OrchestratorLogger.logWarning(
-              `Hook container "${stepName}" failed but allowFailure is true. Continuing build. Error: ${
-                error?.message || error
-              }`,
-            );
-
-            // Continue to next step
-          } else {
-            OrchestratorLogger.log(
-              `Hook container "${stepName}" failed and allowFailure is false (default). Stopping build.`,
-            );
-            throw error;
-          }
+          // Continue to next step
+        } else {
+          OrchestratorLogger.log(
+            `Hook container "${stepName}" failed and allowFailure is false (default). Stopping build.`,
+          );
+          throw error;
         }
       }
-
-      return output;
-    } catch (error) {
-      throw error;
     }
+
+    return output;
   }
 }
