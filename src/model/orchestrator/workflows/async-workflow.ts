@@ -65,7 +65,7 @@ node /builder/dist/index.js -m async-workflow`,
             ParameterValue: process.env.AWS_SECRET_ACCESS_KEY || ``,
           },
         ],
-      },
+      ],
     );
 
     return output;
