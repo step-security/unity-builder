@@ -8,6 +8,7 @@ export class GithubCliReader {
       exec(command, { maxBuffer: 1024 * 10000 }, (error, stdout, stderr) => {
         if (error && !suppressError) {
           reject(error);
+
           return;
         }
         resolve((stdout || '').toString() + (stderr || '').toString());
@@ -31,6 +32,7 @@ export class GithubCliReader {
         .replace(/\n/g, '');
     } catch (error: any) {
       core.info(error || 'Failed to get github auth token from gh cli');
+
       return '';
     }
   }

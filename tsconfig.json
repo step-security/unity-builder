@@ -12,8 +12,8 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "types": ["node", "vitest/globals"]
+    "types": ["node"]
   },
   "include": ["src/**/*", "types/**/*"],
-  "exclude": ["node_modules", "dist", "lib", "src/**/*.test.ts", "src/model/orchestrator", "src/model/cli", "src/integration", "src/test-utils"]
+  "exclude": ["node_modules", "dist", "lib"]
 }

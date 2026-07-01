@@ -1,5 +1,9 @@
 import { afterEach, beforeEach } from 'vitest';
 
+// Fail tests when console.error / console.warn etc are called from
+// production code under test. Mirrors the jest-fail-on-console behaviour
+// the previous jest setup enforced. Tests can opt-out by replacing the
+// method with vi.spyOn(console, 'error') for the duration of that test.
 const original = {
   log: console.log,
   warn: console.warn,
