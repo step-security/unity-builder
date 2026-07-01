@@ -11,7 +11,7 @@ name: Validate Orchestrator Compatibility
 on:
   workflow_dispatch:
   push:
-    branches: [main, 'release/**', 'feature/**', 'refactor/**']
+    branches: [main]
     paths:
       - 'src/model/orchestrator-plugin.ts'
       - 'src/model/build-parameters.ts'
@@ -26,7 +26,7 @@ on:
       - 'yarn.lock'
       - '.github/workflows/validate-orchestrator.yml'
   pull_request:
-    branches: [main, 'release/**']
+    branches: [main]
     paths:
       - 'src/model/orchestrator-plugin.ts'
       - 'src/model/build-parameters.ts'
@@ -89,7 +89,7 @@ jobs:
           corepack install
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
       - name: Resolve yarn cache folder
         id: yarn-config
         run: echo "cacheFolder=$(yarn config get cacheFolder)" >> "$GITHUB_OUTPUT"
@@ -99,9 +99,9 @@ jobs:
           path: |
             ${{ steps.yarn-config.outputs.cacheFolder }}
             .yarn/install-state.gz
-          key: yarn-v2-${{ runner.os }}-node-20-${{ hashFiles('yarn.lock') }}
+          key: yarn-v2-${{ runner.os }}-node-24-${{ hashFiles('yarn.lock') }}
           restore-keys: |
-            yarn-v2-${{ runner.os }}-node-20-
+            yarn-v2-${{ runner.os }}-node-24-
 
       # --- unity-builder compilation and tests ---
       - name: Install unity-builder dependencies
