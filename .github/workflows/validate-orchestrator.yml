@@ -1,13 +1,5 @@
 name: Validate Orchestrator Compatibility
 
-# ==============================================================================
-# Essential plugin health checks — runs on every PR and push.
-# Fast (~5 min): compilation, unit tests, plugin interface, type declarations.
-#
-# For exhaustive integration tests (k8s, AWS, local-docker, rclone) see
-# validate-orchestrator-integration.yml which runs on a daily cron.
-# ==============================================================================
-
 on:
   workflow_dispatch:
   push:
