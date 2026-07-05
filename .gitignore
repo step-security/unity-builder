@@ -8,3 +8,5 @@ yarn-error.log
 $LOG_FILE
 temp/
 **/.DS_Store
+.yarn/cache
+.yarn/install-state.gz
