@@ -56,11 +56,16 @@ jobs:
     name: Plugin Architecture Health
     runs-on: ubuntu-latest
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@v2
+        with:
+          egress-policy: audit
+
       - name: Checkout unity-builder
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Checkout orchestrator
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: game-ci/orchestrator
           ref: ${{ github.head_ref || github.ref_name }}
@@ -70,7 +75,7 @@ jobs:
 
       - name: Fallback to orchestrator main branch
         if: steps.orchestrator-branch.outcome == 'failure'
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: game-ci/orchestrator
           path: orchestrator-standalone
@@ -79,14 +84,14 @@ jobs:
         run: |
           corepack enable
           corepack install
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 24
       - name: Resolve yarn cache folder
         id: yarn-config
         run: echo "cacheFolder=$(yarn config get cacheFolder)" >> "$GITHUB_OUTPUT"
       - name: Restore yarn install cache (node_modules + cacheFolder + install-state)
-        uses: actions/cache@v5
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
         with:
           path: |
             ${{ steps.yarn-config.outputs.cacheFolder }}
